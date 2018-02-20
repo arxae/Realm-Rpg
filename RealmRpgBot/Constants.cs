@@ -12,6 +12,7 @@
 		public const string EMOJI_FACE_SAD = ":frowning:";
 
 		public const string MSG_NOT_REGISTERED = "You are not registered. You can register by using the *.rpg register* command";
+		public const string MSG_USER_NOT_REGISTERED = "That user is not registered to play.";
 		public const string MSG_BUILDING_TIMEOUT = "*Building interaction automatically exits after 15s*";
 	}
 }

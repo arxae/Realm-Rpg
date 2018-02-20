@@ -97,7 +97,7 @@
     <Compile Include="Bot\Commands\GameCommands.cs" />
     <Compile Include="Bot\Commands\InfoCommands.cs" />
     <Compile Include="Bot\Commands\GeneralActionCommands.cs" />
-    <Compile Include="Bot\Commands\SystemCommands.cs" />
+    <Compile Include="Bot\Commands\GameAdminCommands.cs" />
     <Compile Include="Bot\RpgBot.cs" />
     <Compile Include="Bot\Commands\RpgCommandBase.cs" />
     <Compile Include="Buildings\IBuilding.cs" />
@@ -111,6 +111,7 @@
     <Compile Include="Models\Building.cs" />
     <Compile Include="Models\Player.cs" />
     <Compile Include="Models\Race.cs" />
+    <Compile Include="Models\Setting.cs" />
     <Compile Include="Realm.cs" />
     <Compile Include="RealmMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

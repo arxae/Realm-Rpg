@@ -25,17 +25,15 @@
 					return;
 				}
 
-				if (await session.Advanced.ExistsAsync(race) == false)
+				if (await session.Advanced.ExistsAsync("races/" + race) == false)
 				{
 					await c.RespondAsync($"{c.Member.Mention} Race \"{race}\" is not valid. You can use *.info races* to get a list of races");
 					await c.RejectMessage();
 
 					return;
 				}
-				
-				var p = new Player(c.User, race);
 
-				await session.StoreAsync(p);
+				await session.StoreAsync(new Player(c.User, c.Guild, "races/" + race));
 				await session.SaveChangesAsync();
 			}
 

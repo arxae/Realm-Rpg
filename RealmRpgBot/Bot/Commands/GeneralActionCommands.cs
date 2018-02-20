@@ -14,6 +14,13 @@
 	/// </summary>
 	public class GeneralActionCommands : RpgCommandBase
 	{
+		[Command("ping"), Aliases(new[] { "p" }), Description("Check bot responsiveness, replies with latency")]
+		public async Task Ping(CommandContext c)
+		{
+			await c.RespondAsync($"Pong! ({c.Client.Ping}ms)");
+			await c.ConfirmMessage();
+		}
+
 		/// <summary>
 		/// Get location information
 		/// </summary>
@@ -24,7 +31,9 @@
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
-				var player = await session.LoadAsync<Player>(c.User.Id.ToString());
+				var player = await session
+					.Include<Location>(loc=>loc.Id)
+					.LoadAsync<Player>(c.User.Id.ToString());
 
 				if (player == null)
 				{
@@ -46,16 +55,16 @@
 		/// Travel to a location
 		/// </summary>
 		/// <param name="c"></param>
-		/// <param name="locName"></param>
+		/// <param name="destinationName">The name of the destination</param>
 		/// <returns></returns>
 		[Command("travel"), Description("Travel to a specific location that is linked to the current location")]
 		public async Task Travel(CommandContext c,
-			[Description("Name of the destination"), RemainingText] string locName)
+			[Description("Name of the destination"), RemainingText] string destinationName)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				var player = await session
-					.Include("Player.CurrentLocation")
+					.Include<Location>(loc => loc.Id)
 					.LoadAsync<Player>(c.User.Id.ToString());
 
 				if (player == null)
@@ -68,7 +77,7 @@
 
 				var location = await session.LoadAsync<Location>(player.CurrentLocation);
 
-				var dest = await session.Query<Location>().FirstOrDefaultAsync(tl => tl.DisplayName == locName);
+				var dest = await session.Query<Location>().FirstOrDefaultAsync(tl => tl.DisplayName == destinationName);
 
 				if (dest != null)
 				{
@@ -80,7 +89,7 @@
 				}
 				else
 				{
-					await c.RespondAsync($"{locName} is not a valid destination");
+					await c.RespondAsync($"{destinationName} is not a valid destination");
 					await c.RejectMessage();
 				}
 			}
@@ -93,7 +102,7 @@
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				var player = await session
-					.Include("Player.CurrentLocation")
+					.Include<Location>(loc => loc.Id)
 					.LoadAsync<Player>(c.User.Id.ToString());
 
 				if (player == null)

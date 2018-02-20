@@ -58,10 +58,19 @@
 			prop.SetValue(target, value);
 		}
 
-		public static int GetNextXp(int level)
+		public static int GetNextXp(int currentLevel)
 		{
-			int levelFactor = 2; // TODO: Put into config/db
-			return levelFactor * (int)Math.Pow((level + 1), 2) + levelFactor * (level + 1);
+			int levelFactor = Realm.GetSetting<int>("levelfactor");
+			return levelFactor * (int)Math.Pow((currentLevel + 1), 2) + levelFactor * (currentLevel + 1);
+		}
+
+		public static T GetSetting<T>(string key)
+		{
+			using (var session = Db.DocStore.OpenSession())
+			{
+				var setting = session.Query<Models.Setting>().FirstOrDefault(s => s.Id.Equals(key, StringComparison.OrdinalIgnoreCase));
+				return (T)Convert.ChangeType(setting.Value, typeof(T));
+			}
 		}
 	}
 }
