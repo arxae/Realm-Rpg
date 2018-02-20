@@ -61,6 +61,41 @@
 			}
 		}
 
+		[Command("export"), Description("Exports a type as json to text channel")]
+		public async Task ExportJson(CommandContext c,
+			[Description("Document Id")] string Id,
+			[Description("If true, indent the json when outputing")] bool formatJson = true)
+		{
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var cmd = new Raven.Client.Documents.Commands.GetDocumentsCommand(Id, null, false);
+				await session.Advanced.RequestExecutor.ExecuteAsync(cmd, session.Advanced.Context);
+
+				if (cmd.Result.Results.Length == 0)
+				{
+					await c.RespondAsync($"No doc with id {Id} was found");
+					await c.RejectMessage();
+				}
+
+				var res = Newtonsoft.Json.JsonConvert.DeserializeObject(cmd.Result.Results[0].ToString());
+				Realm.SetProperty(res, "Id", Id);
+
+				string json;
+
+				if (formatJson)
+				{
+					json = Newtonsoft.Json.JsonConvert.SerializeObject(res, Newtonsoft.Json.Formatting.Indented);
+				}
+				else
+				{
+					json = cmd.Result.Results[0].ToString();
+				}
+
+				await c.RespondAsync(json);
+				await c.ConfirmMessage();
+			}
+		}
+
 		[Command("importjsonbatch"), Description("Import multiple json strings")]
 		public async Task ImportJsonBatch(CommandContext c, string typeName)
 		{
@@ -93,7 +128,7 @@
 			foreach (var item in lst)
 			{
 				var import = Db.ImportJson(typeName, item);
-				
+
 				if (import == false)
 				{
 					failedLst.Add(item);

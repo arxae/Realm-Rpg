@@ -17,7 +17,8 @@
 		{
 			IDocumentStore s = new DocumentStore()
 			{
-				Urls = new[] { "http://localhost:9090" },
+				//Urls = new[] { "http://localhost:9090" },
+				Urls = Realm.GetDbServerUrls(),
 				Database = "rpg"
 			}.Initialize();
 

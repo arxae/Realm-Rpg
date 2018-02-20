@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using System.Linq;
 
 	public class Realm
@@ -25,6 +26,37 @@
 			}
 
 			return _buildingImplementations.FirstOrDefault(a => a.Name.Equals(implName, StringComparison.OrdinalIgnoreCase));
+		}
+
+		public static Type FindType(string typeName)
+		{
+			try
+			{
+				var t = Type.GetType(typeName, true, true);
+				return t;
+			}
+			catch
+			{
+				return null;
+			}
+		}
+
+		public static string[] GetDbServerUrls()
+		{
+			if (File.Exists("Servers.txt") == false)
+			{
+				Serilog.Log.Logger.Fatal("Could not find servers.txt. Make sure this file exists and has at least 1 server in it. Press any key to exit");
+				Console.ReadKey();
+				Environment.Exit(1);
+			}
+
+			return File.ReadAllLines("Servers.txt");
+		}
+
+		public static void SetProperty(object target, string propertyName, object value)
+		{
+			var prop = target.GetType().GetProperty(propertyName);
+			prop.SetValue(target, value);
 		}
 	}
 }
