@@ -14,6 +14,10 @@
 		public int HpMax { get; set; }
 		public int HpCurrent { get; set; }
 
+		// Progression
+		public int XpCurrent { get; set; }
+		public int XpNext { get; set; }
+
 		// Location
 		public string CurrentLocation { get; set; }
 
@@ -24,6 +28,9 @@
 			UserName = user.GetFullUsername();
 			Race = race;
 			Level = 1;
+			XpCurrent = 0;
 		}
 	}
 }
+// =10*B5^2+10*B5
+// (10 * (LEVEL+1)^2) + (10*(LEVEL+1))

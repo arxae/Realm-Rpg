@@ -15,7 +15,6 @@
 			{
 				_buildingImplementations = new List<Type>();
 
-
 				var interfaceType = typeof(Buildings.IBuilding);
 
 				_buildingImplementations.AddRange(AppDomain.CurrentDomain.GetAssemblies()
@@ -57,6 +56,12 @@
 		{
 			var prop = target.GetType().GetProperty(propertyName);
 			prop.SetValue(target, value);
+		}
+
+		public static int GetNextXp(int level)
+		{
+			int levelFactor = 2; // TODO: Put into config/db
+			return levelFactor * (int)Math.Pow((level + 1), 2) + levelFactor * (level + 1);
 		}
 	}
 }
