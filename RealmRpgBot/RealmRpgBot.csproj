@@ -105,6 +105,11 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Db.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Index\BuildingActions_All.cs" />
+    <Compile Include="Index\Settings_All.cs" />
+    <Compile Include="Index\Races_All.cs" />
+    <Compile Include="Index\Locations_All.cs" />
+    <Compile Include="Index\Players_All.cs" />
     <Compile Include="Models\BuildingAction.cs" />
     <Compile Include="Models\ListObject.cs" />
     <Compile Include="Models\Location.cs" />

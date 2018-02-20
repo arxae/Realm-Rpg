@@ -1,8 +1,6 @@
 ﻿namespace RealmRpgBot
 {
 	using System;
-	using System.Collections.Generic;
-	using System.IO;
 
 	using Raven.Client.Documents;
 
@@ -15,6 +13,7 @@
 
 		static IDocumentStore CreateStore()
 		{
+			Serilog.Log.ForContext<Db>().Information("Initializing DocStore instance");
 			IDocumentStore s = new DocumentStore()
 			{
 				//Urls = new[] { "http://localhost:9090" },
