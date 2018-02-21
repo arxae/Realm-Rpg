@@ -14,5 +14,7 @@
 		public const string MSG_NOT_REGISTERED = "You are not registered. You can register by using the *.rpg register* command";
 		public const string MSG_USER_NOT_REGISTERED = "That user is not registered to play.";
 		public const string MSG_BUILDING_TIMEOUT = "*Building interaction automatically exits after 15s*";
+		public const string MSG_NOT_ENOUGH_ATTRIB_PTS = "You don't have enough attribute points to train";
+		public const string MSG_NOT_ENOUGH_SKILL_PTS = "You don't have enough skill points to learn";
 	}
 }

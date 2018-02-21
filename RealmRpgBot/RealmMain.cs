@@ -25,14 +25,15 @@
 				.CreateLogger();
 
 			AppDomain.CurrentDomain.UnhandledException += (sender, e) => Log.Logger.Error((Exception)e.ExceptionObject, "Unhandled Exception");
-						
+
 			var indexCount = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
 				.Where(t => t.IsClass && t.IsNested == false && t.Namespace == "RealmRpgBot.Index")
 				.Count();
 
-
 			Log.Logger.Information("Deploying {n} indexes", indexCount);
 			Raven.Client.Documents.Indexes.IndexCreation.CreateIndexes(System.Reflection.Assembly.GetExecutingAssembly(), Db.DocStore);
+
+			Realm.SetupDbSubscriptions();
 
 			new Bot.RpgBot()
 				.StartBotAsync()

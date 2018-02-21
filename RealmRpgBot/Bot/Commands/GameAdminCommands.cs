@@ -11,17 +11,15 @@
 		RequireRoles(RoleCheckMode.Any, new[] { "Realm Admin" })]
 	public class GameAdminCommands : RpgCommandBase
 	{
-		[Command("givexp"), Description("Add specified amount of xp to a player")]
+		[Command("addxp"), Description("Add specified amount of xp to a player")]
 		public async Task GiveXp(CommandContext c,
-			[Description("User mention who should receive the xp")] DiscordUser user,
+			[Description("User mention who should receive the xp")] DiscordUser mention,
 			[Description("The amount of xp the user will receive")] int xpAmount)
 		{
-			await c.TriggerTypingAsync();
-
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				// Get player
-				var player = await session.LoadAsync<Models.Player>(user.Id.ToString());
+				var player = await session.LoadAsync<Models.Player>(mention.Id.ToString());
 				if (player == null)
 				{
 					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);

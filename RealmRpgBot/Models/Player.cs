@@ -12,8 +12,10 @@
 		public string UserDiscriminator { get; set; }
 
 		// General Info
-		public string Race { get; set; }
 		public int Level { get; set; }
+		public string Class { get; set; }
+		public string Race { get; set; }
+		public AttributeBlock Attributes { get; set; }
 
 		// Vitality
 		public int HpMax { get; set; }
@@ -22,6 +24,8 @@
 		// Progression
 		public int XpCurrent { get; set; }
 		public int XpNext { get; set; }
+		public int SkillPoints { get; set; }
+		public int AttributePoints { get; set; }
 
 		// Location
 		public string CurrentLocation { get; set; }
@@ -34,12 +38,14 @@
 			UserName = user.Username;
 			UserDiscriminator = user.Discriminator;
 
+			Level = 1;
 			Race = race;
+			Class = Realm.GetSetting<string>("startingclass");
+			Attributes = new AttributeBlock(1);
 
-			HpMax = Realm.GetSetting<int>("startinghp");
+			HpMax = Realm.GetBaseHpForLevel(1);
 			HpCurrent = HpMax;
 
-			Level = 1;
 			XpCurrent = 0;
 			XpNext = Realm.GetNextXp(1);
 
@@ -51,21 +57,27 @@
 			bool hasLeveled = false;
 			XpCurrent += amount;
 
-			if (XpCurrent > XpNext)
+			if (XpCurrent >= XpNext)
 			{
 				hasLeveled = true;
 
-				while (XpCurrent > XpNext)
+				while (XpCurrent >= XpNext)
 				{
 					XpCurrent = XpCurrent - XpNext;
 					Level++;
 					XpNext = Realm.GetNextXp(Level);
+
+					SkillPoints += Realm.GetSetting<int>("skillpointsperlevelup");
+					AttributePoints += Realm.GetSetting<int>("attributepointsperlevelup");
 				}
 			}
 
 			if (hasLeveled == false || c == null) return;
 
-			await c.Channel.SendMessageAsync($"{c.User.Mention} is now level {Level}!");
+			var g = await Bot.RpgBot.Client.GetGuildAsync(GuildId);
+			var m = await g.GetMemberAsync(ulong.Parse(Id));
+
+			await c.Channel.SendMessageAsync($"{m.Mention} is now level {Level}!");
 		}
 	}
 }

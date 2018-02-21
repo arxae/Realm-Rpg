@@ -32,7 +32,7 @@
 			});
 
 			cmd.RegisterCommands(System.Reflection.Assembly.GetExecutingAssembly());
-			l.Information("Registered {n} commandgroup(s)", cmd.RegisteredCommands.Count - 1);
+			l.Information("Registered {n} command(s)", cmd.RegisteredCommands.Count - 1);
 
 			// Interactivity
 			Client.UseInteractivity(new InteractivityConfiguration());
