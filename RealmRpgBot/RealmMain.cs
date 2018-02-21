@@ -19,7 +19,8 @@
 				.MinimumLevel.Verbose()
 				.Enrich.FromLogContext()
 				.WriteTo.Console(
-					outputTemplate: "{Timestamp:HH:mm:ss} [{SourceContext}] [{Level:u3}] - {Message}{NewLine}{Exception}")
+					outputTemplate: "{Timestamp:HH:mm:ss} [{SourceContext}] [{Level:u3}] - {Message}{NewLine}{Exception}",
+					theme: Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme.Literate)
 				.WriteTo.RavenDB(logsStore,
 					restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
 				.CreateLogger();

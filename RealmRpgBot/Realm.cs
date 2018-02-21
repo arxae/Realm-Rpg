@@ -99,6 +99,7 @@
 			var prop = target.GetType().GetProperty(propertyName);
 			prop.SetValue(target, value);
 		}
+
 		public static void SetupDbSubscriptions()
 		{
 			// Invalidates settings cache when a setting changes
@@ -107,6 +108,23 @@
 				{
 					foreach (var setting in s.Items) ClearCacheForKey(setting.Id);
 				});
+		}
+
+		public static string GetCertificate()
+		{
+			var l = Serilog.Log.ForContext<Realm>();
+
+			l.Information("Looking for certificate");
+			var files = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.pfx").Where(item => item.EndsWith(".pfx")).ToArray();
+
+			if (files.Length == 0)
+			{
+				l.Information("No certificate found");
+				return string.Empty;
+			}
+
+			Serilog.Log.ForContext<Realm>().Information($"Found certificate: {Path.GetFileName(files[0])}");
+			return files[0];
 		}
 	}
 }

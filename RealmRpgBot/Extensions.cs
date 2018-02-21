@@ -14,7 +14,7 @@
 		{
 			if (application == null)
 			{
-				application = "SongBot";
+				application = "RealmBot";
 			}
 
 			c.Client.DebugLogger.LogMessage(level, application, message, System.DateTime.Now);

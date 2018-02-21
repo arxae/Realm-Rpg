@@ -17,7 +17,7 @@
 
 			Client = new DiscordClient(new DiscordConfiguration()
 			{
-				Token = Environment.GetEnvironmentVariable("SONGBOT_KEY", EnvironmentVariableTarget.User),
+				Token = Environment.GetEnvironmentVariable("REALMBOT_KEY", EnvironmentVariableTarget.User),
 				TokenType = TokenType.Bot,
 				LogLevel = LogLevel.Debug
 			});

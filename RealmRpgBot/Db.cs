@@ -5,6 +5,7 @@
 	using Raven.Client.Documents;
 
 	using JSON = Newtonsoft.Json.JsonConvert;
+	using Certificate = System.Security.Cryptography.X509Certificates.X509Certificate2;
 
 	public class Db
 	{
@@ -13,13 +14,47 @@
 
 		static IDocumentStore CreateStore()
 		{
-			Serilog.Log.ForContext<Db>().Information("Initializing DocStore instance");
-			IDocumentStore s = new DocumentStore()
+			//Serilog.Log.ForContext<Db>().Information("Initializing DocStore instance");
+			//IDocumentStore s = new DocumentStore()
+			//{
+			//	//Urls = new[] { "http://localhost:9090" },
+			//	Urls = Realm.GetDbServerUrls(),
+			//	Database = "rpg"
+			//};
+			////Certificate=new System.Security.Cryptography.X509Certificates.X509Certificate2("RealmBot.pfx")
+			////}.Initialize();
+
+			//// Check for certificate
+			//var cert = Realm.GetCertificate();
+			//if(cert != string.Empty)
+			//{
+			//	string pw = Environment.GetEnvironmentVariable("REALMBOT_CERT_KEY", EnvironmentVariableTarget.User) ?? string.Empty;
+			//	s.Certificate = new Certificate(cert, pw);
+			//}
+			//s.Initialize();
+
+			string cert = Realm.GetCertificate();
+			string pw = null;
+			if(cert != string.Empty)
 			{
-				//Urls = new[] { "http://localhost:9090" },
+				pw = Environment.GetEnvironmentVariable("REALMBOT_CERT_KEY", EnvironmentVariableTarget.User) ?? string.Empty;
+			}
+
+			IDocumentStore store = new DocumentStore()
+			{
 				Urls = Realm.GetDbServerUrls(),
-				Database = "rpg"
+				Database = "rpg",
+				Certificate = cert == string.Empty ? null : new Certificate(cert, pw)
 			}.Initialize();
+
+
+
+
+
+
+
+
+
 
 			//store.Conventions.FindCollectionName = type =>
 			//{
@@ -28,7 +63,7 @@
 			//	return Raven.Client.Documents.Conventions.DocumentConventions.DefaultGetCollectionName(type);
 			//};
 
-			return s;
+			return store;
 		}
 
 		public static bool ImportJson(string typeName, string json)
