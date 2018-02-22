@@ -128,7 +128,7 @@
 				var bType = Realm.GetBuildingImplementation(building.BuildingImpl);
 				if (bType == null)
 				{
-					await c.RespondAsync("An error occured. Contact one of the admins and mention: Error_GeneralActions_BuildingImplNotFound");
+					await c.RespondAsync("An error occured. Contact one of the admins and (Error_BuildingImplNotFound)");
 					await c.RejectMessage();
 
 					return;

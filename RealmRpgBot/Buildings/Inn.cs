@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Threading.Tasks;
 
 	using DSharpPlus.CommandsNext;
@@ -45,7 +46,7 @@
 			var interact = c.Client.GetInteractivity();
 			var response = await interact.WaitForMessageReactionAsync(msg, c.User, TimeSpan.FromSeconds(15));
 
-			if(response == null)
+			if (response == null)
 			{
 				await c.RejectMessage();
 				await msg.DeleteAsync();
@@ -56,16 +57,7 @@
 			await msg.DeleteAllReactionsAsync();
 			var responseName = response.Emoji.GetDiscordName().ToLower();
 
-			var actionsToPerform = new List<string>();
-			// TODO: Use Linq
-			foreach(var act in actions)
-			{
-				if(act.ReactionIcon==responseName)
-				{
-					actionsToPerform.AddRange(act.ActionCommands);
-				}
-			}
-
+			var actionsToPerform = new List<string>(actions.FirstOrDefault(acts => acts.ReactionIcon.Equals(responseName)).ActionCommands);
 			await msg.DeleteAsync();
 			await new ActionsProcessor(c, msg).ProcessActionList(actionsToPerform);
 		}

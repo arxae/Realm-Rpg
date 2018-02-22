@@ -1,6 +1,7 @@
 ﻿namespace RealmRpgBot.Models
 {
 	using DSharpPlus.Entities;
+	using System.Collections.Generic;
 	using System.Threading.Tasks;
 
 	public class Player
@@ -26,6 +27,7 @@
 		public int XpNext { get; set; }
 		public int SkillPoints { get; set; }
 		public int AttributePoints { get; set; }
+		public List<LearnedSkill> Skills { get; set; }
 
 		// Location
 		public string CurrentLocation { get; set; }
@@ -48,6 +50,7 @@
 
 			XpCurrent = 0;
 			XpNext = Realm.GetNextXp(1);
+			Skills = new List<LearnedSkill>();
 
 			CurrentLocation = Realm.GetSetting<string>("startinglocation");
 		}

@@ -6,10 +6,10 @@
 	using DSharpPlus.CommandsNext.Attributes;
 	using DSharpPlus.Entities;
 
-	[Group("ga"),
+	[Group("dev"),
 		Description("Game administration commands"),
 		RequireRoles(RoleCheckMode.Any, new[] { "Realm Admin" })]
-	public class GameAdminCommands : RpgCommandBase
+	public class DeveloperCommands : RpgCommandBase
 	{
 		[Command("addxp"), Description("Add specified amount of xp to a player")]
 		public async Task GiveXp(CommandContext c,
@@ -31,6 +31,14 @@
 				await player.AddXpAsync(xpAmount, c);
 				await session.SaveChangesAsync();
 			}
+		}
+
+		[Command("fail"), Description("This command throws an exception")]
+		public async Task Fail(CommandContext c)
+		{
+			var d = new System.Collections.Generic.Dictionary<string, string>();
+			await c.RespondAsync(d["non_existing_key"]);
+			await c.RespondAsync("This command should fail");
 		}
 	}
 }

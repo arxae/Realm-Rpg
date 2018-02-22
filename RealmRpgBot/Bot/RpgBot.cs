@@ -34,6 +34,13 @@
 			cmd.RegisterCommands(System.Reflection.Assembly.GetExecutingAssembly());
 			l.Information("Registered {n} command(s)", cmd.RegisteredCommands.Count - 1);
 
+			cmd.CommandErrored += (e) =>
+			{
+				Serilog.Log.ForContext<RpgBot>()
+					.Error(e.Exception, "Unhandled exception when executing command: {cmd}", e.Command.QualifiedName);
+				return Task.CompletedTask;
+			};
+
 			// Interactivity
 			Client.UseInteractivity(new InteractivityConfiguration());
 

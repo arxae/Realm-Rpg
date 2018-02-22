@@ -31,5 +31,36 @@
 
 			await c.ConfirmMessage();
 		}
+
+		[Command("skill"), Description("Get information about a skill")]
+		public async Task GetSkillInfo(CommandContext c,
+			[Description("The name of the skill you want info on"), RemainingText] string skillName)
+		{
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var skill = await session.Query<Models.Skill>("Skills/All")
+						.FirstOrDefaultAsync(s => s.DisplayName.Equals(skillName));
+
+				if (skill == null)
+				{
+					await c.RespondAsync($"Skill *{skillName}* couldn't be found");
+					await c.RejectMessage();
+					return;
+				}
+
+				var embed = new DiscordEmbedBuilder()
+					.WithTitle(skill.DisplayName)
+					.WithDescription(skill.Description);
+
+				if (skill.ImageUrl != null)
+				{
+					embed.WithThumbnailUrl("https://i.redd.it/frqc24q7u96z.jpg");
+				}
+
+				await c.RespondAsync(c.User.Mention, embed: embed);
+			}
+
+			await c.ConfirmMessage();
+		}
 	}
 }

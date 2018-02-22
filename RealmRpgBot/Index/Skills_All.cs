@@ -6,14 +6,15 @@
 
 	using Models;
 
-	public class Settings_All : AbstractIndexCreationTask<Setting>
+	public class Skills_All : AbstractIndexCreationTask<Skill>
 	{
-		public Settings_All()
+		public Skills_All()
 		{
-			Map = settings => from s in settings
+			Map = skills => from s in skills
 							  select new
 							  {
-								  s.Id
+								  s.Id,
+								  s.DisplayName
 							  };
 		}
 	}

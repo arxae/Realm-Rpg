@@ -97,11 +97,13 @@
     <Compile Include="Bot\Commands\GameCommands.cs" />
     <Compile Include="Bot\Commands\InfoCommands.cs" />
     <Compile Include="Bot\Commands\GeneralActionCommands.cs" />
-    <Compile Include="Bot\Commands\GameAdminCommands.cs" />
+    <Compile Include="Bot\Commands\DeveloperCommands.cs" />
+    <Compile Include="Bot\Commands\SkillCommands.cs" />
     <Compile Include="Bot\RpgBot.cs" />
     <Compile Include="Bot\Commands\RpgCommandBase.cs" />
     <Compile Include="Buildings\IBuilding.cs" />
     <Compile Include="Buildings\Inn.cs" />
+    <Compile Include="Buildings\SkillTrainer.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Db.cs" />
     <Compile Include="Extensions.cs" />
@@ -110,8 +112,10 @@
     <Compile Include="Index\Races_All.cs" />
     <Compile Include="Index\Locations_All.cs" />
     <Compile Include="Index\Players_All.cs" />
+    <Compile Include="Index\Skills_All.cs" />
     <Compile Include="Models\BuildingAction.cs" />
     <Compile Include="Models\CharacterClass.cs" />
+    <Compile Include="Models\LearnedSkill.cs" />
     <Compile Include="Models\ListObject.cs" />
     <Compile Include="Models\Location.cs" />
     <Compile Include="Models\Building.cs" />
@@ -119,9 +123,12 @@
     <Compile Include="Models\Race.cs" />
     <Compile Include="Models\Setting.cs" />
     <Compile Include="Models\AttributeBlock.cs" />
+    <Compile Include="Models\Skill.cs" />
     <Compile Include="Realm.cs" />
     <Compile Include="RealmMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Skills\ISkill.cs" />
+    <Compile Include="Skills\TestSkill.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

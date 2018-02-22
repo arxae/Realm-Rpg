@@ -8,6 +8,7 @@
 	public class Realm
 	{
 		private static List<Type> _buildingImplementations;
+		private static List<Type> _skillImplementations;
 		private static List<Models.Setting> _settingsCache = new List<Models.Setting>();
 
 		public static void ClearCacheForKey(string key)
@@ -57,6 +58,22 @@
 
 			return _buildingImplementations.FirstOrDefault(a => a.Name.Equals(implName, StringComparison.OrdinalIgnoreCase));
 		}
+
+		public static Type GetSkillImplementation(string implName)
+		{
+			if (_skillImplementations == null)
+			{
+				_skillImplementations = new List<Type>();
+				var interfaceType = typeof(Skills.ISkill);
+				_skillImplementations.AddRange(AppDomain.CurrentDomain.GetAssemblies()
+					.SelectMany(a => a.GetTypes())
+					.Where(t => t.GetInterfaces().Contains(interfaceType))
+					.ToList());
+			}
+
+			return _skillImplementations.FirstOrDefault(a => a.Name.Equals(implName, StringComparison.OrdinalIgnoreCase));
+		}
+
 		public static string[] GetDbServerUrls()
 		{
 			if (File.Exists("Servers.txt") == false)
@@ -74,6 +91,7 @@
 			int levelFactor = GetSetting<int>("levelfactor");
 			return levelFactor * (int)Math.Pow((currentLevel + 1), 2) + levelFactor * (currentLevel + 1);
 		}
+
 		public static T GetSetting<T>(string key)
 		{
 			var cached = _settingsCache.FirstOrDefault(c => c.Id.Equals(key, StringComparison.OrdinalIgnoreCase));
@@ -86,7 +104,7 @@
 
 			using (var session = Db.DocStore.OpenSession())
 			{
-				Serilog.Log.ForContext<Realm>().Debug("Caching value for {key}", key);
+				Serilog.Log.ForContext<Realm>().Debug("Caching {key} value", key);
 				var setting = session.Query<Models.Setting>().FirstOrDefault(s => s.Id.Equals(key, StringComparison.OrdinalIgnoreCase));
 				_settingsCache.Add(setting);
 

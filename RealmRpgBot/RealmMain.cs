@@ -25,8 +25,7 @@
 					restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
 				.CreateLogger();
 
-			AppDomain.CurrentDomain.UnhandledException += (sender, e) => Log.Logger.Error((Exception)e.ExceptionObject, "Unhandled Exception");
-
+			// Deploy/Update indexes
 			var indexCount = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
 				.Where(t => t.IsClass && t.IsNested == false && t.Namespace == "RealmRpgBot.Index")
 				.Count();
