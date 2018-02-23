@@ -11,5 +11,6 @@
 		public string ImageUrl { get; set; }
 		public string SkillImpl { get; set; }
 		public List<int> TrainingCosts { get; set; }
+		public List<string> ActionCommands { get; set; }
 	}
 }

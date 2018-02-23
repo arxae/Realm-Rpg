@@ -144,5 +144,38 @@
 			Serilog.Log.ForContext<Realm>().Information($"Found certificate: {Path.GetFileName(files[0])}");
 			return files[0];
 		}
+
+		public static Enums.TargetType GetTargetTypeFromId(string id)
+		{
+			if (id == null) return Enums.TargetType.None;
+
+			if (id.StartsWith("<@") && id.EndsWith(">")) return Enums.TargetType.User;
+			if (id.StartsWith("<#") && id.EndsWith(">")) return Enums.TargetType.Channel;
+			if (id.StartsWith("<@&") && id.EndsWith(">")) return Enums.TargetType.Role;
+
+			return Enums.TargetType.None;
+		}
+
+		public static string GetIdFromMentionString(string mention)
+		{
+			string tmp;
+			switch (GetTargetTypeFromId(mention))
+			{
+				case Enums.TargetType.User:
+					tmp = mention.Replace("<@", "");
+					tmp = tmp.Substring(0, tmp.LastIndexOf(">"));
+					return tmp;
+				case Enums.TargetType.Channel:
+					tmp = mention.Replace("<#", "");
+					tmp = tmp.Substring(0, tmp.LastIndexOf(">"));
+					return tmp;
+				case Enums.TargetType.Role:
+					tmp = mention.Replace("<@&", "");
+					tmp = tmp.Substring(0, tmp.LastIndexOf(">"));
+					return tmp;
+				default:
+					return mention;
+			}
+		}
 	}
 }

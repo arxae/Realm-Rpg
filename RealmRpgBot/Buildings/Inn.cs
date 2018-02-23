@@ -59,7 +59,7 @@
 
 			var actionsToPerform = new List<string>(actions.FirstOrDefault(acts => acts.ReactionIcon.Equals(responseName)).ActionCommands);
 			await msg.DeleteAsync();
-			await new ActionsProcessor(c, msg).ProcessActionList(actionsToPerform);
+			await new ActionsProcessor(c, msg :msg).ProcessActionList(actionsToPerform);
 		}
 	}
 }

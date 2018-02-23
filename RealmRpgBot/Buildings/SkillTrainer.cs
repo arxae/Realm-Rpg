@@ -81,7 +81,7 @@
 				var skillEntry = player.Skills.FirstOrDefault(ls => ls.Id.Equals(selectedSkill.Key));
 				if (skillEntry == null)
 				{
-					player.Skills.Add(new LearnedSkill { Id = selectedSkill.Key, Rank = 1 });
+					player.Skills.Add(new TrainedSkill { Id = selectedSkill.Key, Rank = 1 });
 					await c.RespondAsync($"{c.User.Mention} learned {selectedSkill.Value.DisplayName}");
 				}
 				else

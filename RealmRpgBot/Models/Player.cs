@@ -27,7 +27,7 @@
 		public int XpNext { get; set; }
 		public int SkillPoints { get; set; }
 		public int AttributePoints { get; set; }
-		public List<LearnedSkill> Skills { get; set; }
+		public List<TrainedSkill> Skills { get; set; }
 
 		// Location
 		public string CurrentLocation { get; set; }
@@ -50,7 +50,7 @@
 
 			XpCurrent = 0;
 			XpNext = Realm.GetNextXp(1);
-			Skills = new List<LearnedSkill>();
+			Skills = new List<TrainedSkill>();
 
 			CurrentLocation = Realm.GetSetting<string>("startinglocation");
 		}

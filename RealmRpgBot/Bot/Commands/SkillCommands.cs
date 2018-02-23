@@ -45,9 +45,22 @@
 				// Find skill to execute
 				var cmdSplit = input._Split(new string[] { " on " }, true);
 
-				string skillName = cmdSplit.Count == 1
-					? input.Substring(0, input.LastIndexOf(" on"))
-					: cmdSplit[0];
+				string skillName;
+				if (cmdSplit.Count == 1)
+				{
+					if (input.EndsWith(" on"))
+					{
+						skillName = input.Substring(0, input.LastIndexOf(" on"));
+					}
+					else
+					{
+						skillName = input;
+					}
+				}
+				else
+				{
+					skillName = cmdSplit[0];
+				}
 
 				var skill = await session.Query<Models.Skill>()
 					.FirstOrDefaultAsync(s => s.DisplayName.Equals(skillName, System.StringComparison.OrdinalIgnoreCase));
@@ -86,81 +99,5 @@
 				await sImpl.ExecuteSkill(c, skill, player, target);
 			}
 		}
-		//[Command("use"),
-		//	Description("Use a skill (on yourself or the environment)"),
-		//	RequireRoles(RoleCheckMode.Any, new[] { "Realm Player" })]
-		//public async Task UseSkill(CommandContext c,
-		//	[Description(""), RemainingText] string skillName)
-		//{
-		//	using (var session = Db.DocStore.OpenAsyncSession())
-		//	{
-		//		var player = await session
-		//			.Include<Models.Skill>(s => s.DisplayName)
-		//			.LoadAsync<Models.Player>(c.User.Id.ToString());
-
-		//		if (player == null)
-		//		{
-		//			await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_NOT_REGISTERED}");
-		//			await c.RejectMessage();
-		//			return;
-		//		}
-
-		//		var skill = await session.Query<Models.Skill>()
-		//			.FirstOrDefaultAsync(s => s.DisplayName.Equals(skillName, System.StringComparison.OrdinalIgnoreCase));
-
-		//		if(player.Skills.ContainsKey(skill.Id) == false)
-		//		{
-		//			await c.RespondAsync("You try and try, but nothing happens");
-		//			await c.RejectMessage();
-		//			return;
-		//		}
-
-		//		var sType = Realm.GetSkillImplementation(skill.SkillImpl);
-		//		if (sType == null)
-		//		{
-		//			await c.RespondAsync("An error occured. Contact one of the admins (Error_SkillImplNotFound)");
-		//			await c.RejectMessage();
-		//			return;
-		//		}
-
-		//		var sImpl = (Skills.ISkill)System.Activator.CreateInstance(sType);
-		//		await sImpl.ExecuteSkill(c, skill, player, player);
-
-		//		await c.ConfirmMessage();
-		//	}
-		//}
-
-		//[Command("useon"),
-		//	Description("Use a skill on someone or something else"),
-		//	RequireRoles(RoleCheckMode.Any, new[] { "Realm Player" })]
-		//public async Task UseSkillOn(CommandContext c, 
-		//	[Description(""), RemainingText] string input)
-		//{
-		//	using (var session = Db.DocStore.OpenAsyncSession())
-		//	{
-		//		var player = await session
-		//			.Include<Models.Skill>(s => s.DisplayName)
-		//			.LoadAsync<Models.Player>(c.User.Id.ToString());
-
-		//		if (player == null)
-		//		{
-		//			await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_NOT_REGISTERED}");
-		//			await c.RejectMessage();
-		//			return;
-		//		}
-
-		//		if(player.Skills == null)
-		//		{
-		//			await c.RespondAsync("You don't have any skills, poor you");
-		//			await c.RejectMessage();
-		//			return;
-		//		}
-
-		//		//var skill = await session.Query<Models.Skill>()
-		//		//	.FirstOrDefaultAsync(s => s.DisplayName.Equals(skillName, System.StringComparison.OrdinalIgnoreCase));
-
-		//		int x = 0;
-		//	}
-		//}
 	}
 }

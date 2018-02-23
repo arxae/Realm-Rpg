@@ -6,21 +6,39 @@
 
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.Entities;
+
 	using RealmRpgBot.Models;
 
 	public class ActionsProcessor
 	{
 		readonly CommandContext cmdContext;
-		public DiscordMessage AssociatedMessage { get; set; }
+		readonly Serilog.ILogger log;
 
-		public ActionsProcessor(CommandContext c, DiscordMessage msg)
+		bool isValid = true;
+
+		public DiscordMessage AssociatedMessage { get; set; }
+		public Skill AssociatedSkill { get; set; }
+
+
+		public ActionsProcessor(CommandContext c, DiscordMessage msg = null, Skill skill = null)
 		{
+			log = Serilog.Log.ForContext<ActionsProcessor>();
 			cmdContext = c;
+
+			if (msg == null && skill == null)
+			{
+				log.Error("Neither a message or skill was setup for action processing");
+				isValid = false;
+			}
+
 			AssociatedMessage = msg;
+			AssociatedSkill = skill;
 		}
 
 		internal async Task ProcessActionList(List<string> actions)
 		{
+			if (isValid == false) return;
+
 			for (int i = 0; i < actions.Count; i++)
 			{
 				await ExecuteActionAsync(actions[i]);
@@ -29,14 +47,14 @@
 
 		internal async Task ExecuteActionAsync(string action)
 		{
-			var l = Serilog.Log.ForContext<ActionsProcessor>();
+			if (isValid == false) return;
 
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				var player = await session.LoadAsync<Player>(cmdContext.User.Id.ToString());
 				if (player == null)
 				{
-					l.Warning("Trying to execute actions for player {pl}, but wasn't found", cmdContext.GetFullUserName());
+					log.Warning("Trying to execute actions for player {pl}, but wasn't found", cmdContext.GetFullUserName());
 					return;
 				}
 
@@ -57,7 +75,7 @@
 						var parts = action.Split(new[] { "->" }, StringSplitOptions.None);
 						if (int.TryParse(parts[1], out int healAmount) == false)
 						{
-							l.Error("Error processing action params: {cmd}", action);
+							log.Error("Error processing action params: {cmd}", action);
 							return;
 						}
 
@@ -96,7 +114,7 @@
 						return;
 					}
 
-					l.Warning("Unrecognized action: {cmd}", action);
+					log.Warning("Unrecognized action: {cmd}", action);
 
 					if (session.Advanced.HasChanged(player))
 					{
@@ -105,7 +123,6 @@
 				}
 				catch
 				{
-
 					throw;
 				}
 			}
