@@ -10,6 +10,8 @@
 	using DSharpPlus.Interactivity;
 
 	using Models;
+	using Raven.Client.Documents.Attachments;
+	using Raven.Client.Documents.Operations.Attachments;
 
 	public class Inn : IBuilding
 	{
@@ -34,32 +36,39 @@
 				.WithTitle(building.Name)
 				.WithDescription(desc.ToString())
 				.WithFooter(Constants.MSG_BUILDING_TIMEOUT);
-			var msg = await c.RespondAsync(embed: embed);
+			var playerRespondMsg = await c.RespondAsync(embed: embed);
 
 			foreach (var act in actions)
 			{
-				await msg.CreateReactionAsync(DiscordEmoji.FromName(c.Client, act.ReactionIcon));
+				await playerRespondMsg.CreateReactionAsync(DiscordEmoji.FromName(c.Client, act.ReactionIcon));
 			}
 
 			await c.ConfirmMessage();
 
 			var interact = c.Client.GetInteractivity();
-			var response = await interact.WaitForMessageReactionAsync(msg, c.User, TimeSpan.FromSeconds(15));
+			var response = await interact.WaitForMessageReactionAsync(playerRespondMsg, c.User, TimeSpan.FromSeconds(15));
 
 			if (response == null)
 			{
 				await c.RejectMessage();
-				await msg.DeleteAsync();
+				await playerRespondMsg.DeleteAsync();
 
 				return;
 			}
 
-			await msg.DeleteAllReactionsAsync();
+			await playerRespondMsg.DeleteAllReactionsAsync();
 			var responseName = response.Emoji.GetDiscordName().ToLower();
 
-			var actionsToPerform = new List<string>(actions.FirstOrDefault(acts => acts.ReactionIcon.Equals(responseName)).ActionCommands);
-			await msg.DeleteAsync();
-			await new ActionsProcessor(c, msg :msg).ProcessActionList(actionsToPerform);
+			var buildingActionId = actions.FirstOrDefault(ba => ba.ReactionIcon.Equals(responseName)).Id;
+
+			var attachment = await Db.DocStore.Operations.SendAsync(new GetAttachmentOperation(buildingActionId, "action.lua", AttachmentType.Document, null));
+			string script = await new System.IO.StreamReader(attachment.Stream).ReadToEndAsync();
+
+			await playerRespondMsg.DeleteAsync();
+
+			await ScriptRunner.Get.PerformScriptAsync(c, script,
+				c.User.Id.ToString(),
+				playerRespondMsg);
 		}
 	}
 }

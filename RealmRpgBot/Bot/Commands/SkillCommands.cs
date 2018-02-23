@@ -43,7 +43,7 @@
 				}
 
 				// Find skill to execute
-				var cmdSplit = input._Split(new string[] { " on " }, true);
+				var cmdSplit = input.SplitCaseIgnore(new string[] { " on " }, true);
 
 				string skillName;
 				if (cmdSplit.Count == 1)
