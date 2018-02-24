@@ -1,25 +1,23 @@
-﻿namespace RealmRpgBot.Bot.Commands
+﻿using System;
+
+namespace RealmRpgBot.Bot.Commands
 {
 	using System.Linq;
 	using System.Threading.Tasks;
 
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.CommandsNext.Attributes;
-	using DSharpPlus.Entities;
-	using DSharpPlus.Interactivity;
 	using Raven.Client.Documents;
 
 	[Group("skill"),
 		Description("Skill related commands"),
-		RequireRoles(RoleCheckMode.Any, new[] { "Realm Player" })]
+		RequireRoles(RoleCheckMode.Any, "Realm Admin", "Realm Player")]
 	public class SkillCommands : RpgCommandBase
 	{
 		// Format: .skill use <skillname> on <othername>
-		[Command("use"),
-			Description("Use a skill"),
-			RequireRoles(RoleCheckMode.Any, new[] { "Realm Player", "Realm Admin" })]
+		[Command("use"), Description("Use a skill")]
 		public async Task UseSkill(CommandContext c,
-			[Description(""), RemainingText] string input)
+			[Description("Use a skill"), RemainingText] string input)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
@@ -43,19 +41,14 @@
 				}
 
 				// Find skill to execute
-				var cmdSplit = input.SplitCaseIgnore(new string[] { " on " }, true);
+				var cmdSplit = input.SplitCaseIgnore(new[] { " on " }, true);
 
 				string skillName;
 				if (cmdSplit.Count == 1)
 				{
-					if (input.EndsWith(" on"))
-					{
-						skillName = input.Substring(0, input.LastIndexOf(" on"));
-					}
-					else
-					{
-						skillName = input;
-					}
+					skillName = input.EndsWith(" on")
+						? input.Substring(0, input.LastIndexOf(" on", StringComparison.OrdinalIgnoreCase))
+						: input;
 				}
 				else
 				{
@@ -63,7 +56,7 @@
 				}
 
 				var skill = await session.Query<Models.Skill>()
-					.FirstOrDefaultAsync(s => s.DisplayName.Equals(skillName, System.StringComparison.OrdinalIgnoreCase));
+					.FirstOrDefaultAsync(s => s.DisplayName.Equals(skillName, StringComparison.OrdinalIgnoreCase));
 
 				// Check if player has that skill
 				var playerSkill = player.Skills
@@ -95,7 +88,7 @@
 					return;
 				}
 
-				var sImpl = (Skills.ISkill)System.Activator.CreateInstance(sType);
+				var sImpl = (Skills.ISkill)Activator.CreateInstance(sType);
 				await sImpl.ExecuteSkill(c, skill, player, target);
 			}
 		}

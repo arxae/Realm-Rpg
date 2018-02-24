@@ -96,7 +96,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionsProcessor.cs" />
     <Compile Include="Bot\Commands\GameCommands.cs" />
     <Compile Include="Bot\Commands\InfoCommands.cs" />
     <Compile Include="Bot\Commands\GeneralActionCommands.cs" />
@@ -105,7 +104,7 @@
     <Compile Include="Bot\RpgBot.cs" />
     <Compile Include="Bot\Commands\RpgCommandBase.cs" />
     <Compile Include="Buildings\IBuilding.cs" />
-    <Compile Include="Buildings\Inn.cs" />
+    <Compile Include="Buildings\GenericBuilding.cs" />
     <Compile Include="Buildings\SkillTrainer.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Db.cs" />

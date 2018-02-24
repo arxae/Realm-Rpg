@@ -1,6 +1,7 @@
-﻿namespace RealmRpgBot
+﻿using System.Reflection;
+
+namespace RealmRpgBot
 {
-	using System;
 	using System.Linq;
 
 	using Serilog;
@@ -26,12 +27,12 @@
 				.CreateLogger();
 
 			// Deploy/Update indexes
-			var indexCount = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
-				.Where(t => t.IsClass && t.IsNested == false && t.Namespace == "RealmRpgBot.Index")
-				.Count();
+			var indexCount = Assembly.GetExecutingAssembly()
+				.GetTypes()
+				.Count(t => t.IsClass && t.IsNested == false && t.Namespace == "RealmRpgBot.Index");
 
 			Log.Logger.Information("Deploying {n} indexes", indexCount);
-			Raven.Client.Documents.Indexes.IndexCreation.CreateIndexes(System.Reflection.Assembly.GetExecutingAssembly(), Db.DocStore);
+			Raven.Client.Documents.Indexes.IndexCreation.CreateIndexes(Assembly.GetExecutingAssembly(), Db.DocStore);
 
 			Realm.SetupDbSubscriptions();
 

@@ -39,30 +39,30 @@
 		public static async Task<Models.ListObject> GetList(this IAsyncDocumentSession session, string listname) => await session.LoadAsync<Models.ListObject>(listname);
 
 		// Misc
-		public static List<string> SplitCaseIgnore(this string input, string[] splt, bool trimSpaces = false)
+		public static List<string> SplitCaseIgnore(this string input, string[] splitChars, bool trimSpaces = false)
 		{
-			List<string> _Result = new List<string>();
-			foreach (string _splt in splt)
+			var result = new List<string>();
+			foreach (string split in splitChars)
 			{
-				if (splt.Count() == 1)
+				if (splitChars.Count() == 1)
 				{
-					_Result.AddRange(Regex.Split(input, _splt, RegexOptions.IgnoreCase).ToList());
+					result.AddRange(Regex.Split(input, split, RegexOptions.IgnoreCase).ToList());
 				}
 				else
 				{
-					List<string> NewStr = Regex.Split(input, _splt, RegexOptions.IgnoreCase).ToList();
-					foreach (string _NewStr in NewStr)
+					List<string> newString = Regex.Split(input, split, RegexOptions.IgnoreCase).ToList();
+					foreach (string newStr in newString)
 					{
-						List<string> NewSplt = splt.ToList();
-						NewSplt.Remove(_splt);
-						return SplitCaseIgnore(_NewStr, NewSplt.ToArray());
+						List<string> newSplt = splitChars.ToList();
+						newSplt.Remove(split);
+						return SplitCaseIgnore(newStr, newSplt.ToArray());
 					}
 				}
 			}
 
 			return trimSpaces == false
-				? _Result
-				: _Result.Select(s => s.Trim()).ToList();
+				? result
+				: result.Select(s => s.Trim()).ToList();
 		}
 
 		public static string ReplaceCaseInsensitive(this string input, string oldStr, string newStr)

@@ -3,8 +3,10 @@
 	using System.Threading.Tasks;
 
 	using DSharpPlus.CommandsNext;
+	using Raven.Client.Documents.Attachments;
+	using Raven.Client.Documents.Operations.Attachments;
 
-	using RealmRpgBot.Models;
+	using Models;
 
 	public class Projectile : ISkill
 	{
@@ -17,14 +19,18 @@
 				return;
 			}
 
-			if(Realm.GetTargetTypeFromId((string)target)!= Enums.TargetType.User)
+			if (Realm.GetTargetTypeFromId((string)target) != Enums.TargetType.User)
 			{
 				await c.RespondAsync("That is not a valid target");
 				await c.RejectMessage();
 				return;
 			}
 
-			await new ActionsProcessor(c, c.Message).ProcessActionList(skill.ActionCommands);
+			var attachment = await Db.DocStore.Operations.SendAsync(new GetAttachmentOperation(skill.Id, "action.lua", AttachmentType.Document, null));
+			string script = await new System.IO.StreamReader(attachment.Stream).ReadToEndAsync();
+			await ScriptRunner.Get.PerformScriptAsync(c, script,
+				c.User.Id.ToString(),
+				null);
 		}
 	}
 }

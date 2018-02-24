@@ -9,8 +9,8 @@
 
 	public class Db
 	{
-		private static Lazy<IDocumentStore> store = new Lazy<IDocumentStore>(CreateStore);
-		public static IDocumentStore DocStore => store.Value;
+		private static readonly Lazy<IDocumentStore> storeInstance = new Lazy<IDocumentStore>(CreateStore);
+		public static IDocumentStore DocStore => storeInstance.Value;
 
 		static IDocumentStore CreateStore()
 		{
@@ -36,50 +36,6 @@
 			//};
 
 			return store;
-		}
-
-		public static bool ImportJson(string typeName, string json)
-		{
-			try
-			{
-
-				var t = Type.GetType(typeName, true, true);
-
-				var obj = JSON.DeserializeObject(json, t);
-
-				using (var session = DocStore.OpenSession())
-				{
-					session.Store(obj);
-					session.SaveChanges();
-				}
-
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		public static bool ImportJson(string json)
-		{
-			try
-			{
-				var obj = Newtonsoft.Json.Linq.JObject.Parse(json);
-
-				using (var session = DocStore.OpenSession())
-				{
-					session.Store(Newtonsoft.Json.Linq.JObject.Parse(json));
-					session.SaveChanges();
-				}
-
-				return true;
-			}
-			catch
-			{
-				Serilog.Log.Error("Error while importing json: {j}", json);
-				return false;
-			}
 		}
 	}
 }

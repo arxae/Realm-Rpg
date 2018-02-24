@@ -105,19 +105,21 @@
 			using (var session = Db.DocStore.OpenSession())
 			{
 				Serilog.Log.ForContext<Realm>().Debug("Caching {key} value", key);
+
 				var setting = session.Query<Models.Setting>().FirstOrDefault(s => s.Id.Equals(key, StringComparison.OrdinalIgnoreCase));
+
+				if (setting == null)
+				{
+					Serilog.Log.ForContext<Realm>().Error("Tried to retrieve not existing setting {name}", key);
+					return default(T);
+				}
+
 				_settingsCache.Add(setting);
 
 				return (T)Convert.ChangeType(setting.Value, typeof(T));
 			}
 		}
-
-		public static void SetProperty(object target, string propertyName, object value)
-		{
-			var prop = target.GetType().GetProperty(propertyName);
-			prop.SetValue(target, value);
-		}
-
+		
 		public static void SetupDbSubscriptions()
 		{
 			// Invalidates settings cache when a setting changes
@@ -163,15 +165,15 @@
 			{
 				case Enums.TargetType.User:
 					tmp = mention.Replace("<@", "");
-					tmp = tmp.Substring(0, tmp.LastIndexOf(">"));
+					tmp = tmp.Substring(0, tmp.LastIndexOf(">", StringComparison.OrdinalIgnoreCase));
 					return tmp;
 				case Enums.TargetType.Channel:
 					tmp = mention.Replace("<#", "");
-					tmp = tmp.Substring(0, tmp.LastIndexOf(">"));
+					tmp = tmp.Substring(0, tmp.LastIndexOf(">", StringComparison.OrdinalIgnoreCase));
 					return tmp;
 				case Enums.TargetType.Role:
 					tmp = mention.Replace("<@&", "");
-					tmp = tmp.Substring(0, tmp.LastIndexOf(">"));
+					tmp = tmp.Substring(0, tmp.LastIndexOf(">", StringComparison.OrdinalIgnoreCase));
 					return tmp;
 				default:
 					return mention;

@@ -30,15 +30,39 @@
 
 				await player.AddXpAsync(xpAmount, c);
 				await session.SaveChangesAsync();
+
+				await c.ConfirmMessage();
 			}
 		}
 
-		[Command("fail"), Description("This command throws an exception")]
-		public async Task Fail(CommandContext c)
+		[Command("levelup"), Description("Levels up specific player")]
+		public async Task LevelUp(CommandContext c,
+			[Description("User mention who should get the levelup")] DiscordUser mention)
 		{
-			var d = new System.Collections.Generic.Dictionary<string, string>();
-			await c.RespondAsync(d["non_existing_key"]);
-			await c.RespondAsync("This command should fail");
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var player = await session.LoadAsync<Models.Player>(mention.Id.ToString());
+				if (player == null)
+				{
+					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
+					await c.RejectMessage();
+
+					return;
+				}
+
+				var xpNeeded = player.XpNext - player.XpCurrent;
+				await player.AddXpAsync(xpNeeded, c);
+				await session.SaveChangesAsync();
+
+			}
+
+			await c.ConfirmMessage();
+		}
+
+		[Command("test")]
+		public async Task Test(CommandContext c, [RemainingText]params DiscordUser[] users)
+		{
+			await c.ConfirmMessage();
 		}
 	}
 }

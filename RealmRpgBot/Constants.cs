@@ -17,5 +17,7 @@
 		public const string MSG_NOT_ENOUGH_ATTRIB_PTS = "You don't have enough attribute points to train";
 		public const string MSG_NOT_ENOUGH_SKILL_PTS = "You don't have enough skill points to learn";
 		public const string MSG_NO_SUCH_SKILL = "No such skill exists";
+		public const string MSG_NO_EXITS = "This location has no exits";
+		public const string MSG_INVALID_CONNECTION = "There is no such exit from this location";
 	}
 }

@@ -6,7 +6,8 @@
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.Entities;
 	using DSharpPlus.Interactivity;
-	using RealmRpgBot.Models;
+
+	using Models;
 
 	public class SkillTrainer : IBuilding
 	{

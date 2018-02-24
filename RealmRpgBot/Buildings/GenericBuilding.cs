@@ -13,7 +13,7 @@
 	using Raven.Client.Documents.Attachments;
 	using Raven.Client.Documents.Operations.Attachments;
 
-	public class Inn : IBuilding
+	public class GenericBuilding : IBuilding
 	{
 		public async Task EnterBuilding(CommandContext c, Building building)
 		{
@@ -21,8 +21,8 @@
 
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
-				var _acts = await session.LoadAsync<BuildingAction>(building.Actions);
-				actions.AddRange(_acts.Values);
+				var acts = await session.LoadAsync<BuildingAction>(building.Actions);
+				actions.AddRange(acts.Values);
 			}
 
 			var desc = new System.Text.StringBuilder();
@@ -59,7 +59,15 @@
 			await playerRespondMsg.DeleteAllReactionsAsync();
 			var responseName = response.Emoji.GetDiscordName().ToLower();
 
-			var buildingActionId = actions.FirstOrDefault(ba => ba.ReactionIcon.Equals(responseName)).Id;
+			var buildingActionId = actions.FirstOrDefault(ba => ba.ReactionIcon.Equals(responseName))?.Id;
+
+			if (buildingActionId == null)
+			{
+				Serilog.Log.ForContext<GenericBuilding>().Error("Could not find BuildingAction with id {response}", responseName);
+				await c.RespondAsync("An error occured. Contact one of the admins and (Error_BuildingActionReactionIdNotFound)");
+				await c.RejectMessage();
+				return;
+			}
 
 			var attachment = await Db.DocStore.Operations.SendAsync(new GetAttachmentOperation(buildingActionId, "action.lua", AttachmentType.Document, null));
 			string script = await new System.IO.StreamReader(attachment.Stream).ReadToEndAsync();

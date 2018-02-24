@@ -6,7 +6,7 @@
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.CommandsNext.Attributes;
 
-	using RealmRpgBot.Models;
+	using Models;
 
 	[Group("rpg")]
 	public class GameCommands : RpgCommandBase

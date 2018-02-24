@@ -34,7 +34,7 @@
 			}
 
 			// Buildings
-			if (Buildings.Count > 0)
+			if (Buildings?.Count > 0)
 			{
 				builder.AddField("Buildings", string.Join(", ", Buildings.Select(b => b.Name)));
 			}

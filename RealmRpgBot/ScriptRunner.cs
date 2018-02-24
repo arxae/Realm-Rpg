@@ -12,84 +12,86 @@
 
 	public class ScriptRunner
 	{
-		static Lazy<ScriptRunner> _scriptRunnerInstance = new Lazy<ScriptRunner>(() => new ScriptRunner());
-		public static ScriptRunner Get => _scriptRunnerInstance.Value;
+		public static ScriptRunner Get => ScriptRunnerInstance.Value;
+		static readonly Lazy<ScriptRunner> ScriptRunnerInstance = new Lazy<ScriptRunner>(() => new ScriptRunner());
 
-		readonly Script lua;
-		readonly Serilog.ILogger log;
+		readonly Script _lua;
+		readonly Serilog.ILogger _log;
 
-		CommandContext ctx;
-		DiscordMessage BotReply;
-		Player SourcePlayer;
+		CommandContext _ctx;
+		DiscordMessage _botReply;
+		Player _sourcePlayer;
 
-		public ScriptRunner()
+		private ScriptRunner()
 		{
-			log = Serilog.Log.ForContext<ScriptRunner>();
-			lua = new Script();
+			_log = Serilog.Log.ForContext<ScriptRunner>();
+			_lua = new Script
+			{
+				Options = { DebugPrint = s => _log.Debug(s) }
+			};
 
-			lua.Options.DebugPrint = s => log.Debug(s);
 
-			lua.Globals["Reply"] = (Action<string>)(async replyMsg => await DiscordReplyAsync(replyMsg));
-			lua.Globals["SetMessage"] = (Action<string>)(async newMsg => await DiscordSetMessage(newMsg));
+			_lua.Globals["Reply"] = (Action<string>)(async replyMsg => await DiscordReplyAsync(replyMsg));
+			_lua.Globals["SetMessage"] = (Action<string>)(async newMsg => await DiscordSetMessage(newMsg));
 
 			//lua.Globals["DeleteResponse"] = (Action<bool>)(async _ => await DiscordDeleteResponse());
-			lua.Globals["DeleteResponse"] = (Action)(async () => await DiscordDeleteResponse());
+			_lua.Globals["DeleteResponse"] = (Action)(async () => await DiscordDeleteResponse());
 
 
-			lua.Globals["HealPlayer"] = (Action<int>)(async (amt) => await HealPlayer(amt));
-			lua.Globals["FullHealPlayer"] = (Action)(async () => await HealPlayerToFull());
-			lua.Globals["Rest"] = (Action)(async () => await PlaceHolder());
+			_lua.Globals["HealPlayer"] = (Action<int>)(async (amt) => await HealPlayer(amt));
+			_lua.Globals["FullHealPlayer"] = (Action)(async () => await HealPlayerToFull());
+			_lua.Globals["Rest"] = (Action)(async () => await PlaceHolder());
 
-			log.Information($"ScriptRunner initialized with {lua.Globals.Keys.Count()} global(s)");
+			_log.Information($"ScriptRunner initialized with {_lua.Globals.Keys.Count()} global(s)");
 		}
 
 		public async Task PerformScriptAsync(CommandContext c, string script, string sourcePlayerId, DiscordMessage botReply)
 		{
-			ctx = c;
-			BotReply = botReply;
+			_ctx = c;
+			_botReply = botReply;
 
 			using (var session = Db.DocStore.OpenSession())
 			{
-				SourcePlayer = session.Load<Player>(sourcePlayerId);
+				_sourcePlayer = session.Load<Player>(sourcePlayerId);
 
-				await lua.DoStringAsync(script);
+				await _lua.DoStringAsync(script);
 
-				if (session.Advanced.HasChanged(SourcePlayer))
+				if (session.Advanced.HasChanged(_sourcePlayer))
 				{
 					session.SaveChanges();
 				}
 			}
 		}
 
-		public async Task DiscordReplyAsync(string replyMsg) => await ctx.RespondAsync(ParseMessageMention(ctx, replyMsg));
-		public async Task DiscordSetMessage(string newMsg) => await BotReply?.ModifyAsync(ParseMessageMention(ctx, newMsg), null);
-		public async Task DiscordDeleteResponse() => await BotReply?.DeleteAsync();
+		async Task DiscordReplyAsync(string replyMsg) => await _ctx.RespondAsync(ParseMessageMention(_ctx, replyMsg));
+		async Task DiscordSetMessage(string newMsg) => await _botReply?.ModifyAsync(ParseMessageMention(_ctx, newMsg), null);
+		async Task DiscordDeleteResponse() => await _botReply?.DeleteAsync();
 
-		public async Task HealPlayer(int amount)
+		async Task HealPlayer(int amount)
 		{
 			await Task.Run(() =>
 			{
-				SourcePlayer.HpCurrent += amount;
-				if (SourcePlayer.HpCurrent > SourcePlayer.HpMax)
+				_sourcePlayer.HpCurrent += amount;
+				if (_sourcePlayer.HpCurrent > _sourcePlayer.HpMax)
 				{
-					SourcePlayer.HpCurrent = SourcePlayer.HpMax;
+					_sourcePlayer.HpCurrent = _sourcePlayer.HpMax;
 				}
 			});
 		}
 
-		public async Task HealPlayerToFull()
+		async Task HealPlayerToFull()
 		{
 			await Task.Run(() =>
 			{
-				SourcePlayer.HpCurrent = SourcePlayer.HpMax;
+				_sourcePlayer.HpCurrent = _sourcePlayer.HpMax;
 			});
 		}
 
-		public async Task PlaceHolder()
+		async Task PlaceHolder()
 		{
 			await Task.Run(() =>
 			{
-				log.Warning("Placeholder Called");
+				_log.Warning("Placeholder Called");
 			});
 		}
 

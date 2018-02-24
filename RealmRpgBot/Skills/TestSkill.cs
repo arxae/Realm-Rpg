@@ -4,7 +4,7 @@
 
 	using DSharpPlus.CommandsNext;
 
-	using RealmRpgBot.Models;
+	using Models;
 
 	public class TestSkill : ISkill
 	{

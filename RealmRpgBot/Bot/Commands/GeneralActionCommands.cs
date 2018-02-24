@@ -77,6 +77,19 @@
 				}
 
 				var location = await session.LoadAsync<Location>(player.CurrentLocation);
+				if (location.LocationConnections == null || location.LocationConnections.Count == 0)
+				{
+					await c.RespondAsync(Constants.MSG_NO_EXITS);
+					await c.RejectMessage();
+					return;
+				}
+
+				if (location.LocationConnections.Contains(destinationName, System.StringComparer.OrdinalIgnoreCase) == false)
+				{
+					await c.RespondAsync(Constants.MSG_INVALID_CONNECTION);
+					await c.RejectMessage();
+					return;
+				}
 
 				var dest = await session.Query<Location>().FirstOrDefaultAsync(tl => tl.DisplayName == destinationName);
 
@@ -174,8 +187,8 @@
 
 				var embed = new DiscordEmbedBuilder()
 					.WithTitle($"{player.UserName} the {race.DisplayName} {cls.DisplayName}")
-					.AddField("Hp", $"{hpBar.ToString()} ({player.HpCurrent}/{player.HpMax})")
-					.AddField("Xp", $"{xpBar.ToString()} ({player.XpCurrent}/{player.XpNext})")
+					.AddField("Hp", $"{hpBar} ({player.HpCurrent}/{player.HpMax})")
+					.AddField("Xp", $"{xpBar} ({player.XpCurrent}/{player.XpNext})")
 					.AddField("Skill pts", player.SkillPoints.ToString(), true)
 					.AddField("Attrib pts", player.AttributePoints.ToString(), true)
 					.WithDescription(description.ToString());
