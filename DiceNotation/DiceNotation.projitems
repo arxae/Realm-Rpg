@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>f320119c-603c-4c4b-a617-914ad0d9db36</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>DiceNotation</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Dice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DiceExpression.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\ImpossibleDieException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\InvalidChooseException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\InvalidMultiplicityException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\InvalidSyntaxException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IDiceExpression.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Random\DotNetRandom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Random\GaussianRandom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Random\IRandom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Random\KnownSeriesRandom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Random\MaxRandom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Random\MinRandom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SingletonRandom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Terms\AddTerm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Terms\ConstantTerm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Terms\DiceTerm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Terms\DivideTerm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Terms\ITerm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Terms\KeepTerm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Terms\MultiplyTerm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Terms\SubtractTerm.cs" />
+  </ItemGroup>
+</Project>

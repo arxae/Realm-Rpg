@@ -26,6 +26,13 @@
 			}
 
 			var desc = new System.Text.StringBuilder();
+
+			if (building.WelcomeMessage != null)
+			{
+				desc.AppendLine($"*\"{building.WelcomeMessage}\"*");
+				desc.AppendLine();
+			}
+
 			foreach (var act in actions)
 			{
 				desc.AppendLine(act.Description);

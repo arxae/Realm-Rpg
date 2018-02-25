@@ -69,5 +69,10 @@
 		{
 			return Regex.Replace(input, Regex.Escape(oldStr), newStr.Replace("$", "$$"), RegexOptions.IgnoreCase);
 		}
+
+		public static T GetRandomEntry<T>(this List<T> list)
+		{
+			return list[DiceNotation.SingletonRandom.Instance.Next(list.Count - 1)];
+		}
 	}
 }

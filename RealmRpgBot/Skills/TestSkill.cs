@@ -8,7 +8,7 @@
 
 	public class TestSkill : ISkill
 	{
-		public async Task ExecuteSkill(CommandContext c, Skill skill, Player source, object target)
+		public async Task ExecuteSkill(CommandContext c, Skill skill, TrainedSkill trainedskill, Player source, object target)
 		{
 			var targetType = Realm.GetTargetTypeFromId((string)target);
 

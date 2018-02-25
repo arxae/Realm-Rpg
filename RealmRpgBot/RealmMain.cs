@@ -1,8 +1,7 @@
-﻿using System.Reflection;
-
-namespace RealmRpgBot
+﻿namespace RealmRpgBot
 {
 	using System.Linq;
+	using System.Reflection;
 
 	using Serilog;
 
@@ -34,7 +33,11 @@ namespace RealmRpgBot
 			Log.Logger.Information("Deploying {n} indexes", indexCount);
 			Raven.Client.Documents.Indexes.IndexCreation.CreateIndexes(Assembly.GetExecutingAssembly(), Db.DocStore);
 
+			// Setup DB subscriptions
 			Realm.SetupDbSubscriptions();
+
+			// Setup correct RNG implementation
+			DiceNotation.SingletonRandom.Instance = new DiceNotation.Random.GaussianRandom();
 
 			new Bot.RpgBot()
 				.StartBotAsync()

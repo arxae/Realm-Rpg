@@ -89,7 +89,7 @@ namespace RealmRpgBot.Bot.Commands
 				}
 
 				var sImpl = (Skills.ISkill)Activator.CreateInstance(sType);
-				await sImpl.ExecuteSkill(c, skill, player, target);
+				await sImpl.ExecuteSkill(c, skill, playerSkill, player, target);
 			}
 		}
 	}

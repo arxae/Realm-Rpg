@@ -1,11 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+VisualStudioVersion = 15.0.27130.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealmRpgBot", "RealmRpgBot\RealmRpgBot.csproj", "{E895C3FB-46C0-4989-9BCB-B8827A2116F6}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DiceNotation", "DiceNotation\DiceNotation.shproj", "{F320119C-603C-4C4B-A617-914AD0D9DB36}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DiceNotation\DiceNotation.projitems*{e895c3fb-46c0-4989-9bcb-b8827a2116f6}*SharedItemsImports = 4
+		DiceNotation\DiceNotation.projitems*{f320119c-603c-4c4b-a617-914ad0d9db36}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

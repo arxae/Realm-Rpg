@@ -5,6 +5,7 @@
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.CommandsNext.Attributes;
 	using DSharpPlus.Entities;
+	using Raven.Client.Documents;
 
 	[Group("dev"),
 		Description("Game administration commands"),
@@ -31,6 +32,8 @@
 				await player.AddXpAsync(xpAmount, c);
 				await session.SaveChangesAsync();
 
+				await Realm.LogHistory(c.User.GetFullUsername(), mention.GetFullUsername(), c.Command.QualifiedName, xpAmount.ToString());
+
 				await c.ConfirmMessage();
 			}
 		}
@@ -54,6 +57,46 @@
 				await player.AddXpAsync(xpNeeded, c);
 				await session.SaveChangesAsync();
 
+				await Realm.LogHistory(c.User.GetFullUsername(), mention.GetFullUsername(), c.Command.QualifiedName);
+			}
+
+			await c.ConfirmMessage();
+		}
+
+		[Command("teleport"), Aliases("tp")]
+		public async Task Teleport(CommandContext c,
+			[Description("User to teleport")] DiscordUser mention,
+			[Description("Location to teleport to"), RemainingText] string locationName)
+		{
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var player = await session
+					.Include<Models.Location>(loc => loc.DisplayName)
+					.LoadAsync<Models.Player>(mention.Id.ToString());
+				if (player == null)
+				{
+					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
+					await c.RejectMessage();
+
+					return;
+				}
+
+				var location = await session.Query<Models.Location>().FirstOrDefaultAsync(l =>
+					l.DisplayName.Equals(locationName, System.StringComparison.OrdinalIgnoreCase));
+				if (location == null)
+				{
+					await c.RespondAsync("Invalid location");
+					await c.RejectMessage();
+					return;
+				}
+
+				player.CurrentLocation = location.Id;
+				await session.SaveChangesAsync();
+
+				var user = await c.Guild.GetMemberAsync(mention.Id);
+				await user.SendMessageAsync($"[REALM] You have been teleported to {location.DisplayName}");
+
+				await Realm.LogHistory(c.GetFullUserName(), mention.GetFullUsername(), c.Command.QualifiedName, $"{mention.GetFullUsername()} ({mention.Id})", locationName);
 			}
 
 			await c.ConfirmMessage();

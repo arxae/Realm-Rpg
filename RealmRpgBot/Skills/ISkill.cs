@@ -8,6 +8,6 @@
 
 	public interface ISkill
 	{
-		Task ExecuteSkill(CommandContext c, Skill skill, Player source, object target);
+		Task ExecuteSkill(CommandContext c, Skill skill, TrainedSkill trainedSkill, Player source, object target);
 	}
 }

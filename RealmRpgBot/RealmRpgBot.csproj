@@ -56,6 +56,9 @@
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Priority Queue, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OptimizedPriorityQueue.4.1.1\lib\net45\Priority Queue.dll</HintPath>
+    </Reference>
     <Reference Include="Raven.Client, Version=4.0.1.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
       <HintPath>..\packages\RavenDB.Client.4.0.1\lib\netstandard2.0\Raven.Client.dll</HintPath>
     </Reference>
@@ -118,6 +121,10 @@
     <Compile Include="Index\Skills_All.cs" />
     <Compile Include="Models\BuildingAction.cs" />
     <Compile Include="Models\CharacterClass.cs" />
+    <Compile Include="Models\DevHistory.cs" />
+    <Compile Include="Models\Item.cs" />
+    <Compile Include="Models\LocationInventoryItem.cs" />
+    <Compile Include="Models\Perceptable.cs" />
     <Compile Include="Models\TrainedSkill.cs" />
     <Compile Include="Models\ListObject.cs" />
     <Compile Include="Models\Location.cs" />
@@ -132,7 +139,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptRunner.cs" />
     <Compile Include="Skills\ISkill.cs" />
-    <Compile Include="Skills\Projectile.cs" />
+    <Compile Include="Skills\Perception.cs" />
     <Compile Include="Skills\TestSkill.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -144,5 +151,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <Import Project="..\DiceNotation\DiceNotation.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

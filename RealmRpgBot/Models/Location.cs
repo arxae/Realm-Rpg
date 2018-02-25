@@ -12,7 +12,18 @@
 		public string Description { get; set; }
 		public string SafetyRating { get; set; }
 		public List<string> LocationConnections { get; set; }
+		public List<Perceptable> Perceptables { get; set; }
+		public List<LocationInventoryItem> LocationInventory { get; set; }
 		public List<Building> Buildings { get; set; }
+
+		public Location()
+		{
+			// TODO: Lazy initialization
+			LocationConnections = new List<string>();
+			Perceptables = new List<Perceptable>();
+			LocationInventory = new List<LocationInventoryItem>();
+			Buildings = new List<Building>();
+		}
 
 		public DiscordEmbed GetLocationEmbed()
 		{

@@ -4,12 +4,15 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Threading.Tasks;
+
+	using Models;
 
 	public class Realm
 	{
 		private static List<Type> _buildingImplementations;
 		private static List<Type> _skillImplementations;
-		private static List<Models.Setting> _settingsCache = new List<Models.Setting>();
+		private static List<Setting> _settingsCache = new List<Setting>();
 
 		public static void ClearCacheForKey(string key)
 		{
@@ -106,7 +109,7 @@
 			{
 				Serilog.Log.ForContext<Realm>().Debug("Caching {key} value", key);
 
-				var setting = session.Query<Models.Setting>().FirstOrDefault(s => s.Id.Equals(key, StringComparison.OrdinalIgnoreCase));
+				var setting = session.Query<Setting>().FirstOrDefault(s => s.Id.Equals(key, StringComparison.OrdinalIgnoreCase));
 
 				if (setting == null)
 				{
@@ -119,11 +122,11 @@
 				return (T)Convert.ChangeType(setting.Value, typeof(T));
 			}
 		}
-		
+
 		public static void SetupDbSubscriptions()
 		{
 			// Invalidates settings cache when a setting changes
-			Db.DocStore.Subscriptions.GetSubscriptionWorker<Models.Setting>("Settings Changed")
+			Db.DocStore.Subscriptions.GetSubscriptionWorker<Setting>("Settings Changed")
 				.Run(s =>
 				{
 					foreach (var setting in s.Items) ClearCacheForKey(setting.Id);
@@ -177,6 +180,28 @@
 					return tmp;
 				default:
 					return mention;
+			}
+		}
+
+		public static async Task LogHistory(string source, string target = null, string command = null, params string[] parameters)
+		{
+			await LogHistory(new DevHistory
+			{
+				Source = source,
+				Target = target,
+				Command = command,
+				Parameters = parameters
+			});
+		}
+
+		public static async Task LogHistory(DevHistory history)
+		{
+			if (GetSetting<bool>("keepdevcmdhistory") == false) return;
+
+			using (var session = Db.DocStore.OpenAsyncSession("rpg_logs"))
+			{
+				await session.StoreAsync(history);
+				await session.SaveChangesAsync();
 			}
 		}
 	}

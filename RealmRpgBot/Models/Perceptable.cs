@@ -1,0 +1,23 @@
+﻿namespace RealmRpgBot.Models
+{
+	using System;
+
+	/// <summary>
+	/// Definition for items/events that can be found on a certain location. See <seealso cref="Item"/> for the actual item definition
+	/// </summary>
+	public class Perceptable
+	{
+		public string DocId { get; set; }
+		public int Difficulty { get; set; }
+		public int Count { get; set; }
+		public PerceptableType Type { get; set; }
+
+		public override string ToString() => $"{DocId} - {Difficulty} - {Type.ToString()}";
+
+		public enum PerceptableType
+		{
+			Item,
+			Event
+		}
+	}
+}
