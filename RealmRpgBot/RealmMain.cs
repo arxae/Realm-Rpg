@@ -36,6 +36,9 @@
 			// Setup DB subscriptions
 			Realm.SetupDbSubscriptions();
 
+			// Setup scheduler
+			JobScheduler.Scheduler.Initialize();
+
 			// Setup correct RNG implementation
 			DiceNotation.SingletonRandom.Instance = new DiceNotation.Random.GaussianRandom();
 

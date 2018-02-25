@@ -49,6 +49,8 @@
 
 		private void DebugLogger_LogMessageReceived(object sender, DSharpPlus.EventArgs.DebugLogMessageEventArgs e)
 		{
+			if (e.Message == "Received WebSocket Heartbeat Ack" || e.Message == "Sending Heartbeat") return;
+
 			var l = Serilog.Log.ForContext("SourceContext", e.Application);
 
 			switch (e.Level)
