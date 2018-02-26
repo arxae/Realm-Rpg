@@ -53,6 +53,19 @@
 			// Exits
 			builder.AddField("Exits", string.Join(", ", LocationConnections));
 
+			if (LocationInventory?.Count > 0)
+			{
+				var liSb = new System.Text.StringBuilder();
+
+				foreach (var i in LocationInventory)
+				{
+					if (i.Amount < 1) continue;
+					liSb.Append($"{i.DisplayName} (x{i.Amount})");
+				}
+
+				builder.AddField("Items", liSb.ToString());
+			}
+
 			builder.WithDescription(desc.ToString());
 
 			return builder.Build();

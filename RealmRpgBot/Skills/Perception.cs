@@ -1,16 +1,16 @@
-﻿using Raven.Client.Documents.Session;
-
-namespace RealmRpgBot.Skills
+﻿namespace RealmRpgBot.Skills
 {
 	using System.Linq;
 	using System.Threading.Tasks;
 
+	using DiceNotation;
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.Entities;
 	using DSharpPlus.Interactivity;
-	using DiceNotation;
+	using Raven.Client.Documents.Session;
 
 	using Models;
+	using System;
 
 	public class Perception : ISkill
 	{
@@ -51,6 +51,15 @@ namespace RealmRpgBot.Skills
 			{
 				var item = await dbSession.LoadAsync<Item>(perceptable.DocId);
 
+				// TODO: Move to somewhere sensible/db
+				var uncoverVariations = new[]
+				{
+					"under some bushes",
+					"on the floor",
+					"in some boxes",
+					"under a bench",
+					"behind a frog"
+				};
 
 				var existingInventory = location.LocationInventory.FirstOrDefault(li => li.DocId == perceptable.DocId);
 				if (existingInventory == null)
@@ -59,17 +68,28 @@ namespace RealmRpgBot.Skills
 					{
 						DocId = item.Id,
 						DisplayName = item.DisplayName,
-						Amount = 1,
-						DecaysOn = System.DateTime.Now.AddMinutes(15)
+						Amount = perceptable.Count == 0
+							? 1
+							: perceptable.Count,
+						DecaysOn = DateTime.Now.AddMilliseconds((trainedSkill.Rank * 2.5) * 10000)
 					};
 					location.LocationInventory.Add(inv);
+
+					await c.RespondAsync($"{c.User.Mention} uncovered {item.DisplayName} {uncoverVariations.GetRandomEntry()} (Roll {roll})");
 				}
 				else
 				{
-					existingInventory.Amount += 1;
-					// Add a couple of minutes to the location
-					// TODO: Higher perception, adds more minutes (1m/30s for each rank)
-					existingInventory.DecaysOn = existingInventory.DecaysOn.AddMinutes(1);
+					if (existingInventory.Amount < perceptable.MaxPerceptable)
+					{
+						existingInventory.Amount += perceptable.Count;
+						existingInventory.DecaysOn = existingInventory.DecaysOn + TimeSpan.FromMilliseconds((trainedSkill.Rank * 2.5) * 10000);
+
+						await c.RespondAsync($"{c.User.Mention} found some more {item.DisplayName} {uncoverVariations.GetRandomEntry()} (Roll {roll})");
+					}
+					else
+					{
+						await c.RespondAsync($"{c.User.Mention} looked for hours, but couldn't find anything");
+					}
 				}
 			}
 			//	else if (perceptable.Type == Perceptable.PerceptableType.Event) await ProcessPerceptableEvent(perceptable);

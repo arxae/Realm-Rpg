@@ -16,7 +16,6 @@
 			JobManager.JobEnd += info => log.Debug("Ended job: {jobname}", info.Name);
 
 			JobManager.Initialize(new RealmJobRegistry());
-			JobManager.AddJob(() => Console.WriteLine("LAAAAATE"), (s) => s.ToRunOnceIn(10).Seconds());
 		}
 	}
 }

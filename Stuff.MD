@@ -1,1 +1,0 @@
-LastSearched on location. When someone searches the location, no one can find anything anymore for the next X minutes (10/15 or so)

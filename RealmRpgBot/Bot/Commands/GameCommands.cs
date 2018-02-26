@@ -33,7 +33,16 @@
 					return;
 				}
 
-				await session.StoreAsync(new Player(c.User, c.Guild, "races/" + race));
+				var player = new Player(c.User, c.Guild, "races/" + race);
+
+				var skillIds = Realm.GetSetting<string>("startingskills");
+
+				foreach (var skillId in skillIds.Split(';'))
+				{
+					player.Skills.Add(new TrainedSkill(skillId, 1));
+				}
+
+				await session.StoreAsync(player);
 				await session.SaveChangesAsync();
 			}
 

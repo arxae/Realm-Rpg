@@ -74,5 +74,10 @@
 		{
 			return list[DiceNotation.SingletonRandom.Instance.Next(list.Count - 1)];
 		}
+
+		public static T GetRandomEntry<T>(this T[] arr)
+		{
+			return arr[DiceNotation.SingletonRandom.Instance.Next(arr.Length)];
+		}
 	}
 }

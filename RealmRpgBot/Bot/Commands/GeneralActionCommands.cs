@@ -13,6 +13,7 @@
 	/// <summary>
 	/// Various actions player can perform
 	/// </summary>
+	[RequireRoles(RoleCheckMode.All, new[] { "Realm Player", "Realm Admin" })]
 	public class GeneralActionCommands : RpgCommandBase
 	{
 		[Command("ping"), Aliases(new[] { "p" }), Description("Check bot responsiveness, replies with latency")]
@@ -273,6 +274,38 @@
 			}
 
 			await c.ConfirmMessage();
+		}
+
+		[Command("take"), Description("Take an item from the current location")]
+		public async Task TakeItemFromLocation(CommandContext c,
+			[Description("")] string itemName)
+		{
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var player = await session
+					.Include<Location>(l => l.Id)
+					.LoadAsync<Player>(c.User.Id.ToString());
+				var location =await session.LoadAsync<Location>(player.CurrentLocation);
+
+				var inv = location.LocationInventory.FirstOrDefault(i => i.DisplayName.Equals(itemName));
+
+				if (inv == null)
+				{
+					await c.RespondAsync($"Could not find item {itemName} on this location");
+					await c.RejectMessage();
+					return;
+				}
+
+				if(inv.Amount == 0)
+				{
+					location.LocationInventory.Remove(inv);
+					await c.RespondAsync($"Could not find item {itemName} on this location");
+					await c.RejectMessage();
+					return;
+				}
+			}
+
+			await c.RespondAsync();
 		}
 	}
 }

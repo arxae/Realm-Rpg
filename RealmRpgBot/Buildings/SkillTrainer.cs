@@ -28,7 +28,7 @@
 					.WithTitle(building.Name);
 
 				var description = new System.Text.StringBuilder();
-				description.AppendLine($"*\"{building.Parameters["WelcomeMessage"]}\"*");
+				description.AppendLine($"*\"{building.WelcomeMessage}\"");
 
 				// Get skills
 				var skills = await session.LoadAsync<Skill>(building.Parameters.Where(p => p.Value.StartsWith("skills/")).Select(p => p.Value));
@@ -39,7 +39,7 @@
 
 					var descriptionLines = skill.Description.Split('\n');
 					string descriptionText = descriptionLines[0];
-					if(descriptionLines.Length > 1)
+					if (descriptionLines.Length > 1)
 					{
 						descriptionText += "...";
 					}
@@ -82,7 +82,7 @@
 				var skillEntry = player.Skills.FirstOrDefault(ls => ls.Id.Equals(selectedSkill.Key));
 				if (skillEntry == null)
 				{
-					player.Skills.Add(new TrainedSkill { Id = selectedSkill.Key, Rank = 1 });
+					player.Skills.Add(new TrainedSkill(selectedSkill.Key, 1));
 					await c.RespondAsync($"{c.User.Mention} learned {selectedSkill.Value.DisplayName}");
 				}
 				else
