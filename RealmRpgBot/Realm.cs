@@ -132,11 +132,11 @@
 		public static void SetupDbSubscriptions()
 		{
 			// Invalidates settings cache when a setting changes
-			//Db.DocStore.Subscriptions.GetSubscriptionWorker<Setting>("Settings Changed")
-			//	.Run(s =>
-			//	{
-			//		foreach (var setting in s.Items) ClearCacheForKey(setting.Id);
-			//	});
+			Db.DocStore.Subscriptions.GetSubscriptionWorker<Setting>("Settings Changed")
+				.Run(s =>
+				{
+					foreach (var setting in s.Items) ClearCacheForKey(setting.Id);
+				});
 		}
 
 		public static string GetCertificate()

@@ -7,9 +7,7 @@
 	using DSharpPlus.Entities;
 	using Raven.Client.Documents;
 
-	[Group("dev"),
-		Description("Game administration commands"),
-		RequireRoles(RoleCheckMode.Any, new[] { "Realm Admin" })]
+	[Group("dev"), Description("Game administration commands"), RequireRoles(RoleCheckMode.Any, "Realm Admin")]
 	public class DeveloperCommands : RpgCommandBase
 	{
 		[Command("addxp"), Description("Add specified amount of xp to a player")]
@@ -99,6 +97,13 @@
 				await Realm.LogHistory(c.GetFullUserName(), mention.GetFullUsername(), c.Command.QualifiedName, $"{mention.GetFullUsername()} ({mention.Id})", locationName);
 			}
 
+			await c.ConfirmMessage();
+		}
+
+		[Command("clearcache"), Aliases("cc"), Description("Clear the settings cache")]
+		public async Task ClearSettingsCache(CommandContext c)
+		{
+			Realm.ClearSettingsCache();
 			await c.ConfirmMessage();
 		}
 

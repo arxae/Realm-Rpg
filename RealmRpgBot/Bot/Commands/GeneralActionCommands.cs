@@ -277,17 +277,17 @@
 		}
 
 		[Command("take"), Description("Take an item from the current location")]
-		public async Task TakeItemFromLocation(CommandContext c,
-			[Description("")] string itemName)
+		public async Task ItemFromLocation(CommandContext c,
+			[Description("The name of the item you want to take"), RemainingText] string itemName)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				var player = await session
 					.Include<Location>(l => l.Id)
 					.LoadAsync<Player>(c.User.Id.ToString());
-				var location =await session.LoadAsync<Location>(player.CurrentLocation);
+				var location = await session.LoadAsync<Location>(player.CurrentLocation);
 
-				var inv = location.LocationInventory.FirstOrDefault(i => i.DisplayName.Equals(itemName));
+				var inv = location.LocationInventory.FirstOrDefault(i => i.DisplayName.Equals(itemName, System.StringComparison.OrdinalIgnoreCase));
 
 				if (inv == null)
 				{
@@ -296,16 +296,33 @@
 					return;
 				}
 
-				if(inv.Amount == 0)
+				if (inv.Amount == 0)
 				{
 					location.LocationInventory.Remove(inv);
 					await c.RespondAsync($"Could not find item {itemName} on this location");
 					await c.RejectMessage();
 					return;
 				}
+
+				// Add item to player
+				var existingPlayerInventory = player.Inventory.FirstOrDefault(pi => pi.ItemId == inv.DocId);
+				if (existingPlayerInventory == null)
+				{
+					var item = new CharacterInventoryItem(inv.DocId, inv.Amount);
+					player.Inventory.Add(item);
+				}
+				else
+				{
+					existingPlayerInventory.Amount += 1;
+				}
+
+				// Remove item/amount from location
+				location.LocationInventory.Remove(inv);
+
+				await session.SaveChangesAsync();
 			}
 
-			await c.RespondAsync();
+			await c.ConfirmMessage();
 		}
 	}
 }

@@ -17,6 +17,7 @@
 		public string Class { get; set; }
 		public string Race { get; set; }
 		public AttributeBlock Attributes { get; set; }
+		public List<CharacterInventoryItem> Inventory { get; set; }
 
 		// Vitality
 		public int HpMax { get; set; }
@@ -39,6 +40,8 @@
 			GuildId = guild.Id;
 			UserName = user.Username;
 			UserDiscriminator = user.Discriminator;
+
+			Inventory = new List<CharacterInventoryItem>();
 
 			Level = 1;
 			Race = race;

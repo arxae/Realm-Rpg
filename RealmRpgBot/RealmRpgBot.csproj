@@ -45,7 +45,7 @@
       <HintPath>..\packages\FluentScheduler.5.3.0\lib\net40\FluentScheduler.dll</HintPath>
     </Reference>
     <Reference Include="Lambda2Js.Signed.Custom, Version=3.0.2.0, Culture=neutral, PublicKeyToken=9ba16f7edfc48fe6, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Client.4.0.1\lib\netstandard2.0\Lambda2Js.Signed.Custom.dll</HintPath>
+      <HintPath>..\packages\RavenDB.Client.4.0.2\lib\netstandard2.0\Lambda2Js.Signed.Custom.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.DependencyInjection, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Emzi0767.Microsoft.DependencyInjection.2.0.0\lib\net46\Microsoft.Extensions.DependencyInjection.dll</HintPath>
@@ -62,8 +62,8 @@
     <Reference Include="Priority Queue, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\OptimizedPriorityQueue.4.1.1\lib\net45\Priority Queue.dll</HintPath>
     </Reference>
-    <Reference Include="Raven.Client, Version=4.0.1.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Client.4.0.1\lib\netstandard2.0\Raven.Client.dll</HintPath>
+    <Reference Include="Raven.Client, Version=4.0.2.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
+      <HintPath>..\packages\RavenDB.Client.4.0.2\lib\netstandard2.0\Raven.Client.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.2.6.0\lib\net46\Serilog.dll</HintPath>
@@ -77,8 +77,8 @@
     <Reference Include="Serilog.Sinks.RavenDb, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Arx.Serilog.Sinks.RavenDb.1.0.0\lib\net461\Serilog.Sinks.RavenDb.dll</HintPath>
     </Reference>
-    <Reference Include="Sparrow, Version=4.0.1.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
-      <HintPath>..\packages\RavenDB.Client.4.0.1\lib\netstandard2.0\Sparrow.dll</HintPath>
+    <Reference Include="Sparrow, Version=4.0.2.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
+      <HintPath>..\packages\RavenDB.Client.4.0.2\lib\netstandard2.0\Sparrow.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -106,6 +106,7 @@
     <Compile Include="Bot\Commands\InfoCommands.cs" />
     <Compile Include="Bot\Commands\GeneralActionCommands.cs" />
     <Compile Include="Bot\Commands\DeveloperCommands.cs" />
+    <Compile Include="Bot\Commands\InventoryCommands.cs" />
     <Compile Include="Bot\Commands\SkillCommands.cs" />
     <Compile Include="Bot\RpgBot.cs" />
     <Compile Include="Bot\Commands\RpgCommandBase.cs" />
@@ -129,6 +130,7 @@
     <Compile Include="JobScheduler\Scheduler.cs" />
     <Compile Include="Models\BuildingAction.cs" />
     <Compile Include="Models\CharacterClass.cs" />
+    <Compile Include="Models\CharacterInventoryItem.cs" />
     <Compile Include="Models\DevHistory.cs" />
     <Compile Include="Models\Item.cs" />
     <Compile Include="Models\LocationInventoryItem.cs" />

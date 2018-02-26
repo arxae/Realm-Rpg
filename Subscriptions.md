@@ -4,4 +4,4 @@ Subscriptions cannot be exported, so these have to be setup manually. You can fi
 ## Setting Cache Invalidation
 * Name: Settings Changed
 * RQL: ```from Settings```
-* Optional: Yes. When this sub is not added, you will need to restart the bot to apply settings
+* Optional: Yes, When this sub is not added, you will need to restart the bot to apply settings. There is also a "just in case" fallback. Every 3 hours, the settings cache will be cleared. Settings cache can also be cleared with the ```.dev clearcache``` command.
