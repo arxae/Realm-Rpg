@@ -153,7 +153,6 @@
     <Compile Include="Skills\GatherSkill.cs" />
     <Compile Include="Skills\ISkill.cs" />
     <Compile Include="Skills\Perception.cs" />
-    <Compile Include="Skills\TestSkill.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

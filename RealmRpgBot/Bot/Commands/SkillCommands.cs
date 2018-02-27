@@ -1,7 +1,6 @@
-﻿using System;
-
-namespace RealmRpgBot.Bot.Commands
+﻿namespace RealmRpgBot.Bot.Commands
 {
+	using System;
 	using System.Linq;
 	using System.Threading.Tasks;
 
@@ -113,14 +112,9 @@ namespace RealmRpgBot.Bot.Commands
 
 				if (skill.CooldownRanks?.Count > 0 && sImpl.DoCooldown)
 				{
-					if (playerSkill.Rank > skill.CooldownRanks.Count)
-					{
-						playerSkill.CooldownUntil = DateTime.Now.AddSeconds(skill.CooldownRanks[skill.CooldownRanks.Count - 1]);
-					}
-					else
-					{
-						playerSkill.CooldownUntil = DateTime.Now.AddSeconds(skill.CooldownRanks[playerSkill.Rank - 1]);
-					}
+					playerSkill.CooldownUntil = DateTime.Now.AddSeconds(playerSkill.Rank > skill.CooldownRanks.Count
+						? skill.CooldownRanks[skill.CooldownRanks.Count - 1]
+						: skill.CooldownRanks[playerSkill.Rank - 1]);
 				}
 
 				if (session.Advanced.HasChanges)

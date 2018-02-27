@@ -13,7 +13,7 @@
 	/// <summary>
 	/// Various actions player can perform
 	/// </summary>
-	[RequireRoles(RoleCheckMode.All, new[] { "Realm Player", "Realm Admin" })]
+	[RequireRoles(RoleCheckMode.All, "Realm Player", "Realm Admin")]
 	public class GeneralActionCommands : RpgCommandBase
 	{
 		[Command("ping"), Aliases(new[] { "p" }), Description("Check bot responsiveness, replies with latency")]
@@ -61,7 +61,8 @@
 		/// <returns></returns>
 		[Command("travel"), Description("Travel to a specific location that is linked to the current location")]
 		public async Task Travel(CommandContext c,
-			[Description("Name of the destination"), RemainingText] string destinationName)
+			[Description("Name of the destination"), RemainingText]
+			string destinationName)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
@@ -119,7 +120,8 @@
 
 		[Command("enter"), Description("Enter a building")]
 		public async Task EnterBuilding(CommandContext c,
-			[Description("Name of the building"), RemainingText] string buildingName)
+			[Description("Name of the building"), RemainingText]
+			string buildingName)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
@@ -143,7 +145,8 @@
 				}
 
 				var location = await session.LoadAsync<Location>(player.CurrentLocation);
-				var building = location.Buildings.FirstOrDefault(b => b.Name.Equals(buildingName, System.StringComparison.OrdinalIgnoreCase));
+				var building =
+					location.Buildings.FirstOrDefault(b => b.Name.Equals(buildingName, System.StringComparison.OrdinalIgnoreCase));
 
 				if (building == null)
 				{
@@ -216,7 +219,8 @@
 
 		[Command("train"), Description("Increase attributes (with attribute points)")]
 		public async Task TrainAttributes(CommandContext c,
-			[Description("Full or shorthand name of the attribute to train")] string attributeName)
+			[Description("Full or shorthand name of the attribute to train")]
+			string attributeName)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
@@ -275,7 +279,8 @@
 						break;
 
 					default:
-						await c.RespondAsync($"Attribute *{attributeName}* is invalid. Valid options are: STR/Strength, AGI/Agility, STA/Stamina, INT/Intelligence, WIS/Wisdom");
+						await c.RespondAsync(
+							$"Attribute *{attributeName}* is invalid. Valid options are: STR/Strength, AGI/Agility, STA/Stamina, INT/Intelligence, WIS/Wisdom");
 						await c.RejectMessage();
 						return;
 				}
@@ -292,7 +297,8 @@
 
 		[Command("take"), Description("Take an item from the current location")]
 		public async Task ItemFromLocation(CommandContext c,
-			[Description("The name of the item you want to take"), RemainingText] string itemName)
+			[Description("The name of the item you want to take"), RemainingText]
+			string itemName)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
@@ -301,7 +307,8 @@
 					.LoadAsync<Player>(c.User.Id.ToString());
 				var location = await session.LoadAsync<Location>(player.CurrentLocation);
 
-				var inv = location.LocationInventory.FirstOrDefault(i => i.DisplayName.Equals(itemName, System.StringComparison.OrdinalIgnoreCase));
+				var inv = location.LocationInventory.FirstOrDefault(i =>
+					i.DisplayName.Equals(itemName, System.StringComparison.OrdinalIgnoreCase));
 
 				if (inv == null)
 				{
@@ -319,16 +326,6 @@
 				}
 
 				// Add item to player
-				//var existingPlayerInventory = player.Inventory.FirstOrDefault(pi => pi.ItemId == inv.DocId);
-				//if (existingPlayerInventory == null)
-				//{
-				//	var item = new CharacterInventoryItem(inv.DocId, inv.Amount);
-				//	player.Inventory.Add(item);
-				//}
-				//else
-				//{
-				//	existingPlayerInventory.Amount += 1;
-				//}
 				player.AddItemToInventory(inv.DocId, inv.Amount);
 
 				// Remove item/amount from location
@@ -338,6 +335,27 @@
 			}
 
 			await c.ConfirmMessage();
+		}
+
+		[Command("stopaction"), Description("Stop current action and go back to idle. Skill cooldown will still apply")]
+		public async Task StopCurrentAction(CommandContext c)
+		{
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var player = await session.LoadAsync<Player>(c.User.Id.ToString());
+
+				if (player == null)
+				{
+					await c.RespondAsync(Constants.MSG_NOT_REGISTERED);
+					await c.RejectMessage();
+					return;
+				}
+
+				player.SetIdleAction();
+				await session.SaveChangesAsync();
+
+				await c.ConfirmMessage();
+			}
 		}
 	}
 }
