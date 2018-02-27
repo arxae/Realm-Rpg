@@ -32,6 +32,13 @@ namespace RealmRpgBot.Bot.Commands
 					return;
 				}
 
+				if (player.IsIdle == false)
+				{
+					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_PLAYER_NOT_IDLE}: {player.CurrentActionDisplay}");
+					await c.RejectMessage();
+					return;
+				}
+
 				// Check if player has any skills
 				if (player.Skills == null || player.Skills.Count == 0)
 				{
@@ -58,6 +65,13 @@ namespace RealmRpgBot.Bot.Commands
 				var skill = await session.Query<Models.Skill>()
 					.FirstOrDefaultAsync(s => s.DisplayName.Equals(skillName, StringComparison.OrdinalIgnoreCase));
 
+				if (skill.IsActivatable == false)
+				{
+					await c.RespondAsync($"{c.User.Mention}, this skill cannot be activated");
+					await c.RejectMessage();
+					await c.ConfirmMessage();
+				}
+
 				// Check if player has that skill
 				var playerSkill = player.Skills
 					.FirstOrDefault(ps => ps.Id == skill.Id);
@@ -69,10 +83,16 @@ namespace RealmRpgBot.Bot.Commands
 					return;
 				}
 
+				if (playerSkill.CooldownUntil > DateTime.Now)
+				{
+					var remaining = playerSkill.CooldownUntil - DateTime.Now;
+					await c.RespondAsync($"{c.User.Mention}. That skill is still on cooldown ({(int)remaining.TotalSeconds}s more)");
+					await c.ConfirmMessage();
+
+					return;
+				}
+
 				// Figure out what the target is
-				// <@83703349525872640> -> User
-				// <#402615348592902144> -> Channel
-				// <@&400452230781861898> -> Role
 				object target = null;
 				if (cmdSplit.Count > 1)
 				{
@@ -90,6 +110,23 @@ namespace RealmRpgBot.Bot.Commands
 
 				var sImpl = (Skills.ISkill)Activator.CreateInstance(sType);
 				await sImpl.ExecuteSkill(c, skill, playerSkill, player, target);
+
+				if (skill.CooldownRanks?.Count > 0 && sImpl.DoCooldown)
+				{
+					if (playerSkill.Rank > skill.CooldownRanks.Count)
+					{
+						playerSkill.CooldownUntil = DateTime.Now.AddSeconds(skill.CooldownRanks[skill.CooldownRanks.Count - 1]);
+					}
+					else
+					{
+						playerSkill.CooldownUntil = DateTime.Now.AddSeconds(skill.CooldownRanks[playerSkill.Rank - 1]);
+					}
+				}
+
+				if (session.Advanced.HasChanges)
+				{
+					await session.SaveChangesAsync();
+				}
 			}
 		}
 	}

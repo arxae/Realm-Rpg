@@ -19,5 +19,6 @@
 		public const string MSG_NO_SUCH_SKILL = "No such skill exists";
 		public const string MSG_NO_EXITS = "This location has no exits";
 		public const string MSG_INVALID_CONNECTION = "There is no such exit from this location";
+		public const string MSG_PLAYER_NOT_IDLE = "You are currently doing";
 	}
 }

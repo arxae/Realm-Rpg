@@ -1,8 +1,11 @@
 ﻿namespace RealmRpgBot.Models
 {
-	using DSharpPlus.Entities;
+	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Threading.Tasks;
+
+	using DSharpPlus.Entities;
 
 	public class Player
 	{
@@ -33,6 +36,13 @@
 		// Location
 		public string CurrentLocation { get; set; }
 
+		// Actions
+		public string CurrentAction { get; set; }
+		public string CurrentActionDisplay { get; set; }
+		public DateTime BusyUntil { get; set; }
+
+		public bool IsIdle { get => CurrentAction.Equals("idle", StringComparison.OrdinalIgnoreCase); }
+
 		public Player() { }
 		public Player(DiscordUser user, DiscordGuild guild, string race)
 		{
@@ -56,6 +66,9 @@
 			Skills = new List<TrainedSkill>();
 
 			CurrentLocation = Realm.GetSetting<string>("startinglocation");
+
+			CurrentAction = "Idle";
+			CurrentActionDisplay = "Idling";
 		}
 
 		public async Task AddXpAsync(int amount, DSharpPlus.CommandsNext.CommandContext c = null)
@@ -84,6 +97,25 @@
 			var m = await g.GetMemberAsync(ulong.Parse(Id));
 
 			await c.Channel.SendMessageAsync($"{m.Mention} is now level {Level}!");
+		}
+
+		public void AddItemToInventory(string itemId, int amount)
+		{
+			var inv = Inventory.FirstOrDefault(pi => pi.ItemId == itemId);
+			if (inv == null)
+			{
+				Inventory.Add(new CharacterInventoryItem(itemId, amount));
+			}
+			else
+			{
+				inv.Amount += amount;
+			}
+		}
+
+		public void SetIdleAction()
+		{
+			CurrentAction = "Idle";
+			CurrentActionDisplay = "Idling";
 		}
 	}
 }

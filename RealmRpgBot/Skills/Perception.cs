@@ -11,6 +11,8 @@
 
 	public class Perception : ISkill
 	{
+			public bool DoCooldown { get; set; }
+
 		public async Task ExecuteSkill(CommandContext c, Skill skill, TrainedSkill trainedSkill, Player source, object target)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
@@ -89,6 +91,7 @@
 					await session.SaveChangesAsync();
 				}
 
+				DoCooldown = true;
 			}
 
 			await c.ConfirmMessage();

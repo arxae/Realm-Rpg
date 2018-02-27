@@ -8,6 +8,8 @@
 
 	public class TestSkill : ISkill
 	{
+		public bool DoCooldown { get; set; }
+
 		public async Task ExecuteSkill(CommandContext c, Skill skill, TrainedSkill trainedskill, Player source, object target)
 		{
 			var targetType = Realm.GetTargetTypeFromId((string)target);
@@ -33,6 +35,8 @@
 			{
 				await c.RespondAsync($"{c.User.Mention} is dancing around, all by his lonesome self. Weirdo");
 			}
+
+			DoCooldown = true;
 
 			await c.ConfirmMessage();
 		}

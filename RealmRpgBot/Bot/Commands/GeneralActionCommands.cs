@@ -77,6 +77,13 @@
 					return;
 				}
 
+				if (player.IsIdle == false)
+				{
+					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_PLAYER_NOT_IDLE}: {player.CurrentActionDisplay}");
+					await c.RejectMessage();
+					return;
+				}
+
 				var location = await session.LoadAsync<Location>(player.CurrentLocation);
 				if (location.LocationConnections == null || location.LocationConnections.Count == 0)
 				{
@@ -125,6 +132,13 @@
 					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_NOT_REGISTERED}");
 					await c.RejectMessage();
 
+					return;
+				}
+
+				if (player.IsIdle == false)
+				{
+					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_PLAYER_NOT_IDLE}: {player.CurrentActionDisplay}");
+					await c.RejectMessage();
 					return;
 				}
 
@@ -305,16 +319,17 @@
 				}
 
 				// Add item to player
-				var existingPlayerInventory = player.Inventory.FirstOrDefault(pi => pi.ItemId == inv.DocId);
-				if (existingPlayerInventory == null)
-				{
-					var item = new CharacterInventoryItem(inv.DocId, inv.Amount);
-					player.Inventory.Add(item);
-				}
-				else
-				{
-					existingPlayerInventory.Amount += 1;
-				}
+				//var existingPlayerInventory = player.Inventory.FirstOrDefault(pi => pi.ItemId == inv.DocId);
+				//if (existingPlayerInventory == null)
+				//{
+				//	var item = new CharacterInventoryItem(inv.DocId, inv.Amount);
+				//	player.Inventory.Add(item);
+				//}
+				//else
+				//{
+				//	existingPlayerInventory.Amount += 1;
+				//}
+				player.AddItemToInventory(inv.DocId, inv.Amount);
 
 				// Remove item/amount from location
 				location.LocationInventory.Remove(inv);

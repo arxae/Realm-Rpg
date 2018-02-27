@@ -15,6 +15,7 @@
 		public List<Perceptable> Perceptables { get; set; }
 		public List<LocationInventoryItem> LocationInventory { get; set; }
 		public List<Building> Buildings { get; set; }
+		public List<string> Resources { get; set; }
 
 		public Location()
 		{

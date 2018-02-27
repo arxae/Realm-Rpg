@@ -8,6 +8,7 @@
 
 	public interface ISkill
 	{
+		bool DoCooldown { get; set; }
 		Task ExecuteSkill(CommandContext c, Skill skill, TrainedSkill trainedSkill, Player source, object target);
 	}
 }

@@ -1,9 +1,12 @@
 ﻿namespace RealmRpgBot.Models
 {
+	using System;
+
 	public class TrainedSkill
 	{
 		public string Id { get; set; }
 		public int Rank { get; set; }
+		public DateTime CooldownUntil { get; set; }
 
 		public TrainedSkill() { }
 		public TrainedSkill(string skillId, int rank)
