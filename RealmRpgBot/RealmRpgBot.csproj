@@ -117,13 +117,9 @@
     <Compile Include="Db.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Index\BuildingActions_All.cs" />
     <Compile Include="Index\Settings_All.cs" />
-    <Compile Include="Index\Races_All.cs" />
     <Compile Include="Index\Locations_All.cs" />
     <Compile Include="Index\Players_All.cs" />
-    <Compile Include="Index\Skills_ByDisplayName.cs" />
-    <Compile Include="Index\Skills_All.cs" />
     <Compile Include="JobScheduler\Jobs\InvalidateSettingsCache.cs" />
     <Compile Include="JobScheduler\Jobs\LocationInventoryDecayJob.cs" />
     <Compile Include="JobScheduler\Jobs\PlayerActionDurationCheck.cs" />

@@ -14,9 +14,7 @@
 							 select new
 							 {
 								 p.Id,
-								 p.GuildId,
-								 p.UserName,
-								 p.UserDiscriminator
+								 p.GuildId
 							 };
 		}
 	}
