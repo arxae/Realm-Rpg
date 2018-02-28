@@ -1,4 +1,4 @@
-﻿namespace DiceNotation
+﻿namespace RealmRpgBot.DiceNotation
 {
 	/// <summary>
 	/// Interface for a class that parses a string representing a dice expression into a

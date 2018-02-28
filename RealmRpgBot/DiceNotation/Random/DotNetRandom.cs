@@ -1,4 +1,4 @@
-﻿namespace DiceNotation.Random
+﻿namespace RealmRpgBot.DiceNotation.Random
 {
 	using System;
 

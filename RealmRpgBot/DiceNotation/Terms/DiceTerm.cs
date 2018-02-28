@@ -1,4 +1,4 @@
-﻿namespace DiceNotation.Terms
+﻿namespace RealmRpgBot.DiceNotation.Terms
 {
 	using System.Collections.Generic;
 

@@ -1,4 +1,4 @@
-﻿namespace DiceNotation.Random
+﻿namespace RealmRpgBot.DiceNotation.Random
 {
 	/// <summary>
 	/// A "random" number generator that always returns the maxValue parameter given. Again this may

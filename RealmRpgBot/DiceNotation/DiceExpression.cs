@@ -1,4 +1,4 @@
-﻿namespace DiceNotation
+﻿namespace RealmRpgBot.DiceNotation
 {
 	using Terms;
 	using Random;

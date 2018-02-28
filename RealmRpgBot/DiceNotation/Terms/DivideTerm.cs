@@ -1,18 +1,20 @@
-﻿namespace DiceNotation.Terms
+﻿namespace RealmRpgBot.DiceNotation.Terms
 {
+	using System;
+
 	using Random;
 
 	/// <summary>
-	/// Term representing the subtraction operator -- subtracts the second term from the first.
+	/// Term representing the division operator -- divides the first term by the second.
 	/// </summary>
-	public class SubtractTerm : ITerm
+	public class DivideTerm : ITerm
 	{
 		/// <summary>
-		/// Constructor. Takes the two terms to subtract.
+		/// Constructor. Takes the two terms to divide.
 		/// </summary>
 		/// <param name="term1">The first term (left-hand side).</param>
 		/// <param name="term2">The second term (right-hand side).</param>
-		public SubtractTerm(ITerm term1, ITerm term2)
+		public DivideTerm(ITerm term1, ITerm term2)
 		{
 			Term1 = term1;
 			Term2 = term2;
@@ -29,13 +31,13 @@
 		public ITerm Term2 { get; private set; }
 
 		/// <summary>
-		/// Subtracts the second term from the first, evaluating those two terms as necessary.
+		/// Divides the first term by the second, evaluating those two terms as necessary.
 		/// </summary>
 		/// <param name="rng">The rng to used -- passed to other terms.</param>
-		/// <returns>The result of evaluating Term1 - Term2.</returns>
+		/// <returns>The result of evaluating Term1 / Term2.</returns>
 		public int GetResult(IRandom rng)
 		{
-			return Term1.GetResult(rng) - Term2.GetResult(rng);
+			return (int)Math.Round((double)Term1.GetResult(rng) / Term2.GetResult(rng));
 		}
 
 		/// <summary>
@@ -44,7 +46,7 @@
 		/// <returns>A parenthesized string representing the operation.</returns>
 		public override string ToString()
 		{
-			return "(" + Term1 + "-" + Term2 + ")";
+			return "(" + Term1 + "/" + Term2 + ")";
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿namespace DiceNotation.Random
+﻿namespace RealmRpgBot.DiceNotation.Random
 {
 	/// <summary>
 	/// Interface for pseudo-random number generators to implement. TODO:, need to include ways for

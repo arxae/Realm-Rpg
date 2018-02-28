@@ -1,5 +1,6 @@
 ﻿namespace RealmRpgBot
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Text.RegularExpressions;
@@ -78,6 +79,40 @@
 		public static T GetRandomEntry<T>(this T[] arr)
 		{
 			return arr[DiceNotation.SingletonRandom.Instance.Next(arr.Length)];
+		}
+
+		/// <summary>
+		/// Extension method for generic IEnumerable/List collection allowing printing the contents.  Takes the characters to surround the list in,
+		/// the method to use to get the string representation of each element (defaulting to the ToString function of type T),
+		/// and the characters to use to separate the list elements.
+		/// </summary>
+		/// <remarks> Defaults to a representation looking something like [elem1, elem2, elem3].</remarks>
+		/// <typeparam name="T">Type of elements in the IEnumerable.</typeparam>
+		/// <param name="enumerable">IEnumerable to stringify -- never specified manually as this is an extension method.</param>
+		/// <param name="begin">Character(s) that should precede the list elements.</param>
+		/// <param name="elementStringifier">Function to use to get the string representation of each element. Null uses the ToString function of type T.</param>
+		/// <param name="separator">Characters to separate the list by.</param>
+		/// <param name="end">Character(s) that should follow the list elements.</param>
+		/// <returns>A string representation of the IEnumerable.</returns>
+		public static string ExtendToString<T>(this IEnumerable<T> enumerable, string begin = "[", Func<T, string> elementStringifier = null, string separator = ", ", string end = "]")
+		{
+			if (elementStringifier == null)
+				elementStringifier = (T obj) => obj.ToString();
+
+			string result = begin;
+			bool first = true;
+			foreach (var item in enumerable)
+			{
+				if (first)
+					first = false;
+				else
+					result += separator;
+
+				result += elementStringifier(item);
+			}
+			result += end;
+
+			return result;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿namespace DiceNotation.Exceptions
+﻿namespace RealmRpgBot.DiceNotation.Exceptions
 {
 	using System;
 

@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>RealmRpgBot.RealmMain</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DSharpPlus, Version=4.0.0.425, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DSharpPlus.4.0.0-beta-00425\lib\net46\DSharpPlus.dll</HintPath>
@@ -115,6 +118,30 @@
     <Compile Include="Buildings\SkillTrainer.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Db.cs" />
+    <Compile Include="DiceNotation\Dice.cs" />
+    <Compile Include="DiceNotation\DiceExpression.cs" />
+    <Compile Include="DiceNotation\Exceptions\ImpossibleDieException.cs" />
+    <Compile Include="DiceNotation\Exceptions\InvalidChooseException.cs" />
+    <Compile Include="DiceNotation\Exceptions\InvalidMultiplicityException.cs" />
+    <Compile Include="DiceNotation\Exceptions\InvalidSyntaxException.cs" />
+    <Compile Include="DiceNotation\IDiceExpression.cs" />
+    <Compile Include="DiceNotation\IParser.cs" />
+    <Compile Include="DiceNotation\Parser.cs" />
+    <Compile Include="DiceNotation\Random\DotNetRandom.cs" />
+    <Compile Include="DiceNotation\Random\GaussianRandom.cs" />
+    <Compile Include="DiceNotation\Random\IRandom.cs" />
+    <Compile Include="DiceNotation\Random\KnownSeriesRandom.cs" />
+    <Compile Include="DiceNotation\Random\MaxRandom.cs" />
+    <Compile Include="DiceNotation\Random\MinRandom.cs" />
+    <Compile Include="DiceNotation\SingletonRandom.cs" />
+    <Compile Include="DiceNotation\Terms\AddTerm.cs" />
+    <Compile Include="DiceNotation\Terms\ConstantTerm.cs" />
+    <Compile Include="DiceNotation\Terms\DiceTerm.cs" />
+    <Compile Include="DiceNotation\Terms\DivideTerm.cs" />
+    <Compile Include="DiceNotation\Terms\ITerm.cs" />
+    <Compile Include="DiceNotation\Terms\KeepTerm.cs" />
+    <Compile Include="DiceNotation\Terms\MultiplyTerm.cs" />
+    <Compile Include="DiceNotation\Terms\SubtractTerm.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Index\Settings_All.cs" />
@@ -159,6 +186,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <Import Project="..\DiceNotation\DiceNotation.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

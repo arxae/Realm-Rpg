@@ -1,16 +1,17 @@
-﻿namespace DiceNotation.Exceptions
+﻿namespace RealmRpgBot.DiceNotation.Exceptions
 {
 	using System;
 
 	/// <summary>
-	/// Exception that is thrown when a dice term is constructed with a negative number of dice.
+	/// Exception that is thrown when a dice term is constructed with a 'k' choose operation to keep
+	/// an invalid number of dice.
 	/// </summary>
-	public class InvalidMultiplicityException : Exception
+	public class InvalidChooseException : Exception
 	{
 		/// <summary>
-		/// Constructor
+		/// Constructor.
 		/// </summary>
-		public InvalidMultiplicityException()
+		public InvalidChooseException()
 		{
 		}
 
@@ -18,13 +19,13 @@
 		/// Constructor, taking a specified error message.
 		/// </summary>
 		/// <param name="message">The error message that explains the reason for the exception.</param>
-		public InvalidMultiplicityException(string message)
+		public InvalidChooseException(string message)
 		   : base(message)
 		{
 		}
 
 		/// <summary>
-		/// Constructor, taking a specified error message and a reference to the inner exception that
+		/// Constructur, taking a specified error message and a reference to the inner exception that
 		/// is the cause of this exception.
 		/// </summary>
 		/// <param name="message">The error message that explains the reason for the exception.</param>
@@ -33,7 +34,7 @@
 		/// is not a null reference, the current exception is raised in a catch block that handles
 		/// the inner exception.
 		/// </param>
-		public InvalidMultiplicityException(string message, Exception innerException)
+		public InvalidChooseException(string message, Exception innerException)
 		   : base(message, innerException)
 		{
 		}
