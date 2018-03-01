@@ -8,7 +8,7 @@
 	using DSharpPlus.Entities;
 	using MoonSharp.Interpreter;
 
-	using Models;
+	using Models.Character;
 
 	public class ScriptRunner
 	{

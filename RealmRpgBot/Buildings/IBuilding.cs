@@ -4,10 +4,10 @@
 
 	using DSharpPlus.CommandsNext;
 
-	using Models;
+	using Models.Map;
 
-    public interface IBuilding
-    {
+	public interface IBuilding
+	{
 		Task EnterBuilding(CommandContext c, Building building);
-    }
+	}
 }

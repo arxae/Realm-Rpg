@@ -1,4 +1,4 @@
-﻿namespace RealmRpgBot.Models
+﻿namespace RealmRpgBot.Models.Inventory
 {
 	/// <summary>
 	/// Item definition

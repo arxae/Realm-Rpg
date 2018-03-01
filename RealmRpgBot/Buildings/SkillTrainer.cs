@@ -7,7 +7,8 @@
 	using DSharpPlus.Entities;
 	using DSharpPlus.Interactivity;
 
-	using Models;
+	using Models.Character;
+	using Models.Map;
 
 	public class SkillTrainer : IBuilding
 	{

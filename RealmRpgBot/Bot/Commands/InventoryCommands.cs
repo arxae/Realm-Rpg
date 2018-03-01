@@ -6,9 +6,9 @@
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.CommandsNext.Attributes;
 	using DSharpPlus.Entities;
-	using Raven.Client.Documents;
-
-	using Models;
+	
+	using Models.Character;
+	using Models.Inventory;
 
 	[Group("inv"), Description("Inventory Commands"), RequireRoles(RoleCheckMode.All, "Realm Player", "Realm Admin")]
 	public class InventoryCommands : RpgCommandBase
@@ -47,6 +47,7 @@
 			}
 		}
 
+		// TODO: Finish
 		[Command("discard"), Aliases("del"), Description("Remove an item from your inventory")]
 		public async Task DiscardItem(CommandContext c,
 			[Description("Item to remove"), RemainingText] string itemName)
@@ -60,11 +61,7 @@
 				{
 					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
 					await c.RejectMessage();
-
-					return;
 				}
-
-
 			}
 		}
 	}

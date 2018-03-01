@@ -6,7 +6,7 @@
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.CommandsNext.Attributes;
 
-	using Models;
+	using Models.Character;
 
 	[Group("rpg")]
 	public class GameCommands : RpgCommandBase

@@ -1,4 +1,5 @@
-﻿namespace RealmRpgBot.Models
+﻿namespace RealmRpgBot.Models.Map
+
 {
 	using System.Collections.Generic;
 

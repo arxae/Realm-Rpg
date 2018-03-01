@@ -1,4 +1,4 @@
-﻿namespace RealmRpgBot.Models
+﻿namespace RealmRpgBot.Models.Character
 {
 	using System;
 	using System.Collections.Generic;

@@ -7,7 +7,8 @@
 	using DSharpPlus.CommandsNext.Attributes;
 	using Raven.Client.Documents;
 
-	using Models;
+	using Models.Character;
+	using Models.Map;
 	using DSharpPlus.Entities;
 
 	/// <summary>
@@ -16,7 +17,7 @@
 	[RequireRoles(RoleCheckMode.All, "Realm Player", "Realm Admin")]
 	public class GeneralActionCommands : RpgCommandBase
 	{
-		[Command("ping"), Aliases(new[] { "p" }), Description("Check bot responsiveness, replies with latency")]
+		[Command("ping"), Aliases("p"), Description("Check bot responsiveness, replies with latency")]
 		public async Task Ping(CommandContext c)
 		{
 			await c.RespondAsync($"Pong! ({c.Client.Ping}ms)");
@@ -196,7 +197,7 @@
 				xpBar.Append(string.Concat(Enumerable.Repeat("-", 10 - (xpPerc / 10))));
 
 				var description = new System.Text.StringBuilder();
-				description.AppendLine($"**Stats:**");
+				description.AppendLine("**Stats:**");
 				description.AppendLine($"STR: {player.Attributes.Strength}");
 				description.AppendLine($"AGI: {player.Attributes.Agility}");
 				description.AppendLine($"STA: {player.Attributes.Stamina}");
@@ -296,7 +297,7 @@
 		}
 
 		[Command("take"), Description("Take an item from the current location")]
-		public async Task ItemFromLocation(CommandContext c,
+		public async Task TakeItemFromLocation(CommandContext c,
 			[Description("The name of the item you want to take"), RemainingText]
 			string itemName)
 		{

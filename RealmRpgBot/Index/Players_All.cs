@@ -4,9 +4,9 @@
 
 	using Raven.Client.Documents.Indexes;
 
-	using Models;
+	using Models.Character;
 
-	public class Players_All:AbstractIndexCreationTask<Player>
+	public class Players_All : AbstractIndexCreationTask<Player>
 	{
 		public Players_All()
 		{

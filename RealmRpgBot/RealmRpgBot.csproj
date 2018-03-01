@@ -152,23 +152,22 @@
     <Compile Include="JobScheduler\Jobs\PlayerActionDurationCheck.cs" />
     <Compile Include="JobScheduler\RealmJobRegistry.cs" />
     <Compile Include="JobScheduler\Scheduler.cs" />
-    <Compile Include="Models\BuildingAction.cs" />
-    <Compile Include="Models\CharacterClass.cs" />
-    <Compile Include="Models\CharacterInventoryItem.cs" />
+    <Compile Include="Models\Map\BuildingAction.cs" />
+    <Compile Include="Models\Character\CharacterClass.cs" />
+    <Compile Include="Models\Character\CharacterInventoryItem.cs" />
     <Compile Include="Models\DevHistory.cs" />
-    <Compile Include="Models\Item.cs" />
-    <Compile Include="Models\LocationInventoryItem.cs" />
-    <Compile Include="Models\Perceptable.cs" />
-    <Compile Include="Models\Resource.cs" />
-    <Compile Include="Models\TrainedSkill.cs" />
-    <Compile Include="Models\ListObject.cs" />
-    <Compile Include="Models\Location.cs" />
-    <Compile Include="Models\Building.cs" />
-    <Compile Include="Models\Player.cs" />
-    <Compile Include="Models\Race.cs" />
+    <Compile Include="Models\Inventory\Item.cs" />
+    <Compile Include="Models\Map\LocationInventoryItem.cs" />
+    <Compile Include="Models\Map\Perceptable.cs" />
+    <Compile Include="Models\Map\Resource.cs" />
+    <Compile Include="Models\Character\TrainedSkill.cs" />
+    <Compile Include="Models\Map\Location.cs" />
+    <Compile Include="Models\Map\Building.cs" />
+    <Compile Include="Models\Character\Player.cs" />
+    <Compile Include="Models\Character\Race.cs" />
     <Compile Include="Models\Setting.cs" />
-    <Compile Include="Models\AttributeBlock.cs" />
-    <Compile Include="Models\Skill.cs" />
+    <Compile Include="Models\Character\AttributeBlock.cs" />
+    <Compile Include="Models\Character\Skill.cs" />
     <Compile Include="Realm.cs" />
     <Compile Include="RealmMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -185,6 +184,9 @@
     <Content Include="Servers.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\Character\Player\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

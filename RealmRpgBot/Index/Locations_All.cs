@@ -4,7 +4,7 @@
 
 	using Raven.Client.Documents.Indexes;
 
-	using Models;
+	using Models.Map;
 
 	public class Locations_All : AbstractIndexCreationTask<Location>
 	{

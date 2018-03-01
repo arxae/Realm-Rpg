@@ -1,4 +1,4 @@
-﻿namespace RealmRpgBot.Models
+﻿namespace RealmRpgBot.Models.Map
 {
 	using System;
 

@@ -7,6 +7,9 @@
 	using DSharpPlus.Entities;
 	using Raven.Client.Documents;
 
+	using Models.Character;
+	using Models.Map;
+
 	[Group("dev"), Description("Game administration commands"), RequireRoles(RoleCheckMode.Any, "Realm Admin")]
 	public class DeveloperCommands : RpgCommandBase
 	{
@@ -18,7 +21,7 @@
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				// Get player
-				var player = await session.LoadAsync<Models.Player>(mention.Id.ToString());
+				var player = await session.LoadAsync<Player>(mention.Id.ToString());
 				if (player == null)
 				{
 					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
@@ -42,7 +45,7 @@
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
-				var player = await session.LoadAsync<Models.Player>(mention.Id.ToString());
+				var player = await session.LoadAsync<Player>(mention.Id.ToString());
 				if (player == null)
 				{
 					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
@@ -69,8 +72,8 @@
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				var player = await session
-					.Include<Models.Location>(loc => loc.DisplayName)
-					.LoadAsync<Models.Player>(mention.Id.ToString());
+					.Include<Location>(loc => loc.DisplayName)
+					.LoadAsync<Player>(mention.Id.ToString());
 				if (player == null)
 				{
 					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
@@ -79,7 +82,7 @@
 					return;
 				}
 
-				var location = await session.Query<Models.Location>().FirstOrDefaultAsync(l =>
+				var location = await session.Query<Location>().FirstOrDefaultAsync(l =>
 					l.DisplayName.Equals(locationName, System.StringComparison.OrdinalIgnoreCase));
 				if (location == null)
 				{

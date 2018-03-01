@@ -8,10 +8,10 @@
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.Entities;
 	using DSharpPlus.Interactivity;
-
-	using Models;
 	using Raven.Client.Documents.Attachments;
 	using Raven.Client.Documents.Operations.Attachments;
+
+	using Models.Map;
 
 	public class GenericBuilding : IBuilding
 	{

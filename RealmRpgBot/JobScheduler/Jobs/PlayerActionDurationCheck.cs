@@ -5,7 +5,8 @@
 
 	using Raven.Client.Documents.Session;
 
-	using Models;
+	using Models.Character;
+	using Models.Map;
 
 	public class PlayerActionDurationCheck : FluentScheduler.IJob
 	{
@@ -60,7 +61,9 @@
 					.GetAwaiter().GetResult()
 					.GetMemberAsync(ulong.Parse(p.Id))
 					.GetAwaiter().GetResult();
-				discordMember.SendMessageAsync($"Your {skill.DisplayName} action has completed and you gained {amt} pieces of {resource.DisplayName}");
+				discordMember.SendMessageAsync($"Your {skill.DisplayName} action has completed and you gained {amt} pieces of {resource.DisplayName}")
+					.GetAwaiter()
+					.GetResult();
 			}
 		}
 	}

@@ -1,17 +1,19 @@
 ﻿namespace RealmRpgBot.Skills
 {
+	using System;
 	using System.Linq;
 	using System.Threading.Tasks;
 
 	using DiceNotation;
 	using DSharpPlus.CommandsNext;
 
-	using Models;
-	using System;
+	using Models.Character;
+	using Models.Inventory;
+	using Models.Map;
 
 	public class Perception : ISkill
 	{
-			public bool DoCooldown { get; set; }
+		public bool DoCooldown { get; set; }
 
 		public async Task ExecuteSkill(CommandContext c, Skill skill, TrainedSkill trainedSkill, Player source, object target)
 		{

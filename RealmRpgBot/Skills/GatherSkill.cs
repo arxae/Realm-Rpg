@@ -5,7 +5,8 @@
 
 	using DSharpPlus.CommandsNext;
 
-	using RealmRpgBot.Models;
+	using Models.Character;
+	using Models.Map;
 
 	public class GatherSkill : ISkill
 	{

@@ -3,7 +3,7 @@
 	using System;
 	using System.Linq;
 
-	using Models;
+	using Models.Map;
 
 	public class LocationInventoryDecayJob : FluentScheduler.IJob
 	{

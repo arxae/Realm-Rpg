@@ -7,6 +7,8 @@
 	using DSharpPlus.Entities;
 	using Raven.Client.Documents;
 
+	using Models.Character;
+
 	[Group("info")]
 	public class InfoCommands : RpgCommandBase
 	{
@@ -15,7 +17,7 @@
 		{
 			using (var s = Db.DocStore.OpenAsyncSession())
 			{
-				var raceList = await s.Query<Models.Race>("Races/All").ToListAsync();
+				var raceList = await s.Query<Race>("Races/All").ToListAsync();
 
 				var sb = new System.Text.StringBuilder();
 				foreach (var r in raceList) sb.AppendLine($"- {r.DisplayName}");
@@ -38,7 +40,7 @@
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
-				var skill = await session.Query<Models.Skill>("Skills/All")
+				var skill = await session.Query<Skill>("Skills/All")
 						.FirstOrDefaultAsync(s => s.DisplayName.Equals(skillName));
 
 				if (skill == null)

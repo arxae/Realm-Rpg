@@ -4,7 +4,7 @@
 
 	using DSharpPlus.CommandsNext;
 
-	using Models;
+	using Models.Character;
 
 	public interface ISkill
 	{

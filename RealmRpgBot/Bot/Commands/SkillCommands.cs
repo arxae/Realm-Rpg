@@ -8,6 +8,8 @@
 	using DSharpPlus.CommandsNext.Attributes;
 	using Raven.Client.Documents;
 
+	using Models.Character;
+
 	[Group("skill"),
 		Description("Skill related commands"),
 		RequireRoles(RoleCheckMode.Any, "Realm Admin", "Realm Player")]
@@ -22,7 +24,7 @@
 			{
 				// Check if player exists
 				var player = await session
-					.LoadAsync<Models.Player>(c.User.Id.ToString());
+					.LoadAsync<Player>(c.User.Id.ToString());
 
 				if (player == null)
 				{
@@ -61,7 +63,7 @@
 					skillName = cmdSplit[0];
 				}
 
-				var skill = await session.Query<Models.Skill>()
+				var skill = await session.Query<Skill>()
 					.FirstOrDefaultAsync(s => s.DisplayName.Equals(skillName, StringComparison.OrdinalIgnoreCase));
 
 				if (skill.IsActivatable == false)
