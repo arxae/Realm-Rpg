@@ -52,7 +52,7 @@
 
 			if (amt > 0)
 			{
-				_log.Debug("{player} received {item} x{amt}", p.UserName, resource.HarvestedItemId, amt);
+				_log.Debug("{player} received {item} x{amt}", p.Name, resource.HarvestedItemId, amt);
 				p.AddItemToInventory(resource.HarvestedItemId, amt);
 				p.SetIdleAction();
 

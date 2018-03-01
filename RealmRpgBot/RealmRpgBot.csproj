@@ -35,14 +35,14 @@
     <StartupObject>RealmRpgBot.RealmMain</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DSharpPlus, Version=4.0.0.425, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DSharpPlus.4.0.0-beta-00425\lib\net46\DSharpPlus.dll</HintPath>
+    <Reference Include="DSharpPlus, Version=4.0.0.426, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DSharpPlus.4.0.0-beta-00426\lib\net46\DSharpPlus.dll</HintPath>
     </Reference>
-    <Reference Include="DSharpPlus.CommandsNext, Version=4.0.0.425, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DSharpPlus.CommandsNext.4.0.0-beta-00425\lib\net46\DSharpPlus.CommandsNext.dll</HintPath>
+    <Reference Include="DSharpPlus.CommandsNext, Version=4.0.0.426, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DSharpPlus.CommandsNext.4.0.0-beta-00426\lib\net46\DSharpPlus.CommandsNext.dll</HintPath>
     </Reference>
-    <Reference Include="DSharpPlus.Interactivity, Version=4.0.0.425, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DSharpPlus.Interactivity.4.0.0-beta-00425\lib\net46\DSharpPlus.Interactivity.dll</HintPath>
+    <Reference Include="DSharpPlus.Interactivity, Version=4.0.0.426, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DSharpPlus.Interactivity.4.0.0-beta-00426\lib\net46\DSharpPlus.Interactivity.dll</HintPath>
     </Reference>
     <Reference Include="FluentScheduler, Version=5.3.0.0, Culture=neutral, PublicKeyToken=b76503528a14ebd1, processorArchitecture=MSIL">
       <HintPath>..\packages\FluentScheduler.5.3.0\lib\net40\FluentScheduler.dll</HintPath>
@@ -116,6 +116,10 @@
     <Compile Include="Buildings\IBuilding.cs" />
     <Compile Include="Buildings\GenericBuilding.cs" />
     <Compile Include="Buildings\SkillTrainer.cs" />
+    <Compile Include="Combat\Attack.cs" />
+    <Compile Include="Combat\Battle.cs" />
+    <Compile Include="Combat\DamagePerformer.cs" />
+    <Compile Include="Combat\IBattleParticipant.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Db.cs" />
     <Compile Include="DiceNotation\Dice.cs" />

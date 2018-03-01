@@ -110,10 +110,62 @@
 			await c.ConfirmMessage();
 		}
 
-		[Command("test")]
-		public async Task Test(CommandContext c, [RemainingText]params DiscordUser[] users)
+		[Command("combattest")]
+		public async Task Test(CommandContext c)
 		{
-			await c.ConfirmMessage();
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var player = await session.LoadAsync<Player>(c.User.Id.ToString());
+				var monster = new Monster("TestMonster", DiceNotation.SingletonRandom.Instance.Next(player.Level - 1, player.Level + 1));
+
+				await c.RespondAsync($"{c.User.Mention} has encountered a lvl{monster.Level} {monster.Name}");
+
+				var combat = new Combat.Battle(player, monster);
+				combat.DoCombat();
+
+				if (combat.AttackerResult == Combat.Battle.CombatResult.Win)
+				{
+					await c.RespondAsync($"{c.User.Mention} was victorious {combat.Round} round(s) of combat. You have {player.HpCurrent}hp left.");
+					await player.AddXpAsync(2, c); // TODO: Temporary random xp
+				}
+				else if (combat.AttackerResult == Combat.Battle.CombatResult.Tie)
+				{
+					await c.RespondAsync($"{c.User.Mention} and {monster.Name} knocked each other out");
+					await player.AddXpAsync(2, c); // TODO: Temporary random xp
+					await player.SetFainted();
+				}
+				else
+				{
+					await c.RespondAsync($"{c.User.Mention} has fainted after {combat.Round} round(s) of combat. {monster.Name} had {monster.HpCurrent} left");
+					await player.SetFainted();
+				}
+
+				if (session.Advanced.HasChanges)
+				{
+					await session.SaveChangesAsync();
+				}
+			}
+		}
+	}
+
+	// Temporary monster
+	public class Monster : Combat.IBattleParticipant
+	{
+		public string Name { get; set; }
+		public int Level { get; set; }
+		public int HpMax { get; set; }
+		public int HpCurrent { get; set; }
+		public AttributeBlock Attributes { get; set; }
+
+		public Monster(string name, int level)
+		{
+			Name = name;
+			Level = level;
+
+			HpMax = Realm.GetBaseHpForLevel(level) - DiceNotation.SingletonRandom.Instance.Next(1, 5);
+			HpCurrent = HpMax;
+
+			Attributes = new AttributeBlock(1);
 		}
 	}
 }

@@ -205,7 +205,7 @@
 				description.AppendLine($"WIS: {player.Attributes.Wisdom}");
 
 				var embed = new DiscordEmbedBuilder()
-					.WithTitle($"{player.UserName} the {race.DisplayName} {cls.DisplayName}")
+					.WithTitle($"{player.Name} the {race.DisplayName} {cls.DisplayName}")
 					.AddField("Hp", $"{hpBar} ({player.HpCurrent}/{player.HpMax})")
 					.AddField("Xp", $"{xpBar} ({player.XpCurrent}/{player.XpNext})")
 					.AddField("Skill pts", player.SkillPoints.ToString(), true)

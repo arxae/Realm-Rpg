@@ -7,13 +7,14 @@
 
 	using DSharpPlus.Entities;
 
-	public class Player
+	using Combat;
+
+	public class Player : IBattleParticipant
 	{
 		// Identification
 		public string Id { get; set; }
 		public ulong GuildId { get; set; }
-		public string UserName { get; set; }
-		public string UserDiscriminator { get; set; }
+		public string Name { get; set; }
 
 		// General Info
 		public int Level { get; set; }
@@ -48,8 +49,7 @@
 		{
 			Id = user.Id.ToString();
 			GuildId = guild.Id;
-			UserName = user.Username;
-			UserDiscriminator = user.Discriminator;
+			Name = user.Username;
 
 			Inventory = new List<CharacterInventoryItem>();
 
@@ -116,6 +116,20 @@
 		{
 			CurrentAction = "Idle";
 			CurrentActionDisplay = "Idling";
+		}
+
+		public async Task SetFainted()
+		{
+			await Task.Run(() =>
+			{
+				CurrentLocation = Realm.GetSetting<string>("startinglocation");
+				HpCurrent = HpMax;
+
+				if (XpCurrent > 0)
+				{
+					XpCurrent = XpCurrent - Realm.GetSetting<int>("faintxppenality");
+				}
+			});
 		}
 	}
 }
