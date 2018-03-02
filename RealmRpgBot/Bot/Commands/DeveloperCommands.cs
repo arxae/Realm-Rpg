@@ -1,4 +1,6 @@
-﻿namespace RealmRpgBot.Bot.Commands
+﻿using RealmRpgBot.Combat;
+
+namespace RealmRpgBot.Bot.Commands
 {
 	using System.Threading.Tasks;
 
@@ -8,6 +10,7 @@
 	using Raven.Client.Documents;
 
 	using Models.Character;
+	using Models.Enemy;
 	using Models.Map;
 
 	[Group("dev"), Description("Game administration commands"), RequireRoles(RoleCheckMode.Any, "Realm Admin")]
@@ -116,56 +119,40 @@
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				var player = await session.LoadAsync<Player>(c.User.Id.ToString());
-				var monster = new Monster("TestMonster", DiceNotation.SingletonRandom.Instance.Next(player.Level - 1, player.Level + 1));
+				var monster = await session
+					.Include<EnemyTemplate>(t => t.Id)
+					.LoadAsync<GenericEnemy>("enemies/testmonster");
+				var enemyTemplate = await session.LoadAsync<EnemyTemplate>(monster.TemplateName);
+				monster.ApplyTemplate(enemyTemplate);
 
 				await c.RespondAsync($"{c.User.Mention} has encountered a lvl{monster.Level} {monster.Name}");
 
-				var combat = new Combat.Battle(player, monster);
-				combat.DoCombat();
+				var combat = new Battle(player, monster, c);
+				await combat.DoCombatAsync();
 
-				if (combat.AttackerResult == Combat.Battle.CombatResult.Win)
+				switch (combat.AttackerResult)
 				{
-					await c.RespondAsync($"{c.User.Mention} was victorious {combat.Round} round(s) of combat. You have {player.HpCurrent}hp left.");
-					await player.AddXpAsync(2, c); // TODO: Temporary random xp
-				}
-				else if (combat.AttackerResult == Combat.Battle.CombatResult.Tie)
-				{
-					await c.RespondAsync($"{c.User.Mention} and {monster.Name} knocked each other out");
-					await player.AddXpAsync(2, c); // TODO: Temporary random xp
-					await player.SetFainted();
-				}
-				else
-				{
-					await c.RespondAsync($"{c.User.Mention} has fainted after {combat.Round} round(s) of combat. {monster.Name} had {monster.HpCurrent} left");
-					await player.SetFainted();
+					case Battle.CombatResult.Win:
+						await c.RespondAsync($"{c.User.Mention} was victorious {combat.Round} round(s) of combat with {player.HpCurrent}hp left.");
+						await player.AddXpAsync(2, c); // TODO: Temporary random xp
+						break;
+					case Battle.CombatResult.Tie:
+						await c.RespondAsync($"{c.User.Mention} and {monster.Name} knocked each other out");
+						await player.AddXpAsync(2, c); // TODO: Temporary random xp
+						await player.SetFaintedAsync();
+						break;
+					default:
+						await c.RespondAsync($"{c.User.Mention} has fainted after {combat.Round} round(s) of combat. {monster.Name} had {monster.HpCurrent}hp left");
+						await player.SetFaintedAsync();
+						break;
 				}
 
 				if (session.Advanced.HasChanges)
 				{
+					session.Advanced.IgnoreChangesFor(monster);
 					await session.SaveChangesAsync();
 				}
 			}
-		}
-	}
-
-	// Temporary monster
-	public class Monster : Combat.IBattleParticipant
-	{
-		public string Name { get; set; }
-		public int Level { get; set; }
-		public int HpMax { get; set; }
-		public int HpCurrent { get; set; }
-		public AttributeBlock Attributes { get; set; }
-
-		public Monster(string name, int level)
-		{
-			Name = name;
-			Level = level;
-
-			HpMax = Realm.GetBaseHpForLevel(level) - DiceNotation.SingletonRandom.Instance.Next(1, 5);
-			HpCurrent = HpMax;
-
-			Attributes = new AttributeBlock(1);
 		}
 	}
 }

@@ -1,15 +1,17 @@
-﻿namespace RealmRpgBot.Bot.Commands
+﻿
+namespace RealmRpgBot.Bot.Commands
 {
 	using System.Linq;
 	using System.Threading.Tasks;
 
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.CommandsNext.Attributes;
+	using DSharpPlus.Entities;
 	using Raven.Client.Documents;
 
 	using Models.Character;
+	using Combat;
 	using Models.Map;
-	using DSharpPlus.Entities;
 
 	/// <summary>
 	/// Various actions player can perform
@@ -356,6 +358,85 @@
 				await session.SaveChangesAsync();
 
 				await c.ConfirmMessage();
+			}
+		}
+
+		[Command("explore"), Description("Explore current location")]
+		public async Task ExploreLocation(CommandContext c)
+		{
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var player = await session
+					.Include<Location>(loc => loc.Id)
+					.LoadAsync<Player>(c.User.Id.ToString());
+				var location = await session.LoadAsync<Location>(player.CurrentLocation);
+				var locEvent = location.Encounters.GetRandomEntry();
+
+				if (locEvent.StartsWith("enemies/")) // Encounter enemy
+				{
+					var monster = await session
+						.Include<Models.Enemy.EnemyTemplate>(t => t.Id)
+						.LoadAsync<Models.Enemy.GenericEnemy>(locEvent);
+					var enemyTemplate = await session.LoadAsync<Models.Enemy.EnemyTemplate>(monster.TemplateName);
+					monster.ApplyTemplate(enemyTemplate);
+
+					var encounterEmbed = new DiscordEmbedBuilder()
+						.WithTitle("Encounter")
+						.AddField("Attacker", $"{player.Name} (lvl{player.Level})")
+						.AddField("Defender", $"{monster.Name} (lvl{monster.Level})");
+
+					var encounterText = new System.Text.StringBuilder();
+					encounterText.AppendLine($"{c.User.Mention} has encountered a lvl{monster.Level} {monster.Name} and it attacks.");
+
+					//await c.RespondAsync($"{c.User.Mention} has encountered a lvl{monster.Level} {monster.Name} and it attacks.");
+
+					var combat = new Battle(player, monster, c);
+					await combat.DoCombatAsync();
+
+					switch (combat.AttackerResult)
+					{
+						case Battle.CombatResult.Win:
+							//await c.RespondAsync($"{c.User.Mention} was victorious after {combat.Round} round(s) of combat with {A.Source.HpCurrent}hp left.");
+							encounterText.AppendLine($"{c.User.Mention} was victorious after {combat.Round} round(s) of combat with {player.HpCurrent}hp left.");
+							encounterEmbed.WithFooter("Xp earned: 2");
+							encounterEmbed.AddField("Outcome", "Victory");
+							await player.AddXpAsync(2, c); // TODO: Temporary testing xp
+							break;
+						case Battle.CombatResult.Loss:
+							//await c.RespondAsync($"{c.User.Mention} has fainted after {combat.Round} round(s) of combat. {monster.Name} had {monster.HpCurrent}hp left");
+							encounterText.AppendLine($"{c.User.Mention} has fainted after {combat.Round} round(s) of combat. {monster.Name} had {monster.HpCurrent}hp left");
+							await player.SetFaintedAsync();
+							encounterEmbed.AddField("Outcome", "Loss");
+							encounterEmbed.WithFooter("Xp lost: 1");
+							break;
+						case Battle.CombatResult.Tie:
+							//await c.RespondAsync($"{c.User.Mention} and {monster.Name} knocked each other out");
+							encounterText.AppendLine($"{c.User.Mention} and {monster.Name} knocked each other out");
+							await player.AddXpAsync(2, c); // TODO: Temporary testing xp
+							await player.SetFaintedAsync();
+							encounterEmbed.AddField("Outcome", "Tie");
+							encounterEmbed.WithFooter("Xp earned: 2. Xp lost: 1");
+							break;
+					}
+
+					encounterText.AppendLine();
+					encounterText.AppendLine("**Combat Log**");
+
+					foreach (var entry in combat.CombatLog)
+					{
+						encounterText.AppendLine(entry);
+					}
+
+					encounterEmbed.WithDescription(encounterText.ToString());
+
+					if (session.Advanced.HasChanges)
+					{
+						session.Advanced.IgnoreChangesFor(monster);
+						await session.SaveChangesAsync();
+					}
+
+					await c.RespondAsync(embed: encounterEmbed.Build());
+				}
 			}
 		}
 	}

@@ -105,7 +105,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\CombatLog.cs" />
+    <Compile Include="Models\Enemy\EnemyTemplate.cs" />
     <Compile Include="Bot\Commands\GameCommands.cs" />
+    <Compile Include="Models\Enemy\GenericEnemy.cs" />
     <Compile Include="Bot\Commands\InfoCommands.cs" />
     <Compile Include="Bot\Commands\GeneralActionCommands.cs" />
     <Compile Include="Bot\Commands\DeveloperCommands.cs" />
