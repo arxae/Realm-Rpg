@@ -48,23 +48,22 @@
 				.Load<Skill>(skillName);
 			var resource = dbSession.Load<Resource>(skill.Parameters["ResourceType"]);
 
-			var amt = DiceNotation.SingletonRandom.Instance.Next(resource.HarvestQuantityMin, resource.HarvestQuantityMax);
+			var amt = Rng.Instance.Next(resource.HarvestQuantityMin, resource.HarvestQuantityMax);
 
-			if (amt > 0)
-			{
-				_log.Debug("{player} received {item} x{amt}", p.Name, resource.HarvestedItemId, amt);
-				p.AddItemToInventory(resource.HarvestedItemId, amt);
-				p.SetIdleAction();
+			if (amt <= 0) return;
 
-				// Warn player
-				var discordMember = Bot.RpgBot.Client.GetGuildAsync(p.GuildId)
-					.GetAwaiter().GetResult()
-					.GetMemberAsync(ulong.Parse(p.Id))
-					.GetAwaiter().GetResult();
-				discordMember.SendMessageAsync($"Your {skill.DisplayName} action has completed and you gained {amt} pieces of {resource.DisplayName}")
-					.GetAwaiter()
-					.GetResult();
-			}
+			_log.Debug("{player} received {item} x{amt}", p.Name, resource.HarvestedItemId, amt);
+			p.AddItemToInventory(resource.HarvestedItemId, amt);
+			p.SetIdleAction();
+
+			// Warn player
+			var discordMember = Bot.RpgBot.Client.GetGuildAsync(p.GuildId)
+				.GetAwaiter().GetResult()
+				.GetMemberAsync(ulong.Parse(p.Id))
+				.GetAwaiter().GetResult();
+			discordMember.SendMessageAsync($"Your {skill.DisplayName} action has completed and you gained {amt} pieces of {resource.DisplayName}")
+				.GetAwaiter()
+				.GetResult();
 		}
 	}
 }

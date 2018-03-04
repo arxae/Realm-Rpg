@@ -1,8 +1,4 @@
-﻿
-using System;
-using RealmRpgBot.Models.Enemy;
-
-namespace RealmRpgBot.Bot.Commands
+﻿namespace RealmRpgBot.Bot.Commands
 {
 	using System.Linq;
 	using System.Threading.Tasks;
@@ -12,8 +8,9 @@ namespace RealmRpgBot.Bot.Commands
 	using DSharpPlus.Entities;
 	using Raven.Client.Documents;
 
-	using Models.Character;
 	using Combat;
+	using Models.Character;
+	using Models.Encounters;
 	using Models.Map;
 
 	/// <summary>
@@ -374,52 +371,74 @@ namespace RealmRpgBot.Bot.Commands
 					.Include<Encounter>(enc => enc.Id)
 					.LoadAsync<Player>(c.User.Id.ToString());
 				var location = await session.LoadAsync<Location>(player.CurrentLocation);
+
+				if (location.Encounters == null || location.Encounters?.Count == 0)
+				{
+					// TODO: Generic events
+					await c.RespondAsync("Nothing to do here");
+					await c.ConfirmMessage();
+					return;
+				}
+
 				var encounterId = location.Encounters?.GetRandomEntry();
 				var encounter = await session.LoadAsync<Encounter>(encounterId);
 
 				if (encounter.EncounterType == Encounter.EncounterTypes.Enemy)
 				{
-					var template = await session.LoadAsync<EnemyTemplate>(encounter.TemplateId);
-					var enemy = new Enemy(encounter.Name, template);
+					var template = await session.LoadAsync<EncounterTemplate>(encounter.TemplateId);
+					var enemy = new Enemy(encounter.Name, template, player.Level);
 
 					var encounterEmbed = new DiscordEmbedBuilder()
 						.WithTitle($"Encounter with {enemy.Name}");
 
 					var body = new System.Text.StringBuilder();
-					body.AppendLine($"{c.User.Mention} has encountered a lvl{enemy.Level} {enemy.Name}");
+					body.AppendLine($"{c.User.Mention} has encountered a lvl{enemy.Level} {enemy.Name} with {enemy.HpCurrent}hp.");
 
-					var combat = new Battle(player, enemy, c);
-					await combat.DoCombatAsync();
+					var combat = new AutoBattle(player, enemy, c);
+					await combat.StartCombatAsync();
 
-					switch (combat.Outcome)
+					var result = await combat.GetCombatResultAsync();
+
+					string xpMsg = string.Empty;
+					switch (result.Outcome)
 					{
-						case Battle.CombatResult.Undetermined:
-							body.AppendLine("In the middle of the battle, you seem to lose track of each other. After the dust settles, the enemy is gone");
-							break;
-						case Battle.CombatResult.WinA:
+						case CombatOutcome.Attacker:
 							{
 								var xpGain = enemy.Level; // TODO: propper xp calculation
-								body.AppendLine($"{c.User.Mention} has won the battle with {player.HpCurrent}hp left. You gained {xpGain}xp");
 								await player.AddXpAsync(xpGain, c);
+								xpMsg = $"Gained {xpGain}xp";
 								break;
 							}
-						case Battle.CombatResult.WinB:
+						case CombatOutcome.Defender:
 							{
-								body.AppendLine($"The enemy has beaten you down. It had {enemy.HpCurrent} left. You lost some XP");
-								await player.SetFaintedAsync();
+								var xpLost = await player.SetFaintedAsync();
+								xpMsg = $"Lost {xpLost}xp.";
 								break;
 							}
-						case Battle.CombatResult.Tie:
+						case CombatOutcome.Tie:
 							{
-								body.AppendLine($"During the scuffle, you knock each other out. You gaint some xp, but also lost some xp");
 								var xpGain = enemy.Level; // TODO: propper xp calculation
 								await player.AddXpAsync(xpGain, c);
-								await player.SetFaintedAsync();
+								var xpLost = await player.SetFaintedAsync();
+								xpMsg = $"Gained {xpGain}xp, but lost {xpLost}xp.";
 								break;
 							}
 					}
 
-					encounterEmbed.WithFooter("Use the .combatlog command to view your last combatlog");
+					encounterEmbed.WithFooter(xpMsg);
+
+					body.AppendLine();
+					body.AppendLine("*Last lines of Combat Log*");
+					body.AppendLine("*...*");
+					
+					foreach (var line in combat.CombatLog.Skip(System.Math.Max(0, combat.CombatLog.Count - 3)))
+					{
+						body.AppendLine(line);
+					}
+
+					body.AppendLine();
+					body.AppendLine(result.Message);
+
 					encounterEmbed.WithDescription(body.ToString());
 
 					await session.SaveChangesAsync();
@@ -429,8 +448,10 @@ namespace RealmRpgBot.Bot.Commands
 
 				if (session.Advanced.HasChanges)
 				{
-					await c.ConfirmMessage();
+					await session.SaveChangesAsync();
 				}
+
+				await c.ConfirmMessage();
 			}
 		}
 
@@ -448,7 +469,7 @@ namespace RealmRpgBot.Bot.Commands
 				}
 
 				var body = new System.Text.StringBuilder();
-				body.AppendLine($"**Victor: ** {log.Victor}");
+				body.AppendLine($"**Victor: ** {log.Winner}");
 				body.AppendLine($"**Lose: ** {log.Loser}");
 				body.AppendLine();
 				body.AppendLine("**Log**");

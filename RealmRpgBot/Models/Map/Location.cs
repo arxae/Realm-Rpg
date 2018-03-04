@@ -21,11 +21,12 @@
 
 		public Location()
 		{
-			// TODO: Lazy initialization
 			LocationConnections = new List<string>();
 			Perceptables = new List<Perceptable>();
 			LocationInventory = new List<LocationInventoryItem>();
 			Buildings = new List<Building>();
+			Resources = new List<string>();
+			Encounters = new List<string>();
 		}
 
 		public DiscordEmbed GetLocationEmbed()

@@ -1,4 +1,4 @@
-﻿namespace RealmRpgBot.Models.Enemy
+﻿namespace RealmRpgBot.Models.Encounters
 {
     public class Encounter
     {

@@ -1,6 +1,4 @@
-﻿using RealmRpgBot.Combat;
-
-namespace RealmRpgBot.Bot.Commands
+﻿namespace RealmRpgBot.Bot.Commands
 {
 	using System.Threading.Tasks;
 
@@ -10,7 +8,7 @@ namespace RealmRpgBot.Bot.Commands
 	using Raven.Client.Documents;
 
 	using Models.Character;
-	using Models.Enemy;
+	using Models.Encounters;
 	using Models.Map;
 
 	[Group("dev"), Description("Game administration commands"), RequireRoles(RoleCheckMode.Any, "Realm Admin")]

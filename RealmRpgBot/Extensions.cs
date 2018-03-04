@@ -9,7 +9,6 @@
 	using DSharpPlus;
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.Entities;
-	using Raven.Client.Documents.Session;
 
 	public static class Extensions
 	{
@@ -21,7 +20,7 @@
 				application = "RealmBot";
 			}
 
-			c.Client.DebugLogger.LogMessage(level, application, message, System.DateTime.Now);
+			c.Client.DebugLogger.LogMessage(level, application, message, DateTime.Now);
 		}
 
 		public static void LogCritical(this CommandContext c, string message, string application = null) => c.Log(LogLevel.Critical, application, message);
@@ -41,7 +40,7 @@
 			var result = new List<string>();
 			foreach (string split in splitChars)
 			{
-				if (splitChars.Count() == 1)
+				if (splitChars.Length == 1)
 				{
 					result.AddRange(Regex.Split(input, split, RegexOptions.IgnoreCase).ToList());
 				}
@@ -69,12 +68,12 @@
 
 		public static T GetRandomEntry<T>(this List<T> list)
 		{
-			return list[DiceNotation.SingletonRandom.Instance.Next(list.Count - 1)];
+			return list[Rng.Instance.Next(list.Count - 1)];
 		}
 
 		public static T GetRandomEntry<T>(this T[] arr)
 		{
-			return arr[DiceNotation.SingletonRandom.Instance.Next(arr.Length)];
+			return arr[Rng.Instance.Next(arr.Length)];
 		}
 
 		/// <summary>
@@ -93,7 +92,9 @@
 		public static string ExtendToString<T>(this IEnumerable<T> enumerable, string begin = "[", Func<T, string> elementStringifier = null, string separator = ", ", string end = "]")
 		{
 			if (elementStringifier == null)
-				elementStringifier = (T obj) => obj.ToString();
+			{
+				elementStringifier = obj => obj.ToString();
+			}
 
 			string result = begin;
 			bool first = true;

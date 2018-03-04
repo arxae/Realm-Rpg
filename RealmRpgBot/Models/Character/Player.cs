@@ -118,18 +118,20 @@
 			CurrentActionDisplay = "Idling";
 		}
 
-		public async Task SetFaintedAsync()
+		public async Task<int> SetFaintedAsync()
 		{
-			await Task.Run(() =>
+			return await Task.Run(() =>
 			{
 				CurrentLocation = Realm.GetSetting<string>("startinglocation");
 				HpCurrent = HpMax;
-				
+
 				var percentage = Realm.GetSetting<int>("faint_xp_penalty");
 				var xpLoss = (XpCurrent / 100) * percentage;
 
 				XpCurrent = XpCurrent - xpLoss;
 				if (XpCurrent < 0) XpCurrent = 0;
+
+				return xpLoss;
 			});
 		}
 	}

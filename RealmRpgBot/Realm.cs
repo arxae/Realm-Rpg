@@ -12,10 +12,11 @@
 	{
 		private static List<Type> _buildingImplementations;
 		private static List<Type> _skillImplementations;
-		private static List<Setting> _settingsCache = new List<Setting>();
+		private static readonly List<Setting> _settingsCache = new List<Setting>();
 
 		public static void ClearCacheForKey(string key)
 		{
+			if (key.StartsWith("settings/") == false) key = "settings/" + key;
 			var entry = _settingsCache.FirstOrDefault(s => s.Id.Equals(key, StringComparison.OrdinalIgnoreCase));
 			if (entry == null) return;
 
@@ -103,6 +104,7 @@
 
 		public static T GetSetting<T>(string key)
 		{
+			if (key.StartsWith("settings/") == false) key = "settings/" + key;
 			var cached = _settingsCache.FirstOrDefault(c => c.Id.Equals(key, StringComparison.OrdinalIgnoreCase));
 
 			if (cached != null)
