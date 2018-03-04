@@ -1,4 +1,7 @@
 ﻿
+using System;
+using RealmRpgBot.Models.Enemy;
+
 namespace RealmRpgBot.Bot.Commands
 {
 	using System.Linq;
@@ -368,75 +371,95 @@ namespace RealmRpgBot.Bot.Commands
 			{
 				var player = await session
 					.Include<Location>(loc => loc.Id)
+					.Include<Encounter>(enc => enc.Id)
 					.LoadAsync<Player>(c.User.Id.ToString());
 				var location = await session.LoadAsync<Location>(player.CurrentLocation);
-				var locEvent = location.Encounters.GetRandomEntry();
+				var encounterId = location.Encounters?.GetRandomEntry();
+				var encounter = await session.LoadAsync<Encounter>(encounterId);
 
-				if (locEvent.StartsWith("enemies/")) // Encounter enemy
+				if (encounter.EncounterType == Encounter.EncounterTypes.Enemy)
 				{
-					var monster = await session
-						.Include<Models.Enemy.EnemyTemplate>(t => t.Id)
-						.LoadAsync<Models.Enemy.GenericEnemy>(locEvent);
-					var enemyTemplate = await session.LoadAsync<Models.Enemy.EnemyTemplate>(monster.TemplateName);
-					monster.ApplyTemplate(enemyTemplate);
+					var template = await session.LoadAsync<EnemyTemplate>(encounter.TemplateId);
+					var enemy = new Enemy(encounter.Name, template);
 
 					var encounterEmbed = new DiscordEmbedBuilder()
-						.WithTitle("Encounter")
-						.AddField("Attacker", $"{player.Name} (lvl{player.Level})")
-						.AddField("Defender", $"{monster.Name} (lvl{monster.Level})");
+						.WithTitle($"Encounter with {enemy.Name}");
 
-					var encounterText = new System.Text.StringBuilder();
-					encounterText.AppendLine($"{c.User.Mention} has encountered a lvl{monster.Level} {monster.Name} and it attacks.");
+					var body = new System.Text.StringBuilder();
+					body.AppendLine($"{c.User.Mention} has encountered a lvl{enemy.Level} {enemy.Name}");
 
-					//await c.RespondAsync($"{c.User.Mention} has encountered a lvl{monster.Level} {monster.Name} and it attacks.");
-
-					var combat = new Battle(player, monster, c);
+					var combat = new Battle(player, enemy, c);
 					await combat.DoCombatAsync();
 
-					switch (combat.AttackerResult)
+					switch (combat.Outcome)
 					{
-						case Battle.CombatResult.Win:
-							//await c.RespondAsync($"{c.User.Mention} was victorious after {combat.Round} round(s) of combat with {A.Source.HpCurrent}hp left.");
-							encounterText.AppendLine($"{c.User.Mention} was victorious after {combat.Round} round(s) of combat with {player.HpCurrent}hp left.");
-							encounterEmbed.WithFooter("Xp earned: 2");
-							encounterEmbed.AddField("Outcome", "Victory");
-							await player.AddXpAsync(2, c); // TODO: Temporary testing xp
+						case Battle.CombatResult.Undetermined:
+							body.AppendLine("In the middle of the battle, you seem to lose track of each other. After the dust settles, the enemy is gone");
 							break;
-						case Battle.CombatResult.Loss:
-							//await c.RespondAsync($"{c.User.Mention} has fainted after {combat.Round} round(s) of combat. {monster.Name} had {monster.HpCurrent}hp left");
-							encounterText.AppendLine($"{c.User.Mention} has fainted after {combat.Round} round(s) of combat. {monster.Name} had {monster.HpCurrent}hp left");
-							await player.SetFaintedAsync();
-							encounterEmbed.AddField("Outcome", "Loss");
-							encounterEmbed.WithFooter("Xp lost: 1");
-							break;
+						case Battle.CombatResult.WinA:
+							{
+								var xpGain = enemy.Level; // TODO: propper xp calculation
+								body.AppendLine($"{c.User.Mention} has won the battle with {player.HpCurrent}hp left. You gained {xpGain}xp");
+								await player.AddXpAsync(xpGain, c);
+								break;
+							}
+						case Battle.CombatResult.WinB:
+							{
+								body.AppendLine($"The enemy has beaten you down. It had {enemy.HpCurrent} left. You lost some XP");
+								await player.SetFaintedAsync();
+								break;
+							}
 						case Battle.CombatResult.Tie:
-							//await c.RespondAsync($"{c.User.Mention} and {monster.Name} knocked each other out");
-							encounterText.AppendLine($"{c.User.Mention} and {monster.Name} knocked each other out");
-							await player.AddXpAsync(2, c); // TODO: Temporary testing xp
-							await player.SetFaintedAsync();
-							encounterEmbed.AddField("Outcome", "Tie");
-							encounterEmbed.WithFooter("Xp earned: 2. Xp lost: 1");
-							break;
+							{
+								body.AppendLine($"During the scuffle, you knock each other out. You gaint some xp, but also lost some xp");
+								var xpGain = enemy.Level; // TODO: propper xp calculation
+								await player.AddXpAsync(xpGain, c);
+								await player.SetFaintedAsync();
+								break;
+							}
 					}
 
-					encounterText.AppendLine();
-					encounterText.AppendLine("**Combat Log**");
+					encounterEmbed.WithFooter("Use the .combatlog command to view your last combatlog");
+					encounterEmbed.WithDescription(body.ToString());
 
-					foreach (var entry in combat.CombatLog)
-					{
-						encounterText.AppendLine(entry);
-					}
-
-					encounterEmbed.WithDescription(encounterText.ToString());
-
-					if (session.Advanced.HasChanges)
-					{
-						session.Advanced.IgnoreChangesFor(monster);
-						await session.SaveChangesAsync();
-					}
+					await session.SaveChangesAsync();
 
 					await c.RespondAsync(embed: encounterEmbed.Build());
 				}
+
+				if (session.Advanced.HasChanges)
+				{
+					await c.ConfirmMessage();
+				}
+			}
+		}
+
+		[Command("combatlog"), Description("Shows your last combat log (if any)")]
+		public async Task ShowCombatLog(CommandContext c)
+		{
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var log = await session.LoadAsync<Models.CombatLog>("combatlogs/" + c.User.Id);
+				if (log == null)
+				{
+					await c.RespondAsync("No combat log available");
+					await c.ConfirmMessage();
+					return;
+				}
+
+				var body = new System.Text.StringBuilder();
+				body.AppendLine($"**Victor: ** {log.Victor}");
+				body.AppendLine($"**Lose: ** {log.Loser}");
+				body.AppendLine();
+				body.AppendLine("**Log**");
+				log.Lines.ForEach(l => body.AppendLine(l));
+
+				var embed = new DiscordEmbedBuilder()
+					.WithTitle("Combat Log")
+					.WithDescription(body.ToString())
+					.WithTimestamp(log.Timestamp);
+
+				await c.Member.SendMessageAsync(embed: embed.Build());
 			}
 		}
 	}

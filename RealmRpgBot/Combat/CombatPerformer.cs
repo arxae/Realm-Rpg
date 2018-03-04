@@ -4,14 +4,14 @@
 
 	using System.Collections.Generic;
 
-	public class DamagePerformer
+	public class CombatPerformer
 	{
 		public IBattleParticipant Source { get; set; }
 		public IBattleParticipant Target { get; set; }
 
 		List<Attack> _attacks;
 
-		public DamagePerformer(IBattleParticipant src, IBattleParticipant trg)
+		public CombatPerformer(IBattleParticipant src, IBattleParticipant trg)
 		{
 			Source = src;
 			Target = trg;

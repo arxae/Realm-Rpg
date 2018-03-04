@@ -7,12 +7,13 @@
 
 	public class Battle
 	{
-		public DamagePerformer A { get; private set; }
-		public DamagePerformer B { get; private set; }
+		public CombatPerformer A { get; private set; }
+		public CombatPerformer B { get; private set; }
 		public int Round { get; set; }
 
-		public CombatResult AttackerResult { get; set; }
-		public CombatResult DefenderResult { get; set; }
+		public CombatResult Outcome { get; set; }
+		public string VictorName { get; set; }
+		public string LoserName { get; set; }
 
 		public List<string> CombatLog { get; set; }
 
@@ -21,11 +22,12 @@
 
 		public Battle(IBattleParticipant att, IBattleParticipant def, CommandContext c)
 		{
-			A = new DamagePerformer(att, def);
-			B = new DamagePerformer(def, att);
+			A = new CombatPerformer(att, def);
+			B = new CombatPerformer(def, att);
 
 			Round = 0;
 			CombatLog = new List<string>();
+			Outcome = CombatResult.Undetermined;
 
 			log = Serilog.Log.ForContext<Battle>();
 			cmdCtx = c;
@@ -33,41 +35,59 @@
 
 		public async Task DoCombatAsync()
 		{
+			log.Debug("Start combat {a} vs {b}", A.Source.Name, B.Source.Name);
+
 			while (A.Source.HpCurrent > 0 && B.Source.HpCurrent > 0)
 			{
+				if (Round >= 999) continue;
+
 				Round++;
 				DoRound();
 			}
 
-			AttackerResult = A.Source.HpCurrent > 0 ? CombatResult.Win : CombatResult.Loss;
-			DefenderResult = B.Source.HpCurrent > 0 ? CombatResult.Win : CombatResult.Loss;
-
-			if (AttackerResult == DefenderResult)
+			if (A.Source.HpCurrent < 0 && B.Source.HpCurrent < 0)
 			{
-				AttackerResult = CombatResult.Tie;
-				DefenderResult = CombatResult.Tie;
+				Outcome = CombatResult.Tie;
+				VictorName = "None";
+				LoserName = "None";
+			}
+			else if (A.Source.HpCurrent > 0 && B.Source.HpCurrent < 0)
+			{
+				Outcome = CombatResult.WinA;
+				VictorName = A.Source.Name;
+				LoserName = B.Source.Name;
+			}
+			else if (A.Source.HpCurrent < 0 && B.Source.HpCurrent > 0)
+			{
+				Outcome = CombatResult.WinB;
+				VictorName = B.Source.Name;
+				LoserName = A.Source.Name;
+			}
+			else
+			{
+				VictorName = "None";
+				LoserName = "None";
 			}
 
-			var victorName = A.Source.HpCurrent > 0 ? A.Source.Name : B.Source.Name;
-			log.Debug($"Combat ended after {Round} round(s). Victor: {victorName}");
-
 			await StoreCombatLogAsync();
+
+			log.Debug("End combat {a} vs {b} (outcome: {o})", A.Source.Name, B.Source.Name, Outcome);
 		}
 
 		void DoRound()
 		{
-			// TODO: Determine attacks
+			// Issue attacks
+			// TODO: Determine moves
 			// For now, do random damage based on str
 			// A
-			var a_rng = DiceNotation.Dice.Roll("1d6");
-			var a_dmg = A.Source.Attributes.Strength + a_rng;
+			var a_dmg = A.Source.Attributes.Strength + DiceNotation.Dice.Roll("1d6");
 			A.AddAttack(new Attack("A Attack", a_dmg, Attack.DamageTypes.Physical, 1));
 
 			// B
-			var b_rng = DiceNotation.Dice.Roll("1d6");
-			var b_dmg = B.Source.Attributes.Strength + b_rng;
+			var b_dmg = B.Source.Attributes.Strength + DiceNotation.Dice.Roll("1d6");
 			B.AddAttack(new Attack("B Attack", b_dmg, Attack.DamageTypes.Physical, 1));
 
+			// TODO: Based on a stat
 			A.TriggerDamage();
 			B.TriggerDamage();
 
@@ -88,13 +108,23 @@
 					await session.StoreAsync(new Models.CombatLog
 					{
 						Id = "combatlogs/" + cmdCtx.User.Id,
-						Lines = new List<string>(CombatLog)
+						Lines = new List<string>(CombatLog),
+						Loser = LoserName,
+						Result = Outcome,
+						Rounds = Round,
+						Timestamp = System.DateTime.Now,
+						Victor = VictorName
 					});
 				}
 				else
 				{
 					entry.Lines.Clear();
 					entry.Lines.AddRange(CombatLog);
+					entry.Loser = LoserName;
+					entry.Result = Outcome;
+					entry.Rounds = Round;
+					entry.Timestamp = System.DateTime.Now;
+					entry.Victor = VictorName;
 				}
 
 				await session.SaveChangesAsync();
@@ -103,8 +133,9 @@
 
 		public enum CombatResult
 		{
-			Win,
-			Loss,
+			Undetermined,
+			WinA,
+			WinB,
 			Tie
 		}
 	}

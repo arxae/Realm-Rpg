@@ -1,8 +1,8 @@
 ﻿namespace RealmRpgBot.Models.Enemy
 {
-	using RealmRpgBot.Models.Character;
+	using Character;
 
-	public class GenericEnemy : Combat.IBattleParticipant
+	public class Enemy : Combat.IBattleParticipant
 	{
 		public string Name { get; set; }
 		public int Level { get; set; }
@@ -10,24 +10,27 @@
 		public int HpCurrent { get; set; }
 		public AttributeBlock Attributes { get; set; }
 
-		public string TemplateName { get; set; }
+		public string TemplateId { get; set; }
 
-		public void ApplyTemplate(EnemyTemplate tmp)
+		public Enemy(string name, EnemyTemplate tmp)
 		{
+			Name = name;
 			Attributes = tmp.Attributes;
 
 			Level = DiceNotation.SingletonRandom.Instance.Next(tmp.LevelRangeMin, tmp.LevelRangeMax);
 
 			if (DiceNotation.SingletonRandom.Instance.Next(0, 100) > 50)
 			{
-				HpMax = tmp.BaseHp + DiceNotation.SingletonRandom.Instance.Next(0, 3);
+				HpMax = tmp.BaseHp + DiceNotation.SingletonRandom.Instance.Next(0, tmp.HpVariance);
 			}
 			else
 			{
-				HpMax = tmp.BaseHp - DiceNotation.SingletonRandom.Instance.Next(0, 3);
+				HpMax = tmp.BaseHp - DiceNotation.SingletonRandom.Instance.Next(0, tmp.HpVariance);
 			}
 
 			HpCurrent = HpMax;
+
+			TemplateId = tmp.Id;
 		}
 	}
 }

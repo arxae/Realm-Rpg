@@ -112,47 +112,5 @@ namespace RealmRpgBot.Bot.Commands
 			Realm.ClearSettingsCache();
 			await c.ConfirmMessage();
 		}
-
-		[Command("combattest")]
-		public async Task Test(CommandContext c)
-		{
-			using (var session = Db.DocStore.OpenAsyncSession())
-			{
-				var player = await session.LoadAsync<Player>(c.User.Id.ToString());
-				var monster = await session
-					.Include<EnemyTemplate>(t => t.Id)
-					.LoadAsync<GenericEnemy>("enemies/testmonster");
-				var enemyTemplate = await session.LoadAsync<EnemyTemplate>(monster.TemplateName);
-				monster.ApplyTemplate(enemyTemplate);
-
-				await c.RespondAsync($"{c.User.Mention} has encountered a lvl{monster.Level} {monster.Name}");
-
-				var combat = new Battle(player, monster, c);
-				await combat.DoCombatAsync();
-
-				switch (combat.AttackerResult)
-				{
-					case Battle.CombatResult.Win:
-						await c.RespondAsync($"{c.User.Mention} was victorious {combat.Round} round(s) of combat with {player.HpCurrent}hp left.");
-						await player.AddXpAsync(2, c); // TODO: Temporary random xp
-						break;
-					case Battle.CombatResult.Tie:
-						await c.RespondAsync($"{c.User.Mention} and {monster.Name} knocked each other out");
-						await player.AddXpAsync(2, c); // TODO: Temporary random xp
-						await player.SetFaintedAsync();
-						break;
-					default:
-						await c.RespondAsync($"{c.User.Mention} has fainted after {combat.Round} round(s) of combat. {monster.Name} had {monster.HpCurrent}hp left");
-						await player.SetFaintedAsync();
-						break;
-				}
-
-				if (session.Advanced.HasChanges)
-				{
-					session.Advanced.IgnoreChangesFor(monster);
-					await session.SaveChangesAsync();
-				}
-			}
-		}
 	}
 }

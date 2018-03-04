@@ -106,9 +106,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\CombatLog.cs" />
+    <Compile Include="Models\Enemy\Encounter.cs" />
     <Compile Include="Models\Enemy\EnemyTemplate.cs" />
     <Compile Include="Bot\Commands\GameCommands.cs" />
-    <Compile Include="Models\Enemy\GenericEnemy.cs" />
+    <Compile Include="Models\Enemy\Enemy.cs" />
     <Compile Include="Bot\Commands\InfoCommands.cs" />
     <Compile Include="Bot\Commands\GeneralActionCommands.cs" />
     <Compile Include="Bot\Commands\DeveloperCommands.cs" />
@@ -121,7 +122,7 @@
     <Compile Include="Buildings\SkillTrainer.cs" />
     <Compile Include="Combat\Attack.cs" />
     <Compile Include="Combat\Battle.cs" />
-    <Compile Include="Combat\DamagePerformer.cs" />
+    <Compile Include="Combat\CombatPerformer.cs" />
     <Compile Include="Combat\IBattleParticipant.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Db.cs" />

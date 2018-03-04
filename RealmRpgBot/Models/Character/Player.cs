@@ -124,8 +124,11 @@
 			{
 				CurrentLocation = Realm.GetSetting<string>("startinglocation");
 				HpCurrent = HpMax;
+				
+				var percentage = Realm.GetSetting<int>("faint_xp_penalty");
+				var xpLoss = (XpCurrent / 100) * percentage;
 
-				XpCurrent = XpCurrent - Realm.GetSetting<int>("faint_xp_penality");
+				XpCurrent = XpCurrent - xpLoss;
 				if (XpCurrent < 0) XpCurrent = 0;
 			});
 		}
