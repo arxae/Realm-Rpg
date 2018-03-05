@@ -105,6 +105,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bot\Commands\SetCommands.cs" />
     <Compile Include="Combat\AutoBattle.cs" />
     <Compile Include="Combat\CombatOutcome.cs" />
     <Compile Include="DiceNotation\SingletonRandom.cs" />

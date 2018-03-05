@@ -23,7 +23,7 @@
 
 				foreach (var player in players)
 				{
-					if (player.BusyUntil > DateTime.Now) continue;
+					if (player.BusyUntil > DateTime.Now) continue; // Player is still busy
 
 					if (player.CurrentAction.StartsWith(Constants.ACTION_GATHERING, StringComparison.OrdinalIgnoreCase))
 					{
@@ -33,6 +33,11 @@
 					{
 						Resting(player);
 					}
+				}
+
+				if (session.Advanced.HasChanges)
+				{
+					session.SaveChanges();
 				}
 			}
 		}
@@ -56,7 +61,6 @@
 
 			_log.Debug("{player} received {item} x{amt}", p.Name, resource.HarvestedItemId, amt);
 			p.AddItemToInventory(resource.HarvestedItemId, amt);
-			p.SetIdleAction();
 
 			// Warn player
 			var discordMember = Bot.RpgBot.Client.GetGuildAsync(p.GuildId)
@@ -66,6 +70,18 @@
 			discordMember.SendMessageAsync($"Your {skill.DisplayName} action has completed and you gained {amt} pieces of {resource.DisplayName}")
 				.GetAwaiter()
 				.GetResult();
+
+			// Set repeat
+			if (p.CurrentActionRepeat == false || skill.IsRepeatable == false)
+			{
+				p.SetIdleAction();
+				return;
+			}
+
+			_log.Debug("Repeating {act} action for {pname} ({pid})", p.CurrentAction, p.Name, p.Id);
+			var trainedRank = p.Skills.FirstOrDefault(s => s.Id == skillName).Rank;
+			var cd = skill.CooldownRanks[trainedRank - 1];
+			p.SetActionAsync(p.CurrentAction, p.CurrentActionDisplay, TimeSpan.FromSeconds(cd)).GetAwaiter();
 		}
 
 		/// <summary>
@@ -76,6 +92,12 @@
 		{
 			int heal = (p.HpMax / 100) * 10;// TODO: Add to settings
 			p.HealHpAsync(heal).ConfigureAwait(false);
+
+			if (p.CurrentActionRepeat)
+			{
+				_log.Debug("Repeating rest action for {pname} ({pid})", p.Name, p.Id);
+				p.SetActionAsync(p.CurrentAction, p.CurrentActionDisplay, TimeSpan.FromMinutes(1)).GetAwaiter();
+			}
 		}
 	}
 }

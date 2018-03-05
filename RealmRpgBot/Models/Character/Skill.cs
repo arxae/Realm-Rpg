@@ -10,6 +10,7 @@
 		public string ReactionIcon { get; set; }
 		public string ImageUrl { get; set; }
 		public string SkillImpl { get; set; }
+		public bool IsRepeatable { get; set; }
 		public bool IsActivatable { get; set; }
 		public List<int> TrainingCosts { get; set; }
 		public List<int> CooldownRanks { get; set; }

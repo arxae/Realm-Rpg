@@ -40,6 +40,7 @@
 		// Actions
 		public string CurrentAction { get; set; }
 		public string CurrentActionDisplay { get; set; }
+		public bool CurrentActionRepeat { get; set; }
 		public DateTime BusyUntil { get; set; }
 
 		public bool IsIdle { get => CurrentAction.Equals("idle", StringComparison.OrdinalIgnoreCase); }
@@ -114,6 +115,7 @@
 
 		public void SetIdleAction()
 		{
+			CurrentActionRepeat = false;
 			CurrentAction = "Idle";
 			CurrentActionDisplay = "Idling";
 		}
