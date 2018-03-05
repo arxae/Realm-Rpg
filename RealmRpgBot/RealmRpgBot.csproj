@@ -108,6 +108,7 @@
     <Compile Include="Combat\AutoBattle.cs" />
     <Compile Include="Combat\CombatOutcome.cs" />
     <Compile Include="DiceNotation\SingletonRandom.cs" />
+    <Compile Include="JobScheduler\Jobs\ServerTick.cs" />
     <Compile Include="Models\CombatLog.cs" />
     <Compile Include="Models\Encounters\Encounter.cs" />
     <Compile Include="Models\Encounters\EncounterTemplate.cs" />
@@ -157,8 +158,7 @@
     <Compile Include="Index\Locations_All.cs" />
     <Compile Include="Index\Players_All.cs" />
     <Compile Include="JobScheduler\Jobs\InvalidateSettingsCache.cs" />
-    <Compile Include="JobScheduler\Jobs\LocationInventoryDecayJob.cs" />
-    <Compile Include="JobScheduler\Jobs\PlayerActionDurationCheck.cs" />
+    <Compile Include="JobScheduler\Jobs\LocationInventoryDecay.cs" />
     <Compile Include="JobScheduler\RealmJobRegistry.cs" />
     <Compile Include="JobScheduler\Scheduler.cs" />
     <Compile Include="Models\Map\BuildingAction.cs" />

@@ -2,8 +2,6 @@
 {
 	public class Constants
 	{
-		public const string NAMES_LIST_RACES = "Races";
-
 		public const string EMOJI_GREEN_CHECK = ":white_check_mark:";
 		public const string EMOJI_BLACK_CHECK = ":heavy_check_mark:";
 		public const string EMOJI_BLACK_CROSS = ":heavy_multiplication_x:";
@@ -20,5 +18,9 @@
 		public const string MSG_NO_EXITS = "This location has no exits";
 		public const string MSG_INVALID_CONNECTION = "There is no such exit from this location";
 		public const string MSG_PLAYER_NOT_IDLE = "You are currently doing";
+
+		public const string ACTION_IDLE = "Idle";
+		public const string ACTION_REST = "Rest";
+		public const string ACTION_GATHERING = "Gathering";
 	}
 }

@@ -5,13 +5,13 @@
 
 	using Models.Map;
 
-	public class LocationInventoryDecayJob : FluentScheduler.IJob
+	public class LocationInventoryDecay : FluentScheduler.IJob
 	{
 		Serilog.ILogger _log;
 
 		public void Execute()
 		{
-			_log = Serilog.Log.ForContext<LocationInventoryDecayJob>();
+			_log = Serilog.Log.ForContext<LocationInventoryDecay>();
 
 			using (var session = Db.DocStore.OpenSession())
 			{

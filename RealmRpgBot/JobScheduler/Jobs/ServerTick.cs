@@ -8,41 +8,43 @@
 	using Models.Character;
 	using Models.Map;
 
-	public class PlayerActionDurationCheck : FluentScheduler.IJob
+	public class ServerTick : FluentScheduler.IJob
 	{
 		Serilog.ILogger _log;
 
 		public void Execute()
 		{
-			_log = Serilog.Log.ForContext<LocationInventoryDecayJob>();
+			_log = Serilog.Log.ForContext<ServerTick>();
 
 			using (var session = Db.DocStore.OpenSession())
 			{
 				var players = session.Query<Player>()
-					.Where(p => p.CurrentAction != "Idle" || p.CurrentAction == string.Empty || p.CurrentAction == null)
-					.ToList();
+					.Where(p => p.CurrentAction != Constants.ACTION_IDLE || p.CurrentAction == string.Empty || p.CurrentAction == null);
 
 				foreach (var player in players)
 				{
-					if (player.BusyUntil < DateTime.Now)
-					{
-						if (player.CurrentAction.StartsWith("Gathering:", StringComparison.OrdinalIgnoreCase))
-						{
-							Gathering(player, player.CurrentAction, session);
-						}
-					}
-				}
+					if (player.BusyUntil > DateTime.Now) continue;
 
-				if (session.Advanced.HasChanges)
-				{
-					session.SaveChanges();
+					if (player.CurrentAction.StartsWith(Constants.ACTION_GATHERING, StringComparison.OrdinalIgnoreCase))
+					{
+						Gathering(player, session);
+					}
+					else if (player.CurrentAction.StartsWith(Constants.ACTION_REST, StringComparison.OrdinalIgnoreCase))
+					{
+						Resting(player);
+					}
 				}
 			}
 		}
 
-		void Gathering(Player p, string actionString, IDocumentSession dbSession)
+		/// <summary>
+		/// Player is gathering resources on a location
+		/// </summary>
+		/// <param name="p"></param>
+		/// <param name="dbSession"></param>
+		void Gathering(Player p, IDocumentSession dbSession)
 		{
-			var skillName = actionString.Split(':')[1];
+			var skillName = p.CurrentAction.Split(':')[1];
 			var skill = dbSession
 				.Include<Resource>(r => r.Id)
 				.Load<Skill>(skillName);
@@ -64,6 +66,16 @@
 			discordMember.SendMessageAsync($"Your {skill.DisplayName} action has completed and you gained {amt} pieces of {resource.DisplayName}")
 				.GetAwaiter()
 				.GetResult();
+		}
+
+		/// <summary>
+		/// Player is resting, healing 10% hp/tick
+		/// </summary>
+		/// <param name="p"></param>
+		void Resting(Player p)
+		{
+			int heal = (p.HpMax / 100) * 10;// TODO: Add to settings
+			p.HealHpAsync(heal).ConfigureAwait(false);
 		}
 	}
 }

@@ -430,7 +430,7 @@
 					body.AppendLine();
 					body.AppendLine("*Last lines of Combat Log*");
 					body.AppendLine("*...*");
-					
+
 					foreach (var line in combat.CombatLog.Skip(System.Math.Max(0, combat.CombatLog.Count - 3)))
 					{
 						body.AppendLine(line);
@@ -441,7 +441,7 @@
 
 					encounterEmbed.WithDescription(body.ToString());
 
-					await session.SaveChangesAsync();
+					await player.SetActionAsync(Constants.ACTION_REST, "Recovering from combat", System.TimeSpan.FromMinutes(1));
 
 					await c.RespondAsync(embed: encounterEmbed.Build());
 				}

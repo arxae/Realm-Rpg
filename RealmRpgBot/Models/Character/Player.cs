@@ -134,5 +134,24 @@
 				return xpLoss;
 			});
 		}
+
+		public async Task SetActionAsync(string action, string actionDisplay, TimeSpan time)
+		{
+			await Task.Run(() =>
+			{
+				CurrentAction = action;
+				CurrentActionDisplay = actionDisplay;
+				BusyUntil = DateTime.Now + time;
+			});
+		}
+
+		public async Task HealHpAsync(int hp)
+		{
+			await Task.Run(() =>
+			{
+				HpCurrent += hp;
+				if (HpCurrent > HpMax) HpCurrent = HpMax;
+			});
+		}
 	}
 }
