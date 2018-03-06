@@ -54,9 +54,9 @@ namespace RealmRpgBot.Combat
 				await DoRoundAsync();
 			}
 
-			if (Attacker.HpCurrent < 0 && Defender.HpCurrent < 0) { Outcome = CombatOutcome.Tie; }
-			else if (Attacker.HpCurrent > 0 && Defender.HpCurrent < 0) { Outcome = CombatOutcome.Attacker; }
-			else if (Attacker.HpCurrent < 0 && Defender.HpCurrent > 0) { Outcome = CombatOutcome.Defender; }
+			if (Attacker.HpCurrent <= 0 && Defender.HpCurrent <= 0) { Outcome = CombatOutcome.Tie; }
+			else if (Attacker.HpCurrent > 0 && Defender.HpCurrent <= 0) { Outcome = CombatOutcome.Attacker; }
+			else if (Attacker.HpCurrent <= 0 && Defender.HpCurrent > 0) { Outcome = CombatOutcome.Defender; }
 
 			await StoreCombatLogAsync();
 
@@ -131,20 +131,20 @@ namespace RealmRpgBot.Combat
 			string winnerName;
 			string loserName;
 
-			if (Outcome == CombatOutcome.Attacker)
+			switch (Outcome)
 			{
-				winnerName = Attacker.Name;
-				loserName = Defender.Name;
-			}
-			else if (Outcome == CombatOutcome.Defender)
-			{
-				winnerName = Defender.Name;
-				loserName = Attacker.Name;
-			}
-			else
-			{
-				winnerName = "None";
-				loserName = "None";
+				case CombatOutcome.Attacker:
+					winnerName = Attacker.Name;
+					loserName = Defender.Name;
+					break;
+				case CombatOutcome.Defender:
+					winnerName = Defender.Name;
+					loserName = Attacker.Name;
+					break;
+				default:
+					winnerName = "None";
+					loserName = "None";
+					break;
 			}
 
 			using (var session = Db.DocStore.OpenAsyncSession())

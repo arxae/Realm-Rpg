@@ -16,5 +16,7 @@
 		public int HpVariance { get; set; }
 
 		public AttributeBlock Attributes { get; set; }
+
+		public override string ToString() => $"{TemplateName} ({Id})";
 	}
 }

@@ -108,6 +108,7 @@
 				if (dest != null)
 				{
 					player.CurrentLocation = dest.Id;
+					player.SetIdleAction();
 					await session.SaveChangesAsync();
 
 					await c.RespondAsync($"{c.User.Mention} has arrived in {dest.DisplayName}");
@@ -385,8 +386,20 @@
 
 				if (encounter.EncounterType == Encounter.EncounterTypes.Enemy)
 				{
-					var template = await session.LoadAsync<EncounterTemplate>(encounter.TemplateId);
-					var enemy = new Enemy(encounter.Name, template, player.Level);
+					var templates = (await session.LoadAsync<EncounterTemplate>(encounter.Templates)).Values
+						.Where(t => t.LevelRangeMin >= player.Level && player.Level <= t.LevelRangeMin || t.AdjustToPlayerLevel)
+						.ToList();
+
+					if (templates.Count == 0)
+					{
+						await c.RespondAsync("Nothing to see here");
+						await c.ConfirmMessage();
+						return;
+					}
+
+					var template = templates.GetRandomEntry();
+
+					var enemy = new Enemy(template, player.Level);
 
 					var encounterEmbed = new DiscordEmbedBuilder()
 						.WithTitle($"Encounter with {enemy.Name}");

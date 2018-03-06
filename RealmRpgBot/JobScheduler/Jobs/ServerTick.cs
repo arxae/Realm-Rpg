@@ -90,8 +90,14 @@
 		/// <param name="p"></param>
 		void Resting(Player p)
 		{
-			int heal = (p.HpMax / 100) * 10;// TODO: Add to settings
+			int heal = (p.HpMax / 100) * Realm.GetSetting<int>("rest_heal_perc");
 			p.HealHpAsync(heal).ConfigureAwait(false);
+
+			if (p.HpCurrent == p.HpMax)
+			{
+				p.SetIdleAction();
+				return;
+			}
 
 			if (p.CurrentActionRepeat)
 			{

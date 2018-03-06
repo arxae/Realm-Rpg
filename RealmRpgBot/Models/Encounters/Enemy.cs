@@ -12,9 +12,10 @@
 
 		public string TemplateId { get; set; }
 
-		public Enemy(string name, EncounterTemplate tmp, int playerLevel)
+		public Enemy(EncounterTemplate tmp, int playerLevel)
 		{
-			Name = name;
+			//Name = name;
+			Name = tmp.TemplateName;
 
 			if (tmp.AdjustToPlayerLevel)
 			{

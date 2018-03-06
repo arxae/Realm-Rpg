@@ -68,7 +68,9 @@
 
 		public static T GetRandomEntry<T>(this List<T> list)
 		{
-			return list[Rng.Instance.Next(list.Count - 1)];
+			return list.Count == 1
+				? list[0]
+				: list[Rng.Instance.Next(list.Count - 1)];
 		}
 
 		public static T GetRandomEntry<T>(this T[] arr)

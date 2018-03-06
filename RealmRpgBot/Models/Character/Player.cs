@@ -43,7 +43,7 @@
 		public bool CurrentActionRepeat { get; set; }
 		public DateTime BusyUntil { get; set; }
 
-		public bool IsIdle { get => CurrentAction.Equals("idle", StringComparison.OrdinalIgnoreCase); }
+		public bool IsIdle => CurrentAction.Equals("idle", StringComparison.OrdinalIgnoreCase);
 
 		public Player() { }
 		public Player(DiscordUser user, DiscordGuild guild, string race)
@@ -93,6 +93,9 @@
 			}
 
 			if (hasLeveled == false || c == null) return;
+
+			HpMax = Realm.GetBaseHpForLevel(Level);
+			HpCurrent = HpMax;
 
 			var g = await Bot.RpgBot.Client.GetGuildAsync(GuildId);
 			var m = await g.GetMemberAsync(ulong.Parse(Id));
