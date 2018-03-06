@@ -1,7 +1,6 @@
 ﻿namespace RealmRpgBot
 {
 	using System;
-	using System.Linq;
 	using System.Threading.Tasks;
 
 	using DSharpPlus.CommandsNext;
@@ -12,17 +11,14 @@
 
 	public class ScriptRunner
 	{
-		public static ScriptRunner Get => ScriptRunnerInstance.Value;
-		static readonly Lazy<ScriptRunner> ScriptRunnerInstance = new Lazy<ScriptRunner>(() => new ScriptRunner());
-
-		readonly Script _lua;
-		readonly Serilog.ILogger _log;
+		Script _lua;
+		Serilog.ILogger _log;
 
 		CommandContext _ctx;
 		DiscordMessage _botReply;
 		Player _sourcePlayer;
 
-		private ScriptRunner()
+		public ScriptRunner(CommandContext c, DiscordMessage botReply)
 		{
 			_log = Serilog.Log.ForContext<ScriptRunner>();
 			_lua = new Script
@@ -30,29 +26,32 @@
 				Options = { DebugPrint = s => _log.Debug(s) }
 			};
 
-
+			// Register globals
 			_lua.Globals["Reply"] = (Action<string>)(async replyMsg => await DiscordReplyAsync(replyMsg));
 			_lua.Globals["SetMessage"] = (Action<string>)(async newMsg => await DiscordSetMessage(newMsg));
-
-			//lua.Globals["DeleteResponse"] = (Action<bool>)(async _ => await DiscordDeleteResponse());
 			_lua.Globals["DeleteResponse"] = (Action)(async () => await DiscordDeleteResponse());
-
-
-			_lua.Globals["HealPlayer"] = (Action<int>)(async (amt) => await HealPlayer(amt));
+			_lua.Globals["HealPlayer"] = (Action<int>)(async amt => await HealPlayer(amt));
 			_lua.Globals["FullHealPlayer"] = (Action)(async () => await HealPlayerToFull());
 			_lua.Globals["Rest"] = (Action)(async () => await PlaceHolder());
 
-			_log.Information($"ScriptRunner initialized with {_lua.Globals.Keys.Count()} global(s)");
-		}
+			// Register types
+			UserData.RegisterType<Player>();
+			UserData.RegisterType<AttributeBlock>();
+			UserData.RegisterType<TrainedSkill>();
 
-		public async Task PerformScriptAsync(CommandContext c, string script, string sourcePlayerId, DiscordMessage botReply)
-		{
 			_ctx = c;
 			_botReply = botReply;
 
+			_log.Debug("ScriptRunner initialized for {ursname} ({userid})", c.GetFullUserName(), c.User.Id);
+		}
+
+		public async Task PerformScriptAsync(string script)
+		{
 			using (var session = Db.DocStore.OpenSession())
 			{
-				_sourcePlayer = session.Load<Player>(sourcePlayerId);
+				_sourcePlayer = session.Load<Player>(_ctx.User.Id.ToString());
+
+				_lua.Globals["Player"] = _sourcePlayer;
 
 				await _lua.DoStringAsync(script);
 

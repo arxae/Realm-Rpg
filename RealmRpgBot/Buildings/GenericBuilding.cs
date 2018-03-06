@@ -80,10 +80,7 @@
 			string script = await new System.IO.StreamReader(attachment.Stream).ReadToEndAsync();
 
 			await playerRespondMsg.DeleteAsync();
-
-			await ScriptRunner.Get.PerformScriptAsync(c, script,
-				c.User.Id.ToString(),
-				playerRespondMsg);
+			await new ScriptRunner(c, playerRespondMsg).PerformScriptAsync(script);
 		}
 	}
 }

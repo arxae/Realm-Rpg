@@ -1,4 +1,7 @@
-﻿namespace RealmRpgBot.Bot.Commands
+﻿using Raven.Client.Documents.Attachments;
+using Raven.Client.Documents.Operations.Attachments;
+
+namespace RealmRpgBot.Bot.Commands
 {
 	using System.Threading.Tasks;
 
@@ -109,6 +112,28 @@
 		{
 			Realm.ClearSettingsCache();
 			await c.ConfirmMessage();
+		}
+
+		[Command("test")]
+		public async Task Test(CommandContext c)
+		{
+			using (var s = Db.DocStore.OpenAsyncSession())
+			{
+				var doc = await s.LoadAsync<Models.Setting>("test/testdoc");
+
+
+				//var attachment = await Db.DocStore.Operations.SendAsync(new GetAttachmentOperation(buildingActionId, "action.lua", AttachmentType.Document, null));
+				//string script = await new System.IO.StreamReader(attachment.Stream).ReadToEndAsync();
+
+				var att = await Db.DocStore.Operations.SendAsync(new GetAttachmentOperation("test/testdoc", "action.lua", AttachmentType.Document, null));
+				string script = await new System.IO.StreamReader(att.Stream).ReadToEndAsync();
+
+				var scriptR = new ScriptRunner(c, null);
+				await scriptR.PerformScriptAsync(script);
+
+
+
+			}
 		}
 	}
 }
