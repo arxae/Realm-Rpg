@@ -1,17 +1,16 @@
-# Realm
+# Realm - Discord RPG
+Rpg played completely in Discord. 
 
-Play a RPG inside your discord chanel.
+## Quick Start Notes:
+1. Setup RavenDB instance with a ```rpg``` and ```rpg_logs``` database
+2. Import the ```Rpg_Default_Data.ravendbdump``` file into the ```rpg``` database
+3. Modify ```Servers.txt``` to point to your RavenDb instance.
+4. Set a environmental variable called ```REALMBOT_KEY``` containing your own Discord bot key.
+5. Make sure a ```Realm Admin``` role exists on your server
+6. Start bot
 
-## Installation
-1. Create a RavenDB instance somewhere
-2. Create a *rpg* and *rpg_logs* database
-3. Import the Rpg_Default_data.ravendbdump file into a database
-4. Modify the Urls and Database property in Db.cs to point to the correct instance url and database (Put in config is todo)
-5. Set a *REALMBOT_KEY* user environmental variable containing your bot key.
-6. In discord, create a "Realm Admin" role (and assign it to yourself i needed)
-7. Start bot
+In case you use a secure RavenDb instance, generate a certificate with read/write rights to the ```rpg``` and ```rpg_logs``` database. Drop the .pfx file into the bot directory. The first .pfx file found will be used.
 
-Should you use a secured service. Generate a certificate with at least read/write rights to the *rpg* and *rpg_logs* databases. Drop this certificate into the output directory.
-The first *.pfx* certificate will be loaded.
+If your certificate requires a passkey, enter your password into a ```REALMBOT_CERT_KEY``` environmental variable.
 
-Should you use a password for your certificate, put it in a user environmental variable called *REALMBOT_CERT_KEY*
+To build the documentation, clone the repo and run the ```BuildDocs.ps1``` command. This will build the documentation and and serve it on localhost port 8081

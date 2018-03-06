@@ -3,7 +3,7 @@
 	using System;
 
 	/// <summary>
-	/// Definition for items/events that can be found on a certain location. See <seealso cref="Item"/> for the actual item definition
+	/// Definition for items/events that can be found on a certain location. See <seealso cref="RealmRpgBot.Models.Inventory.Item"/> for the actual item definition
 	/// </summary>
 	public class Perceptable
 	{

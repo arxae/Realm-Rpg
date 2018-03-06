@@ -1,0 +1,13 @@
+###############
+#    folder   #
+###############
+/**/DROP/
+/**/TEMP/
+/**/packages/
+/**/bin/
+/**/obj/
+_site
+.manifest
+
+#will be copied over when building docs
+index.md
