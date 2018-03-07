@@ -60,17 +60,25 @@
 		/// Travel to a location
 		/// </summary>
 		/// <param name="c"></param>
-		/// <param name="destinationName">The name of the destination</param>
+		/// <param name="destinations">The name of the destination. Can be split with ; to pass multiple locations.
+		/// Will stop at the final destination, or the last correct destination (in case of a incorrect destination name)</param>
 		/// <returns></returns>
-		[Command("travel"), Description("Travel to a specific location that is linked to the current location")]
-		public async Task Travel(CommandContext c,
-			[Description("Name of the destination"), RemainingText]
-			string destinationName)
+		[Command("travel")]
+		public async Task TravelMultiple(CommandContext c,
+			[Description("Travel to a specific location that is linked to the current location"), RemainingText] string destinations)
 		{
+			var dests = destinations.Split(';');
+			if (dests.Length == 0)
+			{
+				await c.RespondAsync($"Something went wrong while parsing the travel command (Error_DestinationLengthZero {destinations})");
+				await c.RejectMessage();
+				return;
+			}
+
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				var player = await session
-					.Include<Location>(loc => loc.Id)
+					.Include<Location>(l => l.Id)
 					.LoadAsync<Player>(c.User.Id.ToString());
 
 				if (player == null)
@@ -88,38 +96,41 @@
 					return;
 				}
 
-				var location = await session.LoadAsync<Location>(player.CurrentLocation);
-				if (location.LocationConnections == null || location.LocationConnections.Count == 0)
+				Serilog.Log.ForContext<GeneralActionCommands>().Debug("({u}) Checking path {p}", c.GetFullUserName(), dests.ExtendToString());
+
+				var loc = await session.LoadAsync<Location>(player.CurrentLocation);
+				bool arrivedWithIssue = false;
+				for (int i = 0; i < dests.Length; i++)
 				{
-					await c.RespondAsync(Constants.MSG_NO_EXITS);
-					await c.RejectMessage();
-					return;
+					var d = dests[i];
+					if (loc.LocationConnections.Contains(d, System.StringComparer.OrdinalIgnoreCase))
+					{
+						loc = await session.Query<Location>().FirstOrDefaultAsync(tl => tl.DisplayName == d);
+						Serilog.Log.ForContext<GeneralActionCommands>().Debug("({usr}) {x}/{y} found {a}", c.GetFullUserName(), i + 1, dests.Length, loc.Id);
+					}
+					else
+					{
+						Serilog.Log.ForContext<GeneralActionCommands>().Debug("({usr}) {x}/{y} not found {a}. Stopping", c.GetFullUserName(), i + 1, dests.Length, dests[i]);
+						arrivedWithIssue = true;
+						break;
+					}
 				}
 
-				if (location.LocationConnections.Contains(destinationName, System.StringComparer.OrdinalIgnoreCase) == false)
+				Serilog.Log.ForContext<GeneralActionCommands>().Debug("({usr}) End destination: {a}", c.GetFullUserName(), loc.DisplayName);
+
+				if (arrivedWithIssue)
 				{
-					await c.RespondAsync(Constants.MSG_INVALID_CONNECTION);
-					await c.RejectMessage();
-					return;
-				}
-
-				var dest = await session.Query<Location>().FirstOrDefaultAsync(tl => tl.DisplayName == destinationName);
-
-				if (dest != null)
-				{
-					player.CurrentLocation = dest.Id;
-					player.SetIdleAction();
-					await session.SaveChangesAsync();
-
-					await c.RespondAsync($"{c.User.Mention} has arrived in {dest.DisplayName}");
-					await c.ConfirmMessage();
+					await c.RespondAsync($"{c.User.Mention} got lost, but eventually found {loc.DisplayName}");
 				}
 				else
 				{
-					await c.RespondAsync($"{destinationName} is not a valid destination");
-					await c.RejectMessage();
+					await c.RespondAsync($"{c.User.Mention} arrived at {loc.DisplayName}");
 				}
+
+				player.CurrentLocation = loc.Id;
 			}
+
+			await c.ConfirmMessage();
 		}
 
 		[Command("enter"), Description("Enter a building")]

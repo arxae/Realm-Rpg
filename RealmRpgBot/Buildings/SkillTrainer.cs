@@ -29,7 +29,7 @@
 					.WithTitle(building.Name);
 
 				var description = new System.Text.StringBuilder();
-				description.AppendLine($"*\"{building.WelcomeMessage}\"");
+				description.AppendLine($"*\"{building.WelcomeMessage}\"*");
 
 				// Get skills
 				var skills = await session.LoadAsync<Skill>(building.Parameters.Where(p => p.Value.StartsWith("skills/")).Select(p => p.Value));
@@ -52,7 +52,7 @@
 
 				if (player.SkillPoints < 1)
 				{
-					skillMenuBuilder.WithFooter("Only showing buttons for skills you can purchase. For full descriptions, use the *.info skill <skillname>* command");
+					skillMenuBuilder.WithFooter("Only showing buttons for skills you can purchase. For full descriptions, use the \".info skill <skillname>\" command");
 				}
 
 				var msg = await c.RespondAsync(embed: skillMenuBuilder.Build());
