@@ -49,7 +49,7 @@
 				}
 
 				var location = await session.LoadAsync<Location>(player.CurrentLocation);
-				var locEmbed = location.GetLocationEmbed();
+				var locEmbed = location.GetLocationEmbed(player.FoundHiddenLocations);
 
 				await c.RespondAsync(c.User.Mention, embed: locEmbed);
 				await c.ConfirmMessage();
@@ -103,10 +103,27 @@
 				for (int i = 0; i < dests.Length; i++)
 				{
 					var d = dests[i];
-					if (loc.LocationConnections.Contains(d, System.StringComparer.OrdinalIgnoreCase))
+
+					if (loc.LocationConnections.Keys.Contains(d, System.StringComparer.OrdinalIgnoreCase))
 					{
 						loc = await session.Query<Location>().FirstOrDefaultAsync(tl => tl.DisplayName == d);
 						Serilog.Log.ForContext<GeneralActionCommands>().Debug("({usr}) {x}/{y} found {a}", c.GetFullUserName(), i + 1, dests.Length, loc.Id);
+					}
+					else if (loc.HiddenLocationConnections.Keys.Contains(d, System.StringComparer.OrdinalIgnoreCase))
+					{
+						// check if the player has the point
+						var hiddenLoc = loc.HiddenLocationConnections[loc.HiddenLocationConnections
+							.FirstOrDefault(l => l.Key.Equals(d, System.StringComparison.OrdinalIgnoreCase)).Key];
+						if (player.FoundHiddenLocations.Contains(hiddenLoc))
+						{
+							loc = await session.Query<Location>().FirstOrDefaultAsync(tl => tl.DisplayName == d);
+							Serilog.Log.ForContext<GeneralActionCommands>().Debug("({usr}) {x}/{y} found hidden {a}", c.GetFullUserName(), i + 1, dests.Length, loc.Id);
+						}
+						else
+						{
+							Serilog.Log.ForContext<GeneralActionCommands>().Debug("({usr}) {x}/{y} not found {a}. Stopping", c.GetFullUserName(), i + 1, dests.Length, dests[i]);
+							break;
+						}
 					}
 					else
 					{
@@ -118,7 +135,11 @@
 
 				Serilog.Log.ForContext<GeneralActionCommands>().Debug("({usr}) End destination: {a}", c.GetFullUserName(), loc.DisplayName);
 
-				if (arrivedWithIssue)
+				if (player.CurrentLocation == loc.Id)
+				{
+					await c.RespondAsync($"{c.User.Mention} couldn't find that exit");
+				}
+				else if (arrivedWithIssue)
 				{
 					await c.RespondAsync($"{c.User.Mention} got lost, but eventually found {loc.DisplayName}");
 				}
@@ -128,6 +149,7 @@
 				}
 
 				player.CurrentLocation = loc.Id;
+				await session.SaveChangesAsync();
 			}
 
 			await c.ConfirmMessage();
@@ -395,6 +417,7 @@
 				var encounterId = location.Encounters?.GetRandomEntry();
 				var encounter = await session.LoadAsync<Encounter>(encounterId);
 
+				// TODO: Put in a method somewhere else to make more concise
 				if (encounter.EncounterType == Encounter.EncounterTypes.Enemy)
 				{
 					var templates = (await session.LoadAsync<EncounterTemplate>(encounter.Templates)).Values

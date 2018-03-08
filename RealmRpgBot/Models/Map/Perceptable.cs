@@ -18,6 +18,7 @@
 		public enum PerceptableType
 		{
 			Item,
+			HiddenExit,
 			Event
 		}
 	}

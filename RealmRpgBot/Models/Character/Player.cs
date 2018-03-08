@@ -36,6 +36,7 @@
 
 		// Location
 		public string CurrentLocation { get; set; }
+		public List<string> FoundHiddenLocations { get; set; }
 
 		// Actions
 		public string CurrentAction { get; set; }
@@ -46,7 +47,7 @@
 		public bool IsIdle => CurrentAction.Equals("idle", StringComparison.OrdinalIgnoreCase);
 
 		public Player() { }
-		public Player(DiscordUser user, DiscordGuild guild, string race)
+		public Player(DiscordUser user, DiscordGuild guild, string race) : this()
 		{
 			Id = user.Id.ToString();
 			GuildId = guild.Id;
@@ -67,6 +68,7 @@
 			Skills = new List<TrainedSkill>();
 
 			CurrentLocation = Realm.GetSetting<string>("startinglocation");
+			FoundHiddenLocations = new List<string>();
 
 			CurrentAction = "Idle";
 			CurrentActionDisplay = "Idling";

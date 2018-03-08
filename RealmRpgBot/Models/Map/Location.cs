@@ -12,7 +12,8 @@
 		public string DisplayName { get; set; }
 		public string Description { get; set; }
 		public string SafetyRating { get; set; }
-		public List<string> LocationConnections { get; set; }
+		public Dictionary<string, string> LocationConnections { get; set; }
+		public Dictionary<string, string> HiddenLocationConnections { get; set; }
 		public List<Perceptable> Perceptables { get; set; }
 		public List<LocationInventoryItem> LocationInventory { get; set; }
 		public List<Building> Buildings { get; set; }
@@ -21,7 +22,8 @@
 
 		public Location()
 		{
-			LocationConnections = new List<string>();
+			LocationConnections = new Dictionary<string, string>();
+			HiddenLocationConnections = new Dictionary<string, string>();
 			Perceptables = new List<Perceptable>();
 			LocationInventory = new List<LocationInventoryItem>();
 			Buildings = new List<Building>();
@@ -29,7 +31,7 @@
 			Encounters = new List<string>();
 		}
 
-		public DiscordEmbed GetLocationEmbed()
+		public DiscordEmbed GetLocationEmbed(List<string> foundHiddenLocations = null)
 		{
 			var builder = new DiscordEmbedBuilder()
 				.WithTitle(DisplayName);
@@ -55,7 +57,22 @@
 			}
 
 			// Exits
-			builder.AddField("Exits", string.Join(", ", LocationConnections));
+			var exits = new List<string>();
+			if (LocationConnections.Keys.Count > 0)
+			{
+				exits.AddRange(LocationConnections.Keys);
+			}
+
+			// Include hidden exits (if found)
+			if (HiddenLocationConnections.Keys.Count > 0 && foundHiddenLocations != null)
+			{
+				var toInclude = HiddenLocationConnections
+					.Where(l => foundHiddenLocations.Contains(l.Value))
+					.Select(l => l.Key);
+				exits.AddRange(toInclude);
+			}
+
+			builder.AddField("Exits", string.Join(", ", exits));
 
 			// Location Inventory
 			if (LocationInventory?.Count > 0)

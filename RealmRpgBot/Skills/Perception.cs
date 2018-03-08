@@ -24,7 +24,7 @@
 					.Include<Item>(i => i.Id)
 					.LoadAsync<Location>(source.CurrentLocation);
 
-				if (location.Perceptables == null || location.Perceptables.Count == 0)
+				if (location.Perceptables?.Count == 0 && location.HiddenLocationConnections?.Count == 0)
 				{
 					await c.RespondAsync("Nothing to see here");
 					await c.ConfirmMessage();
@@ -32,12 +32,24 @@
 				}
 
 				var roll = Dice.Roll($"1d20+{trainedSkill.Rank}");
-				var foundPerceptables = location.Perceptables.Where(p => p.Difficulty <= roll).ToList();
+				var foundPerceptables = location.Perceptables?.Where(p => p.Difficulty <= roll).ToList();
 
 				// Select a random one
 				var perceptable = foundPerceptables.GetRandomEntry();
+				bool perceptablePerformed = false;
 
-				if (perceptable.Type == Perceptable.PerceptableType.Item)
+				if (perceptable.Type == Perceptable.PerceptableType.HiddenExit)
+				{
+					// Check if the player hasn't found the exit yet
+					if (source.FoundHiddenLocations.Contains(perceptable.DocId) == false)
+					{
+						source.FoundHiddenLocations.Add(perceptable.DocId);
+						await c.RespondAsync($"{c.User.Mention} found a hidden exit");
+						perceptablePerformed = true;
+					}
+				}
+
+				if (perceptable.Type == Perceptable.PerceptableType.Item && perceptablePerformed == false)
 				{
 					var item = await session.LoadAsync<Item>(perceptable.DocId);
 
@@ -65,8 +77,7 @@
 						};
 						location.LocationInventory.Add(inv);
 
-						await c.RespondAsync(
-							$"{c.User.Mention} uncovered {item.DisplayName} {uncoverVariations.GetRandomEntry()} (Roll {roll})");
+						await c.RespondAsync($"{c.User.Mention} uncovered {item.DisplayName} {uncoverVariations.GetRandomEntry()} (Roll {roll})");
 					}
 					else
 					{
@@ -87,6 +98,11 @@
 					}
 				}
 				//	else if (perceptable.Type == Perceptable.PerceptableType.Event) await ProcessPerceptableEvent(perceptable);
+
+				if (perceptablePerformed == false)
+				{
+					await c.RespondAsync($"{c.User.Mention} couldn't find anything at this place..this time");
+				}
 
 				if (session.Advanced.HasChanges)
 				{
