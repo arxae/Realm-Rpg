@@ -13,6 +13,13 @@
 	public static class Extensions
 	{
 		// Logging
+		/// <summary>
+		/// Logs a message to dsp logger
+		/// </summary>
+		/// <param name="c">The <see cref="CommandContext"/> of the issued command</param>
+		/// <param name="level">Severity of the log entry</param>
+		/// <param name="application">The application/context name</param>
+		/// <param name="message">The actual message</param>
 		static void Log(this CommandContext c, LogLevel level, string application, string message)
 		{
 			if (application == null)
@@ -23,23 +30,52 @@
 			c.Client.DebugLogger.LogMessage(level, application, message, DateTime.Now);
 		}
 
+		/// <summary>
+		/// Shorthand to log a critical message
+		/// </summary>
 		public static void LogCritical(this CommandContext c, string message, string application = null) => c.Log(LogLevel.Critical, application, message);
+
+		/// <summary>
+		/// Shorthand to log a debug message
+		/// </summary>
 		public static void LogDebug(this CommandContext c, string message, string application = null) => c.Log(LogLevel.Debug, application, message);
+
+		/// <summary>
+		/// Shorthand to log a information message
+		/// </summary>
 		public static void LogInfo(this CommandContext c, string message, string application = null) => c.Log(LogLevel.Info, application, message);
+
+		/// <summary>
+		/// Shorthand to log a warning message
+		/// </summary>
 		public static void LogWarning(this CommandContext c, string message, string application = null) => c.Log(LogLevel.Warning, application, message);
 
 		// Discord
-		public static string GetFullUsername(this DiscordUser user) => $"{user.Username}#{user.Discriminator}";
-		public static string GetFullUserName(this CommandContext c) => c.User.GetFullUsername();
-		//public static async Task ConfirmMessage(this CommandContext c) => await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_GREEN_CHECK));
-		//public static async Task RejectMessage(this CommandContext c) => await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_RED_CROSS));
+		/// <summary>
+		/// Gets the username#discriminator from a command issuer
+		/// </summary>
+		/// <param name="c"></param>
+		/// <returns>username#discriminator</returns>
+		public static string GetFullUserName(this CommandContext c) => $"{c.User.Username}#{c.User.Discriminator}";
 
+		/// <summary>
+		/// Assigns a message as confirmed (with optional message)
+		/// </summary>
+		/// <param name="c"></param>
+		/// <param name="message">(Optional) Provide a message that will be replied before the command message is marked as confirmed.</param>
+		/// <returns></returns>
 		public static async Task ConfirmMessage(this CommandContext c, string message = null)
 		{
 			if (message != null) { await c.RespondAsync(message); }
 			await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_GREEN_CHECK));
 		}
 
+		/// <summary>
+		/// Assigns a message as rejected (with optional message)
+		/// </summary>
+		/// <param name="c"></param>
+		/// <param name="message">(Optional) Provide a message that will be replied before the command message is marked as rejected.</param>
+		/// <returns></returns>
 		public static async Task RejectMessage(this CommandContext c, string message = null)
 		{
 			if (message != null) { await c.RespondAsync(message); }
@@ -47,6 +83,13 @@
 		}
 
 		// Misc
+		/// <summary>
+		/// Splits a string, but ignores the case when splitting on a word
+		/// </summary>
+		/// <param name="input">String to split</param>
+		/// <param name="splitChars">String(s) to split on</param>
+		/// <param name="trimSpaces">If true, splitted parts will automatically be splitted.</param>
+		/// <returns></returns>
 		public static List<string> SplitCaseIgnore(this string input, string[] splitChars, bool trimSpaces = false)
 		{
 			var result = new List<string>();
@@ -68,26 +111,49 @@
 				}
 			}
 
-			return trimSpaces == false
-				? result
-				: result.Select(s => s.Trim()).ToList();
+			return trimSpaces == false ? result : result.Select(s => s.Trim()).ToList();
 		}
 
+		/// <summary>
+		/// Replace a string, but ignore the case
+		/// </summary>
+		/// <param name="input">String where something has to be replaced</param>
+		/// <param name="oldStr">What to replace</param>
+		/// <param name="newStr">New string</param>
+		/// <returns></returns>
 		public static string ReplaceCaseInsensitive(this string input, string oldStr, string newStr)
 		{
 			return Regex.Replace(input, Regex.Escape(oldStr), newStr.Replace("$", "$$"), RegexOptions.IgnoreCase);
 		}
 
+		/// <summary>
+		/// Gets a random entry from a list
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="list">The source list</param>
+		/// <returns>A single random entry from the source list</returns>
 		public static T GetRandomEntry<T>(this List<T> list)
 		{
+			if (list.Count == 0) return default(T);
+
 			return list.Count == 1
 				? list[0]
 				: list[Rng.Instance.Next(list.Count - 1)];
 		}
 
+		/// <summary>
+		/// Gets a random entry from a array
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="arr">The source array</param>
+		/// <returns>A single random entry from the source array</returns>
 		public static T GetRandomEntry<T>(this T[] arr)
 		{
-			return arr[Rng.Instance.Next(arr.Length)];
+			if (arr.Length == 0) return default(T);
+
+			return arr.Length == 1
+				   ? arr[0]
+					: arr[Rng.Instance.Next(arr.Length)];
 		}
 
 		/// <summary>

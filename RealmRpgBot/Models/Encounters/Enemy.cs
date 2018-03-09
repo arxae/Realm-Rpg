@@ -33,8 +33,8 @@
 			if (tmp.AutoHp)
 			{
 				HpMax = Rng.Instance.Next(0, 100) > 50
-					? Realm.GetBaseHpForLevel(Level) + Rng.Instance.Next(0, tmp.HpVariance)
-					: Realm.GetBaseHpForLevel(Level) - Rng.Instance.Next(0, tmp.HpVariance);
+					? Rpg.GetBaseHpForLevel(Level) + Rng.Instance.Next(0, tmp.HpVariance)
+					: Rpg.GetBaseHpForLevel(Level) - Rng.Instance.Next(0, tmp.HpVariance);
 			}
 			else
 			{

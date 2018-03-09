@@ -3,15 +3,21 @@
 	using System;
 
 	using Raven.Client.Documents;
-
-	using JSON = Newtonsoft.Json.JsonConvert;
+	
 	using Certificate = System.Security.Cryptography.X509Certificates.X509Certificate2;
 
+	/// <summary>
+	/// Holds document store singleton
+	/// </summary>
 	public class Db
 	{
-		private static readonly Lazy<IDocumentStore> storeInstance = new Lazy<IDocumentStore>(CreateStore);
+		static readonly Lazy<IDocumentStore> storeInstance = new Lazy<IDocumentStore>(CreateStore);
 		public static IDocumentStore DocStore => storeInstance.Value;
 
+		/// <summary>
+		/// Sets up the document store
+		/// </summary>
+		/// <returns></returns>
 		static IDocumentStore CreateStore()
 		{
 			string cert = Realm.GetCertificate();

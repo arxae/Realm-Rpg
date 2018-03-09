@@ -181,6 +181,7 @@
     <Compile Include="Realm.cs" />
     <Compile Include="RealmMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rpg.cs" />
     <Compile Include="ScriptRunner.cs" />
     <Compile Include="Skills\GatherSkill.cs" />
     <Compile Include="Skills\ISkill.cs" />

@@ -33,8 +33,6 @@
 				await player.AddXpAsync(xpAmount, c);
 				await session.SaveChangesAsync();
 
-				await Realm.LogHistory(c.User.GetFullUsername(), mention.GetFullUsername(), c.Command.QualifiedName, xpAmount.ToString());
-
 				await c.ConfirmMessage();
 			}
 		}
@@ -57,8 +55,6 @@
 				var xpNeeded = player.XpNext - player.XpCurrent;
 				await player.AddXpAsync(xpNeeded, c);
 				await session.SaveChangesAsync();
-
-				await Realm.LogHistory(c.User.GetFullUsername(), mention.GetFullUsername(), c.Command.QualifiedName);
 			}
 
 			await c.ConfirmMessage();
@@ -96,8 +92,6 @@
 
 				var user = await c.Guild.GetMemberAsync(mention.Id);
 				await user.SendMessageAsync($"[REALM] You have been teleported to {location.DisplayName}");
-
-				await Realm.LogHistory(c.GetFullUserName(), mention.GetFullUsername(), c.Command.QualifiedName, $"{mention.GetFullUsername()} ({mention.Id})", locationName);
 			}
 
 			await c.ConfirmMessage();

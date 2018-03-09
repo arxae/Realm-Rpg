@@ -33,9 +33,6 @@
 			Log.Logger.Information("Deploying {n} indexes", indexCount);
 			Raven.Client.Documents.Indexes.IndexCreation.CreateIndexes(Assembly.GetExecutingAssembly(), Db.DocStore);
 
-			// Setup DB subscriptions
-			Realm.SetupDbSubscriptions();
-
 			// Setup scheduler
 			JobScheduler.Scheduler.Initialize();
 

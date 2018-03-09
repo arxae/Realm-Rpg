@@ -2,7 +2,10 @@
 {
     public class Enums
     {
-        public enum TargetType
+		/// <summary>
+		/// Discord types/mention types
+		/// </summary>
+        public enum DiscordTargetType
 		{
 			None,
 			User,

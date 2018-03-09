@@ -62,11 +62,11 @@
 			Class = Realm.GetSetting<string>("startingclass");
 			Attributes = new AttributeBlock(1);
 
-			HpMax = Realm.GetBaseHpForLevel(1);
+			HpMax = Rpg.GetBaseHpForLevel(1);
 			HpCurrent = HpMax;
 
 			XpCurrent = 0;
-			XpNext = Realm.GetNextXp(1);
+			XpNext = Rpg.GetNextXp(1);
 			Skills = new List<TrainedSkill>();
 
 			CurrentLocation = Realm.GetSetting<string>("startinglocation");
@@ -89,7 +89,7 @@
 				{
 					XpCurrent = XpCurrent - XpNext;
 					Level++;
-					XpNext = Realm.GetNextXp(Level);
+					XpNext = Rpg.GetNextXp(Level);
 
 					SkillPoints += Realm.GetSetting<int>("skillpointsperlevelup");
 					AttributePoints += Realm.GetSetting<int>("attributepointsperlevelup");
@@ -98,7 +98,7 @@
 
 			if (hasLeveled == false || c == null) return;
 
-			HpMax = Realm.GetBaseHpForLevel(Level);
+			HpMax = Rpg.GetBaseHpForLevel(Level);
 			HpCurrent = HpMax;
 
 			var g = await Bot.RpgBot.Client.GetGuildAsync(GuildId);

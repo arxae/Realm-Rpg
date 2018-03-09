@@ -8,12 +8,19 @@
 
 	using Models;
 
+	/// <summary>
+	/// This class is used to hold various methods in regards to system functionality (settings, cache, etc...)
+	/// </summary>
 	public class Realm
 	{
 		private static List<Type> _buildingImplementations;
 		private static List<Type> _skillImplementations;
 		private static readonly List<Setting> _settingsCache = new List<Setting>();
 
+		/// <summary>
+		/// Clears the cache entry for a specific setting
+		/// </summary>
+		/// <param name="key">The name of the setting.</param>
 		public static void ClearCacheForKey(string key)
 		{
 			if (key.StartsWith("settings/") == false) key = "settings/" + key;
@@ -25,33 +32,20 @@
 			_settingsCache.Remove(entry);
 		}
 
+		/// <summary>
+		/// Clear the entire settings cache
+		/// </summary>
 		public static void ClearSettingsCache()
 		{
 			Serilog.Log.ForContext<Realm>().Debug("Removing {n} cached settings", _settingsCache.Count);
 			_settingsCache.Clear();
 		}
-
-		public static Type FindType(string typeName)
-		{
-			try
-			{
-				var t = Type.GetType(typeName, true, true);
-				return t;
-			}
-			catch
-			{
-				return null;
-			}
-		}
-
-		public static int GetBaseHpForLevel(int currentLevel)
-		{
-			var increaseFactor = GetSetting<int>("hpincreasefactor");
-			var startinghp = GetSetting<int>("startinghp");
-
-			return (increaseFactor * currentLevel) * startinghp;
-		}
-
+		
+		/// <summary>
+		/// Gets a building implementation based on the name.
+		/// </summary>
+		/// <param name="implName">Name of the building implementation</param>
+		/// <returns>The <see cref="Type"/> of the implementation</returns>
 		public static Type GetBuildingImplementation(string implName)
 		{
 			if (_buildingImplementations == null)
@@ -69,6 +63,11 @@
 			return _buildingImplementations.FirstOrDefault(a => a.Name.Equals(implName, StringComparison.OrdinalIgnoreCase));
 		}
 
+		/// <summary>
+		/// Gets a skill implementation based on the name.
+		/// </summary>
+		/// <param name="implName">The name of the skill implementation</param>
+		/// <returns>The <see cref="Type"/> of the implmentation</returns>
 		public static Type GetSkillImplementation(string implName)
 		{
 			if (_skillImplementations == null)
@@ -84,6 +83,10 @@
 			return _skillImplementations.FirstOrDefault(a => a.Name.Equals(implName, StringComparison.OrdinalIgnoreCase));
 		}
 
+		/// <summary>
+		/// Gets all the server urls from the server config file (Servers.txt in the root folder)
+		/// </summary>
+		/// <returns>A array of server urls</returns>
 		public static string[] GetDbServerUrls()
 		{
 			if (File.Exists("Servers.txt") == false)
@@ -96,12 +99,12 @@
 			return File.ReadAllLines("Servers.txt");
 		}
 
-		public static int GetNextXp(int currentLevel)
-		{
-			int levelFactor = GetSetting<int>("levelfactor");
-			return levelFactor * (int)Math.Pow((currentLevel + 1), 2) + levelFactor * (currentLevel + 1);
-		}
-
+		/// <summary>
+		/// Gets a specific setting and cache it.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="key">Setting name (exlude the settings/ prefix)</param>
+		/// <returns>Value of the setting</returns>
 		public static T GetSetting<T>(string key)
 		{
 			if (key.StartsWith("settings/") == false) key = "settings/" + key;
@@ -136,16 +139,10 @@
 			}
 		}
 
-		public static void SetupDbSubscriptions()
-		{
-			// Invalidates settings cache when a setting changes
-			Db.DocStore.Subscriptions.GetSubscriptionWorker<Setting>("Settings Changed")
-				.Run(s =>
-				{
-					foreach (var setting in s.Items) ClearCacheForKey(setting.Id);
-				});
-		}
-
+		/// <summary>
+		/// Looks for the first .pfx file it finds in the root directory, and use that to connect to the database server.
+		/// </summary>
+		/// <returns>Filename of the certificate</returns>
 		public static string GetCertificate()
 		{
 			var l = Serilog.Log.ForContext<Realm>();
@@ -163,58 +160,46 @@
 			return files[0];
 		}
 
-		public static Enums.TargetType GetTargetTypeFromId(string id)
+		/// <summary>
+		/// Gets if the id is a discord user, channel or role
+		/// </summary>
+		/// <param name="mention">The mention (in string form)</param>
+		/// <returns>Enum value containing the type of the mention</returns>
+		public static Enums.DiscordTargetType GetTargetTypeFromMention(string mention)
 		{
-			if (id == null) return Enums.TargetType.None;
+			if (mention == null) return Enums.DiscordTargetType.None;
 
-			if (id.StartsWith("<@") && id.EndsWith(">")) return Enums.TargetType.User;
-			if (id.StartsWith("<#") && id.EndsWith(">")) return Enums.TargetType.Channel;
-			if (id.StartsWith("<@&") && id.EndsWith(">")) return Enums.TargetType.Role;
+			if (mention.StartsWith("<@") && mention.EndsWith(">")) return Enums.DiscordTargetType.User;
+			if (mention.StartsWith("<#") && mention.EndsWith(">")) return Enums.DiscordTargetType.Channel;
+			if (mention.StartsWith("<@&") && mention.EndsWith(">")) return Enums.DiscordTargetType.Role;
 
-			return Enums.TargetType.None;
+			return Enums.DiscordTargetType.None;
 		}
 
+		/// <summary>
+		/// Gets the id from a discord user, channel or role mention
+		/// </summary>
+		/// <param name="mention">The mention (in string form)</param>
+		/// <returns>The id witouth the mention characters</returns>
 		public static string GetIdFromMentionString(string mention)
 		{
 			string tmp;
-			switch (GetTargetTypeFromId(mention))
+			switch (GetTargetTypeFromMention(mention))
 			{
-				case Enums.TargetType.User:
+				case Enums.DiscordTargetType.User:
 					tmp = mention.Replace("<@", "");
 					tmp = tmp.Substring(0, tmp.LastIndexOf(">", StringComparison.OrdinalIgnoreCase));
 					return tmp;
-				case Enums.TargetType.Channel:
+				case Enums.DiscordTargetType.Channel:
 					tmp = mention.Replace("<#", "");
 					tmp = tmp.Substring(0, tmp.LastIndexOf(">", StringComparison.OrdinalIgnoreCase));
 					return tmp;
-				case Enums.TargetType.Role:
+				case Enums.DiscordTargetType.Role:
 					tmp = mention.Replace("<@&", "");
 					tmp = tmp.Substring(0, tmp.LastIndexOf(">", StringComparison.OrdinalIgnoreCase));
 					return tmp;
 				default:
 					return mention;
-			}
-		}
-
-		public static async Task LogHistory(string source, string target = null, string command = null, params string[] parameters)
-		{
-			await LogHistory(new DevHistory
-			{
-				Source = source,
-				Target = target,
-				Command = command,
-				Parameters = parameters
-			});
-		}
-
-		public static async Task LogHistory(DevHistory history)
-		{
-			if (GetSetting<bool>("keepdevcmdhistory") == false) return;
-
-			using (var session = Db.DocStore.OpenAsyncSession("rpg_logs"))
-			{
-				await session.StoreAsync(history);
-				await session.SaveChangesAsync();
 			}
 		}
 	}
