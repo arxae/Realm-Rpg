@@ -31,8 +31,20 @@
 		// Discord
 		public static string GetFullUsername(this DiscordUser user) => $"{user.Username}#{user.Discriminator}";
 		public static string GetFullUserName(this CommandContext c) => c.User.GetFullUsername();
-		public static async Task ConfirmMessage(this CommandContext c) => await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_GREEN_CHECK));
-		public static async Task RejectMessage(this CommandContext c) => await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_RED_CROSS));
+		//public static async Task ConfirmMessage(this CommandContext c) => await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_GREEN_CHECK));
+		//public static async Task RejectMessage(this CommandContext c) => await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_RED_CROSS));
+
+		public static async Task ConfirmMessage(this CommandContext c, string message = null)
+		{
+			if (message != null) { await c.RespondAsync(message); }
+			await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_GREEN_CHECK));
+		}
+
+		public static async Task RejectMessage(this CommandContext c, string message = null)
+		{
+			if (message != null) { await c.RespondAsync(message); }
+			await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_RED_CROSS));
+		}
 
 		// Misc
 		public static List<string> SplitCaseIgnore(this string input, string[] splitChars, bool trimSpaces = false)

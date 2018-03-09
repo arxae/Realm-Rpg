@@ -12,6 +12,7 @@
 		public string DisplayName { get; set; }
 		public string Description { get; set; }
 		public string SafetyRating { get; set; }
+		public int ExploresNeeded { get; set; }
 		public Dictionary<string, string> LocationConnections { get; set; }
 		public Dictionary<string, string> HiddenLocationConnections { get; set; }
 		public List<Perceptable> Perceptables { get; set; }
@@ -19,6 +20,7 @@
 		public List<Building> Buildings { get; set; }
 		public List<string> Resources { get; set; }
 		public List<string> Encounters { get; set; }
+		public List<string> FluffEvents { get; set; }
 
 		public Location()
 		{
@@ -31,7 +33,10 @@
 			Encounters = new List<string>();
 		}
 
-		public DiscordEmbed GetLocationEmbed(List<string> foundHiddenLocations = null)
+		public DiscordEmbed GetLocationEmbed(
+			List<string> foundHiddenLocations = null,
+			string entranceId = null,
+			int exploreCount = -1)
 		{
 			var builder = new DiscordEmbedBuilder()
 				.WithTitle(DisplayName);
@@ -60,7 +65,15 @@
 			var exits = new List<string>();
 			if (LocationConnections.Keys.Count > 0)
 			{
-				exits.AddRange(LocationConnections.Keys);
+				// Always show all exits for the starting location
+				if (exploreCount >= ExploresNeeded || Id == Realm.GetSetting<string>("startinglocation"))
+				{
+					exits.AddRange(LocationConnections.Keys);
+				}
+				else
+				{
+					exits.Add(LocationConnections.FirstOrDefault(l => l.Value.Equals(entranceId, System.StringComparison.OrdinalIgnoreCase)).Key);
+				}
 			}
 
 			// Include hidden exits (if found)

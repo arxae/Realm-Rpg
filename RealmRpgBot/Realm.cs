@@ -125,6 +125,11 @@
 					return default(T);
 				}
 
+				if (setting.Value.GetType() == typeof(Newtonsoft.Json.Linq.JArray))
+				{
+					setting.Value = ((Newtonsoft.Json.Linq.JArray)setting.Value).ToObject<T>();
+				}
+
 				_settingsCache.Add(setting);
 
 				return (T)Convert.ChangeType(setting.Value, typeof(T));

@@ -34,9 +34,11 @@
 		public int AttributePoints { get; set; }
 		public List<TrainedSkill> Skills { get; set; }
 
-		// Location
+		// Locations
+		public string PreviousLocation { get; set; }
 		public string CurrentLocation { get; set; }
 		public List<string> FoundHiddenLocations { get; set; }
+		public Dictionary<string, int> LocationExploreCounts { get; set; }
 
 		// Actions
 		public string CurrentAction { get; set; }

@@ -1,4 +1,6 @@
-﻿namespace RealmRpgBot.Bot.Commands
+﻿using System.Collections.Generic;
+
+namespace RealmRpgBot.Bot.Commands
 {
 	using System.Linq;
 	using System.Threading.Tasks;
@@ -48,8 +50,14 @@
 					return;
 				}
 
+				int exploreCounts = -1;
+				if (player.LocationExploreCounts.ContainsKey(player.CurrentLocation))
+				{
+					exploreCounts = player.LocationExploreCounts[player.CurrentLocation];
+				}
+
 				var location = await session.LoadAsync<Location>(player.CurrentLocation);
-				var locEmbed = location.GetLocationEmbed(player.FoundHiddenLocations);
+				var locEmbed = location.GetLocationEmbed(player.FoundHiddenLocations, player.PreviousLocation, exploreCounts);
 
 				await c.RespondAsync(c.User.Mention, embed: locEmbed);
 				await c.ConfirmMessage();
@@ -100,12 +108,14 @@
 
 				var loc = await session.LoadAsync<Location>(player.CurrentLocation);
 				bool arrivedWithIssue = false;
+				string previousLocation = player.CurrentLocation;
 				for (int i = 0; i < dests.Length; i++)
 				{
 					var d = dests[i];
 
 					if (loc.LocationConnections.Keys.Contains(d, System.StringComparer.OrdinalIgnoreCase))
 					{
+						previousLocation = loc.Id;
 						loc = await session.Query<Location>().FirstOrDefaultAsync(tl => tl.DisplayName == d);
 						Serilog.Log.ForContext<GeneralActionCommands>().Debug("({usr}) {x}/{y} found {a}", c.GetFullUserName(), i + 1, dests.Length, loc.Id);
 					}
@@ -116,6 +126,7 @@
 							.FirstOrDefault(l => l.Key.Equals(d, System.StringComparison.OrdinalIgnoreCase)).Key];
 						if (player.FoundHiddenLocations.Contains(hiddenLoc))
 						{
+							previousLocation = loc.Id;
 							loc = await session.Query<Location>().FirstOrDefaultAsync(tl => tl.DisplayName == d);
 							Serilog.Log.ForContext<GeneralActionCommands>().Debug("({usr}) {x}/{y} found hidden {a}", c.GetFullUserName(), i + 1, dests.Length, loc.Id);
 						}
@@ -148,7 +159,9 @@
 					await c.RespondAsync($"{c.User.Mention} arrived at {loc.DisplayName}");
 				}
 
+				player.PreviousLocation = previousLocation;
 				player.CurrentLocation = loc.Id;
+
 				await session.SaveChangesAsync();
 			}
 
@@ -408,89 +421,103 @@
 
 				if (location.Encounters == null || location.Encounters?.Count == 0)
 				{
-					// TODO: Generic events
-					await c.RespondAsync("Nothing to do here");
-					await c.ConfirmMessage();
-					return;
+					var fluffEvents = new List<string>();
+					fluffEvents.AddRange(location.FluffEvents);
+					fluffEvents.AddRange(Realm.GetSetting<string[]>("generic_fluff_events"));
+					await c.RespondAsync(fluffEvents.GetRandomEntry());
+				}
+				else
+				{
+					var encounterId = location.Encounters?.GetRandomEntry();
+					var encounter = await session.LoadAsync<Encounter>(encounterId);
+
+					// TODO: Put in a method somewhere else to make more concise
+					if (encounter?.EncounterType == Encounter.EncounterTypes.Enemy)
+					{
+						var templates = (await session.LoadAsync<EncounterTemplate>(encounter.Templates)).Values
+							.Where(t => t.LevelRangeMin >= player.Level && player.Level <= t.LevelRangeMin || t.AdjustToPlayerLevel)
+							.ToList();
+
+						if (templates.Count == 0)
+						{
+							await c.RespondAsync("Nothing to see here");
+							await c.ConfirmMessage();
+							return;
+						}
+
+						var template = templates.GetRandomEntry();
+
+						var enemy = new Enemy(template, player.Level);
+
+						var encounterEmbed = new DiscordEmbedBuilder()
+							.WithTitle($"Encounter with {enemy.Name}");
+
+						var body = new System.Text.StringBuilder();
+						body.AppendLine($"{c.User.Mention} has encountered a lvl{enemy.Level} {enemy.Name} with {enemy.HpCurrent}hp.");
+
+						var combat = new AutoBattle(player, enemy, c);
+						await combat.StartCombatAsync();
+
+						var result = await combat.GetCombatResultAsync();
+
+						string xpMsg = string.Empty;
+						switch (result.Outcome)
+						{
+							case CombatOutcome.Attacker:
+								{
+									var xpGain = enemy.Level; // TODO: propper xp calculation
+									await player.AddXpAsync(xpGain, c);
+									xpMsg = $"Gained {xpGain}xp";
+									break;
+								}
+							case CombatOutcome.Defender:
+								{
+									var xpLost = await player.SetFaintedAsync();
+									xpMsg = $"Lost {xpLost}xp.";
+									break;
+								}
+							case CombatOutcome.Tie:
+								{
+									var xpGain = enemy.Level; // TODO: propper xp calculation
+									await player.AddXpAsync(xpGain, c);
+									var xpLost = await player.SetFaintedAsync();
+									xpMsg = $"Gained {xpGain}xp, but lost {xpLost}xp.";
+									break;
+								}
+						}
+
+						encounterEmbed.WithFooter(xpMsg);
+
+						body.AppendLine();
+						body.AppendLine("*Last lines of Combat Log*");
+						body.AppendLine("*...*");
+
+						foreach (var line in combat.CombatLog.Skip(System.Math.Max(0, combat.CombatLog.Count - 3)))
+						{
+							body.AppendLine(line);
+						}
+
+						body.AppendLine();
+						body.AppendLine(result.Message);
+
+						encounterEmbed.WithDescription(body.ToString());
+
+						await player.SetActionAsync(Constants.ACTION_REST, "Recovering from combat", System.TimeSpan.FromMinutes(1));
+
+						await c.RespondAsync(embed: encounterEmbed.Build());
+					}
 				}
 
-				var encounterId = location.Encounters?.GetRandomEntry();
-				var encounter = await session.LoadAsync<Encounter>(encounterId);
-
-				// TODO: Put in a method somewhere else to make more concise
-				if (encounter.EncounterType == Encounter.EncounterTypes.Enemy)
+				if (player.LocationExploreCounts.ContainsKey(player.CurrentLocation) == false)
 				{
-					var templates = (await session.LoadAsync<EncounterTemplate>(encounter.Templates)).Values
-						.Where(t => t.LevelRangeMin >= player.Level && player.Level <= t.LevelRangeMin || t.AdjustToPlayerLevel)
-						.ToList();
+					player.LocationExploreCounts.Add(player.CurrentLocation, 0);
+				}
 
-					if (templates.Count == 0)
-					{
-						await c.RespondAsync("Nothing to see here");
-						await c.ConfirmMessage();
-						return;
-					}
+				player.LocationExploreCounts[player.CurrentLocation] += 1;
 
-					var template = templates.GetRandomEntry();
-
-					var enemy = new Enemy(template, player.Level);
-
-					var encounterEmbed = new DiscordEmbedBuilder()
-						.WithTitle($"Encounter with {enemy.Name}");
-
-					var body = new System.Text.StringBuilder();
-					body.AppendLine($"{c.User.Mention} has encountered a lvl{enemy.Level} {enemy.Name} with {enemy.HpCurrent}hp.");
-
-					var combat = new AutoBattle(player, enemy, c);
-					await combat.StartCombatAsync();
-
-					var result = await combat.GetCombatResultAsync();
-
-					string xpMsg = string.Empty;
-					switch (result.Outcome)
-					{
-						case CombatOutcome.Attacker:
-							{
-								var xpGain = enemy.Level; // TODO: propper xp calculation
-								await player.AddXpAsync(xpGain, c);
-								xpMsg = $"Gained {xpGain}xp";
-								break;
-							}
-						case CombatOutcome.Defender:
-							{
-								var xpLost = await player.SetFaintedAsync();
-								xpMsg = $"Lost {xpLost}xp.";
-								break;
-							}
-						case CombatOutcome.Tie:
-							{
-								var xpGain = enemy.Level; // TODO: propper xp calculation
-								await player.AddXpAsync(xpGain, c);
-								var xpLost = await player.SetFaintedAsync();
-								xpMsg = $"Gained {xpGain}xp, but lost {xpLost}xp.";
-								break;
-							}
-					}
-
-					encounterEmbed.WithFooter(xpMsg);
-
-					body.AppendLine();
-					body.AppendLine("*Last lines of Combat Log*");
-					body.AppendLine("*...*");
-
-					foreach (var line in combat.CombatLog.Skip(System.Math.Max(0, combat.CombatLog.Count - 3)))
-					{
-						body.AppendLine(line);
-					}
-
-					body.AppendLine();
-					body.AppendLine(result.Message);
-
-					encounterEmbed.WithDescription(body.ToString());
-
-					await player.SetActionAsync(Constants.ACTION_REST, "Recovering from combat", System.TimeSpan.FromMinutes(1));
-
-					await c.RespondAsync(embed: encounterEmbed.Build());
+				if (location.ExploresNeeded == player.LocationExploreCounts[player.CurrentLocation])
+				{
+					await c.RespondAsync($"{c.User.Mention} has discovered routes to new locations");
 				}
 
 				if (session.Advanced.HasChanges)

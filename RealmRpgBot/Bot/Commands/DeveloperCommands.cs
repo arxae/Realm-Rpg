@@ -1,7 +1,4 @@
-﻿using Raven.Client.Documents.Attachments;
-using Raven.Client.Documents.Operations.Attachments;
-
-namespace RealmRpgBot.Bot.Commands
+﻿namespace RealmRpgBot.Bot.Commands
 {
 	using System.Threading.Tasks;
 
@@ -11,7 +8,6 @@ namespace RealmRpgBot.Bot.Commands
 	using Raven.Client.Documents;
 
 	using Models.Character;
-	using Models.Encounters;
 	using Models.Map;
 
 	[Group("dev"), Description("Game administration commands"), RequireRoles(RoleCheckMode.Any, "Realm Admin")]
@@ -114,26 +110,79 @@ namespace RealmRpgBot.Bot.Commands
 			await c.ConfirmMessage();
 		}
 
-		[Command("test")]
-		public async Task Test(CommandContext c)
+		[Command("unlockexits"), Description("Unlocks all locations for a player on it's location)")]
+		public async Task UnlockExits(CommandContext c,
+			[Description("")] DiscordUser mention,
+			[Description("Also add hidden exits to user")] bool includeHidden = false)
 		{
-			using (var s = Db.DocStore.OpenAsyncSession())
+			using (var session = Db.DocStore.OpenAsyncSession())
 			{
-				var doc = await s.LoadAsync<Models.Setting>("test/testdoc");
+				var player = await session
+					.Include<Location>(lc => lc.Id)
+					.LoadAsync<Player>(mention.Id.ToString());
 
+				if (player == null)
+				{
+					await c.RejectMessage("That user is not part of the realm");
+					return;
+				}
 
-				//var attachment = await Db.DocStore.Operations.SendAsync(new GetAttachmentOperation(buildingActionId, "action.lua", AttachmentType.Document, null));
-				//string script = await new System.IO.StreamReader(attachment.Stream).ReadToEndAsync();
+				var location = await session.LoadAsync<Location>(player.CurrentLocation);
+				int unlocks = 0;
+				int hiddenUnlocks = 0;
+				// Regular Exits
+				if (player.LocationExploreCounts.ContainsKey(player.CurrentLocation) == false)
+				{
+					player.LocationExploreCounts.Add(player.CurrentLocation, location.ExploresNeeded);
+					unlocks += location.LocationConnections.Count;
+				}
+				else
+				{
+					if (player.LocationExploreCounts[player.CurrentLocation] < location.ExploresNeeded)
+					{
+						player.LocationExploreCounts[player.CurrentLocation] = location.ExploresNeeded;
+						unlocks += location.LocationConnections.Count;
+					}
+				}
 
-				var att = await Db.DocStore.Operations.SendAsync(new GetAttachmentOperation("test/testdoc", "action.lua", AttachmentType.Document, null));
-				string script = await new System.IO.StreamReader(att.Stream).ReadToEndAsync();
+				// Hidden Exits
+				if (includeHidden)
+				{
+					if (location.HiddenLocationConnections.Count > 0)
+					{
+						foreach (var l in location.HiddenLocationConnections.Values)
+						{
+							if (player.FoundHiddenLocations.Contains(l)) continue;
+							player.FoundHiddenLocations.Add(l);
+							unlocks++;
+							hiddenUnlocks++;
+						}
+					}
+				}
 
-				var scriptR = new ScriptRunner(c, null);
-				await scriptR.PerformScriptAsync(script);
+				var m = await c.Guild.GetMemberAsync(mention.Id);
+				if (unlocks + hiddenUnlocks > 0)
+				{
+					string message = $"[ADMIN] {unlocks} exits have been unlocked.";
+					if (hiddenUnlocks > 0)
+					{
+						message += $" Including {hiddenUnlocks}";
+					}
 
+					await m.SendMessageAsync(message);
+				}
+				else
+				{
+					await m.SendMessageAsync("[ADMIN] No additional exits have been unlocked for this location");
+				}
 
-
+				if (session.Advanced.HasChanges)
+				{
+					await session.SaveChangesAsync();
+				}
 			}
+
+			await c.ConfirmMessage();
 		}
 	}
 }
