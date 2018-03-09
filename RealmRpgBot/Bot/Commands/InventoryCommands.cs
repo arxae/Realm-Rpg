@@ -6,11 +6,11 @@
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.CommandsNext.Attributes;
 	using DSharpPlus.Entities;
-	
+
 	using Models.Character;
 	using Models.Inventory;
 
-	[Group("inv"), Description("Inventory Commands"), RequireRoles(RoleCheckMode.All, "Realm Player", "Realm Admin")]
+	[Group("inv"), Description("Inventory Commands"), RequireRoles(RoleCheckMode.Any, new[] { Constants.ROLE_PLAYER })]
 	public class InventoryCommands : RpgCommandBase
 	{
 		[Command("list"), Description("List your inventory")]
@@ -23,7 +23,7 @@
 					.LoadAsync<Player>(c.User.Id.ToString());
 				if (player == null)
 				{
-					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
+					await c.RespondAsync(Realm.GetMessage("user_not_registered"));
 					await c.RejectMessage();
 
 					return;
@@ -59,7 +59,7 @@
 					.LoadAsync<Player>(c.User.Id.ToString());
 				if (player == null)
 				{
-					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
+					await c.RespondAsync(Realm.GetMessage("user_not_registered"));
 					await c.RejectMessage();
 				}
 			}

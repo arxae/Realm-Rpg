@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
-	using System.Threading.Tasks;
 
 	using Models;
 
@@ -13,9 +12,9 @@
 	/// </summary>
 	public class Realm
 	{
-		private static List<Type> _buildingImplementations;
-		private static List<Type> _skillImplementations;
-		private static readonly List<Setting> _settingsCache = new List<Setting>();
+		static List<Type> _buildingImplementations;
+		static List<Type> _skillImplementations;
+		static readonly List<Setting> _settingsCache = new List<Setting>();
 
 		/// <summary>
 		/// Clears the cache entry for a specific setting
@@ -40,7 +39,7 @@
 			Serilog.Log.ForContext<Realm>().Debug("Removing {n} cached settings", _settingsCache.Count);
 			_settingsCache.Clear();
 		}
-		
+
 		/// <summary>
 		/// Gets a building implementation based on the name.
 		/// </summary>
@@ -132,11 +131,41 @@
 				{
 					setting.Value = ((Newtonsoft.Json.Linq.JArray)setting.Value).ToObject<T>();
 				}
+				else if (setting.Value.GetType() == typeof(Newtonsoft.Json.Linq.JObject))
+				{
+					setting.Value = ((Newtonsoft.Json.Linq.JObject)setting.Value).ToObject<T>();
+				}
 
 				_settingsCache.Add(setting);
 
 				return (T)Convert.ChangeType(setting.Value, typeof(T));
 			}
+		}
+
+		/// <summary>
+		/// Gets a specific message from the settings
+		/// </summary>
+		/// <param name="msgName">The name of the message</param>
+		/// <returns></returns>
+		public static string GetMessage(string msgName)
+		{
+			var setting = GetSetting<Dictionary<string, string>>("messages");
+			if (setting.ContainsKey(msgName)) return setting[msgName];
+			Serilog.Log.ForContext<Realm>().Error("Could not find message {msgname}", msgName);
+			return string.Empty;
+		}
+
+		/// <summary>
+		/// Gets a specific emoji name from the settings
+		/// </summary>
+		/// <param name="emojiName">The name of the emoji</param>
+		/// <returns></returns>
+		public static string GetEmoji(string emojiName)
+		{
+			var setting = GetSetting<Dictionary<string, string>>("emoji_list");
+			if (setting.ContainsKey(emojiName)) return setting[emojiName];
+			Serilog.Log.ForContext<Realm>().Error("Could not find emoji {ename}", emojiName);
+			return string.Empty;
 		}
 
 		/// <summary>

@@ -10,7 +10,7 @@
 	using Models.Character;
 	using Models.Map;
 
-	[Group("dev"), Description("Game administration commands"), RequireRoles(RoleCheckMode.Any, "Realm Admin")]
+	[Group("dev"), Description("Game administration commands"), RequireRoles(RoleCheckMode.All, new[] { Constants.ROLE_ADMIN })]
 	public class DeveloperCommands : RpgCommandBase
 	{
 		[Command("addxp"), Description("Add specified amount of xp to a player")]
@@ -20,11 +20,10 @@
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
-				// Get player
 				var player = await session.LoadAsync<Player>(mention.Id.ToString());
 				if (player == null)
 				{
-					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
+					await c.RespondAsync(Realm.GetMessage("user_not_registered"));
 					await c.RejectMessage();
 
 					return;
@@ -46,7 +45,7 @@
 				var player = await session.LoadAsync<Player>(mention.Id.ToString());
 				if (player == null)
 				{
-					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
+					await c.RespondAsync(Realm.GetMessage("user_not_registered"));
 					await c.RejectMessage();
 
 					return;
@@ -72,7 +71,7 @@
 					.LoadAsync<Player>(mention.Id.ToString());
 				if (player == null)
 				{
-					await c.RespondAsync(Constants.MSG_USER_NOT_REGISTERED);
+					await c.RespondAsync(Realm.GetMessage("user_not_registered"));
 					await c.RejectMessage();
 
 					return;

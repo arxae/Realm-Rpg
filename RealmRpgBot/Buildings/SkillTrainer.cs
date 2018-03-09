@@ -20,7 +20,7 @@
 
 				if (player == null)
 				{
-					await c.RespondAsync(Constants.MSG_NOT_REGISTERED);
+					await c.RespondAsync(Realm.GetMessage("not_registered"));
 					await c.RejectMessage();
 					return;
 				}

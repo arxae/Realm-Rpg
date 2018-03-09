@@ -1,6 +1,9 @@
-﻿namespace RealmRpgBot.Bot
+﻿using DSharpPlus.CommandsNext.Attributes;
+
+namespace RealmRpgBot.Bot
 {
 	using System;
+	using System.Linq;
 	using System.Threading.Tasks;
 
 	using DSharpPlus;
@@ -36,9 +39,37 @@
 
 			cmd.CommandErrored += (e) =>
 			{
-				Serilog.Log.ForContext<RpgBot>()
-					.Error(e.Exception, "Unhandled exception when executing command: {cmd}", e.Command.QualifiedName);
-				return Task.CompletedTask;
+				return Task.Run(async () =>
+				{
+					var checks = ((DSharpPlus.CommandsNext.Exceptions.ChecksFailedException)e.Exception).FailedChecks;
+					// Check if the error is due to missing role
+					if (checks.Any(x => x is RequireRolesAttribute))
+					{
+						using (var s = Db.DocStore.OpenAsyncSession())
+						{
+							var p = await s.LoadAsync<Models.Character.Player>(e.Context.User.Id.ToString());
+							if (p == null)
+							{
+								await e.Context.Member.SendMessageAsync(Realm.GetMessage("not_registered"));
+							}
+							else
+							{
+								var missingRoles = ((RequireRolesAttribute)checks
+										.FirstOrDefault(x => x is RequireRolesAttribute))
+									.RoleNames
+									.ExtendToString("", null, ", ", "");
+
+								await e.Context.Member.SendMessageAsync(string.Format(Realm.GetMessage("missing_roles"), missingRoles));
+							}
+						}
+
+						e.Handled = true;
+						return;
+					}
+
+					Serilog.Log.ForContext<RpgBot>()
+						.Error(e.Exception, "Unhandled exception when executing command: {cmd}", e.Command.QualifiedName);
+				});
 			};
 
 			// Interactivity

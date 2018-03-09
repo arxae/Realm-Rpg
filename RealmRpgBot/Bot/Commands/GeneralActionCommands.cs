@@ -18,7 +18,7 @@ namespace RealmRpgBot.Bot.Commands
 	/// <summary>
 	/// Various actions player can perform
 	/// </summary>
-	[RequireRoles(RoleCheckMode.All, "Realm Player", "Realm Admin")]
+	[RequireRoles(RoleCheckMode.Any, new[] { Constants.ROLE_PLAYER })]
 	public class GeneralActionCommands : RpgCommandBase
 	{
 		[Command("ping"), Aliases("p"), Description("Check bot responsiveness, replies with latency")]
@@ -44,7 +44,7 @@ namespace RealmRpgBot.Bot.Commands
 
 				if (player == null)
 				{
-					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_NOT_REGISTERED}");
+					await c.RespondAsync($"{c.User.Mention}, {Realm.GetMessage("not_registered")}");
 					await c.RejectMessage();
 
 					return;
@@ -91,7 +91,7 @@ namespace RealmRpgBot.Bot.Commands
 
 				if (player == null)
 				{
-					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_NOT_REGISTERED}");
+					await c.RespondAsync($"{c.User.Mention}, {Realm.GetMessage("not_registered")}");
 					await c.RejectMessage();
 
 					return;
@@ -99,7 +99,7 @@ namespace RealmRpgBot.Bot.Commands
 
 				if (player.IsIdle == false)
 				{
-					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_PLAYER_NOT_IDLE}: {player.CurrentActionDisplay}");
+					await c.RespondAsync(string.Format(Realm.GetMessage("player_not_idle"), c.User.Mention, player.CurrentActionDisplay));
 					await c.RejectMessage();
 					return;
 				}
@@ -181,7 +181,7 @@ namespace RealmRpgBot.Bot.Commands
 
 				if (player == null)
 				{
-					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_NOT_REGISTERED}");
+					await c.RespondAsync($"{c.User.Mention}, {Realm.GetMessage("not_registered")}");
 					await c.RejectMessage();
 
 					return;
@@ -189,7 +189,7 @@ namespace RealmRpgBot.Bot.Commands
 
 				if (player.IsIdle == false)
 				{
-					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_PLAYER_NOT_IDLE}: {player.CurrentActionDisplay}");
+					await c.RespondAsync(string.Format(Realm.GetMessage("player_not_idle"), c.User.Mention, player.CurrentActionDisplay));
 					await c.RejectMessage();
 					return;
 				}
@@ -278,14 +278,14 @@ namespace RealmRpgBot.Bot.Commands
 
 				if (player == null)
 				{
-					await c.RespondAsync(Constants.MSG_NOT_REGISTERED);
+					await c.RespondAsync(Realm.GetMessage("not_registered"));
 					await c.RejectMessage();
 					return;
 				}
 
 				if (player.AttributePoints < 1)
 				{
-					await c.RespondAsync(Constants.MSG_NOT_ENOUGH_ATTRIB_PTS);
+					await c.RespondAsync(Realm.GetMessage("not_enough_attrib_pts"));
 					await c.RejectMessage();
 					return;
 				}
@@ -396,7 +396,7 @@ namespace RealmRpgBot.Bot.Commands
 
 				if (player == null)
 				{
-					await c.RespondAsync(Constants.MSG_NOT_REGISTERED);
+					await c.RespondAsync(Realm.GetMessage("not_registered"));
 					await c.RejectMessage();
 					return;
 				}

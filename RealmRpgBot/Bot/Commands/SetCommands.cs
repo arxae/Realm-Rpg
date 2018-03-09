@@ -8,7 +8,7 @@
 
 	using Models.Character;
 
-	[Group("set"), RequireRoles(RoleCheckMode.All, "Realm Player", "Realm Admin")]
+	[Group("set"), RequireRoles(RoleCheckMode.Any, new[] { Constants.ROLE_PLAYER })]
 	public class SetCommands : RpgCommandBase
 	{
 		[Command("repeat"), Description("Repeat a action (if it allows it), until the setting is set back to off. Stopping an action automatically turns of repeat")]

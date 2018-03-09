@@ -67,7 +67,7 @@
 		public static async Task ConfirmMessage(this CommandContext c, string message = null)
 		{
 			if (message != null) { await c.RespondAsync(message); }
-			await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_GREEN_CHECK));
+			await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Realm.GetEmoji("confirm")));
 		}
 
 		/// <summary>
@@ -79,7 +79,7 @@
 		public static async Task RejectMessage(this CommandContext c, string message = null)
 		{
 			if (message != null) { await c.RespondAsync(message); }
-			await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.EMOJI_RED_CROSS));
+			await c.Message.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Realm.GetEmoji("reject")));
 		}
 
 		// Misc
@@ -176,20 +176,25 @@
 				elementStringifier = obj => obj.ToString();
 			}
 
-			string result = begin;
+			var result = new System.Text.StringBuilder(begin);
 			bool first = true;
 			foreach (var item in enumerable)
 			{
 				if (first)
+				{
 					first = false;
+				}
 				else
-					result += separator;
+				{
+					result.Append(separator);
+				}
 
-				result += elementStringifier(item);
+				result.Append(elementStringifier(item));
 			}
-			result += end;
 
-			return result;
+			result.Append(end);
+
+			return result.ToString();
 		}
 	}
 }

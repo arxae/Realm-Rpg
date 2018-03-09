@@ -12,7 +12,7 @@
 
 	[Group("skill"),
 		Description("Skill related commands"),
-		RequireRoles(RoleCheckMode.Any, "Realm Admin", "Realm Player")]
+		RequireRoles(RoleCheckMode.Any, new[] { Constants.ROLE_PLAYER })]
 	public class SkillCommands : RpgCommandBase
 	{
 		// Format: .skill use <skillname> on <othername>
@@ -28,14 +28,14 @@
 
 				if (player == null)
 				{
-					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_NOT_REGISTERED}");
+					await c.RespondAsync($"{c.User.Mention}, {Realm.GetMessage("not_registered")}");
 					await c.RejectMessage();
 					return;
 				}
 
 				if (player.IsIdle == false)
 				{
-					await c.RespondAsync($"{c.User.Mention}, {Constants.MSG_PLAYER_NOT_IDLE}: {player.CurrentActionDisplay}");
+					await c.RespondAsync(string.Format(Realm.GetMessage("player_not_idle"), c.User.Mention, player.CurrentActionDisplay));
 					await c.RejectMessage();
 					return;
 				}

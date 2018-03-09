@@ -61,7 +61,7 @@
 			await c.ConfirmMessage();
 		}
 
-		[Command("remove"), Description("Remove yourself")]
+		[Command("remove"), Description("Remove yourself"), RequireRoles(RoleCheckMode.All, new string[] { Constants.ROLE_PLAYER })]
 		public async Task RemovePlayer(CommandContext c)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
@@ -70,7 +70,7 @@
 
 				if (player == null)
 				{
-					await c.RespondAsync("You are not registered");
+					await c.RespondAsync(Realm.GetMessage("not_registered"));
 					await c.ConfirmMessage();
 					return;
 				}

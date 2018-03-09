@@ -42,7 +42,7 @@
 				.WithColor(DiscordColor.Blurple)
 				.WithTitle(building.Name)
 				.WithDescription(desc.ToString())
-				.WithFooter(Constants.MSG_BUILDING_TIMEOUT);
+				.WithFooter(Realm.GetMessage("building_timeout"));
 			var playerRespondMsg = await c.RespondAsync(embed: embed);
 
 			foreach (var act in actions)
