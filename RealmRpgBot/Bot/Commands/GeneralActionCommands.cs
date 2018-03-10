@@ -57,9 +57,26 @@ namespace RealmRpgBot.Bot.Commands
 				}
 
 				var location = await session.LoadAsync<Location>(player.CurrentLocation);
-				var locEmbed = location.GetLocationEmbed(player.FoundHiddenLocations, player.PreviousLocation, exploreCounts);
 
-				await c.RespondAsync(c.User.Mention, embed: locEmbed);
+				var playersOnLoc = await session.Query<Player>()
+					.Where(pl => pl.CurrentLocation == location.Id && pl.Id != c.User.Id.ToString())
+					.Select(pl => pl.Id)
+					.ToListAsync();
+
+				var locEmbed = new DiscordEmbedBuilder(location.GetLocationEmbed(player.FoundHiddenLocations, player.PreviousLocation, exploreCounts));
+
+				if (playersOnLoc.Count > 0)
+				{
+					var names = new List<string>();
+					foreach (var pl in playersOnLoc)
+					{
+						names.Add((await c.Guild.GetMemberAsync(ulong.Parse(pl))).DisplayName);
+					}
+
+					locEmbed.AddField("Also Here", string.Join(", ", names));
+				}
+
+				await c.RespondAsync(c.User.Mention, embed: locEmbed.Build());
 				await c.ConfirmMessage();
 			}
 		}

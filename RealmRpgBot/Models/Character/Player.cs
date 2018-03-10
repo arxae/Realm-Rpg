@@ -70,7 +70,9 @@
 			Skills = new List<TrainedSkill>();
 
 			CurrentLocation = Realm.GetSetting<string>("startinglocation");
+			PreviousLocation = CurrentLocation;
 			FoundHiddenLocations = new List<string>();
+			LocationExploreCounts = new Dictionary<string, int>();
 
 			CurrentAction = "Idle";
 			CurrentActionDisplay = "Idling";
