@@ -53,23 +53,52 @@
 			var skill = dbSession
 				.Include<Resource>(r => r.Id)
 				.Load<Skill>(skillName);
-			var resource = dbSession.Load<Resource>(skill.Parameters["ResourceType"]);
+			var resource = dbSession.Load<Resource>(skill.GetParameter<string>("ResourceType"));
 
-			var amt = Rng.Instance.Next(resource.HarvestQuantityMin, resource.HarvestQuantityMax);
+			// Check for main item
+			var amount = Rng.Instance.Next(resource.HarvestQuantityMin, resource.HarvestQuantityMax);
+			if (amount == 0) amount = 1;
 
-			if (amt <= 0) return;
+			// Check for additional resource
+			int additionalHarvesAmt = 0;
+			string additionalHarvestId = string.Empty;
+			string additionalHarvestName = string.Empty;
+			if (resource.AdditionalItems.Count > 0)
+			{
+				// Make roll
+				// TODO: Take harvest skill into account
+				var additionalItemRoll = Rng.Instance.Next(0, 100);
+				if (additionalItemRoll > resource.AdditionalItemsDificulty)
+				{
+					additionalHarvestId = resource.AdditionalItems.GetRandomEntry();
+					additionalHarvesAmt = Rng.Instance.Next(resource.AdditionalItemsQuantityMin, resource.AdditionalItemsQuantityMax);
+				}
 
-			_log.Debug("{player} received {item} x{amt}", p.Name, resource.HarvestedItemId, amt);
-			p.AddItemToInventory(resource.HarvestedItemId, amt);
+				additionalHarvestName = dbSession.Load<Models.Inventory.Item>(additionalHarvestId).DisplayName;
+			}
 
-			// Warn player
+			p.AddItemToInventory(resource.HarvestedItemId, amount);
+			if (additionalHarvesAmt > 0)
+			{
+				p.AddItemToInventory(additionalHarvestId, additionalHarvesAmt);
+			}
+
+			_log.Debug("{player} received {item} x{amt} (additional {addi} x{addamt}", p.Name, resource.HarvestedItemId, amount, additionalHarvestId, additionalHarvesAmt);
+
 			var discordMember = Bot.RpgBot.Client.GetGuildAsync(p.GuildId)
 				.GetAwaiter().GetResult()
 				.GetMemberAsync(ulong.Parse(p.Id))
 				.GetAwaiter().GetResult();
-			discordMember.SendMessageAsync($"Your {skill.DisplayName} action has completed and you gained {amt} pieces of {resource.DisplayName}")
+			discordMember.SendMessageAsync($"Your {skill.DisplayName} action has been completed and you gained {resource.DisplayName} x{amount}")
 				.GetAwaiter()
 				.GetResult();
+
+			if (additionalHarvesAmt > 0)
+			{
+				discordMember.SendMessageAsync($"Additionally, you gained {additionalHarvestName} x{additionalHarvesAmt}")
+					.GetAwaiter()
+					.GetResult();
+			}
 
 			// Set repeat
 			if (p.CurrentActionRepeat == false || skill.IsRepeatable == false)

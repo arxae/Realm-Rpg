@@ -14,6 +14,8 @@
 		public bool IsActivatable { get; set; }
 		public List<int> TrainingCosts { get; set; }
 		public List<int> CooldownRanks { get; set; }
-		public Dictionary<string, string> Parameters { get; set; }
+		public Dictionary<string, object> Parameters { get; set; }
+
+		public T GetParameter<T>(string name) => (T)System.Convert.ChangeType(Parameters[name], typeof(T));
 	}
 }

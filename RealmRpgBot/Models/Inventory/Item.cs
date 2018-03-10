@@ -7,5 +7,13 @@
     {
         public string Id { get; set; }
 		public string DisplayName { get; set; }
+		public ItemTypes Type { get; set; }
+
+	    public enum ItemTypes
+	    {
+			Junk,
+			Recipe,
+			Resource
+	    }
     }
 }

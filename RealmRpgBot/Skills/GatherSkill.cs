@@ -27,24 +27,21 @@
 					return;
 				}
 
-				string resourceType;
 				if (skill.Parameters.ContainsKey("ResourceType") == false)
 				{
 					await c.RespondAsync("An error occured. Contact one of the admins and (Error_NoResourceTypeForGatherSkill)");
 					await c.RejectMessage();
 					return;
 				}
-				else
-				{
-					resourceType = skill.Parameters["ResourceType"];
-				}
+
+				string resourceType = skill.GetParameter<string>("ResourceType");
 
 				// Check if there is a resource type like this on the location
 				if (location.Resources.Contains(resourceType))
 				{
 					source.BusyUntil = DateTime.Now.AddSeconds(skill.CooldownRanks[0]);
 					source.CurrentAction = $"gathering:{skill.Id}";
-					source.CurrentActionDisplay = skill.Parameters["ActionDisplayText"];
+					source.CurrentActionDisplay = skill.GetParameter<string>("ActionDisplayText");
 
 					DoCooldown = true;
 				}
