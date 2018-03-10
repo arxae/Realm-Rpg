@@ -46,23 +46,5 @@
 				await c.ConfirmMessage();
 			}
 		}
-
-		// TODO: Finish
-		[Command("discard"), Aliases("del"), Description("Remove an item from your inventory")]
-		public async Task DiscardItem(CommandContext c,
-			[Description("Item to remove"), RemainingText] string itemName)
-		{
-			using (var session = Db.DocStore.OpenAsyncSession())
-			{
-				var player = await session
-					.Include<Item>(i => i.Id)
-					.LoadAsync<Player>(c.User.Id.ToString());
-				if (player == null)
-				{
-					await c.RespondAsync(Realm.GetMessage("user_not_registered"));
-					await c.RejectMessage();
-				}
-			}
-		}
 	}
 }

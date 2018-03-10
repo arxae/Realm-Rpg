@@ -5,7 +5,7 @@
 	/// <summary>
 	/// Pseudo-random number generator that uses a Box-Muller transformation to generate random
 	/// numbers. Basically this will give you "random" numbers that distribute on a bell curve
-	/// centered on the proper range. TODO: Port this to use any random source.
+	/// centered on the proper range.
 	/// </summary>
 	public class GaussianRandom : IRandom
 	{

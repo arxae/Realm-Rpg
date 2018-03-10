@@ -54,6 +54,7 @@
 				.Include<Resource>(r => r.Id)
 				.Load<Skill>(skillName);
 			var resource = dbSession.Load<Resource>(skill.GetParameter<string>("ResourceType"));
+			var trainedSkillRank = p.Skills.FirstOrDefault(s => s.Id == skillName).Rank;
 
 			// Check for main item
 			var amount = Rng.Instance.Next(resource.HarvestQuantityMin, resource.HarvestQuantityMax);
@@ -66,8 +67,7 @@
 			if (resource.AdditionalItems.Count > 0)
 			{
 				// Make roll
-				// TODO: Take harvest skill into account
-				var additionalItemRoll = Rng.Instance.Next(0, 100);
+				var additionalItemRoll = Rng.Instance.Next(0, 100) + trainedSkillRank;
 				if (additionalItemRoll > resource.AdditionalItemsDificulty)
 				{
 					additionalHarvestId = resource.AdditionalItems.GetRandomEntry();
@@ -108,8 +108,7 @@
 			}
 
 			_log.Debug("Repeating {act} action for {pname} ({pid})", p.CurrentAction, p.Name, p.Id);
-			var trainedRank = p.Skills.FirstOrDefault(s => s.Id == skillName).Rank;
-			var cd = skill.CooldownRanks[trainedRank - 1];
+			var cd = skill.CooldownRanks[trainedSkillRank - 1];
 			p.SetActionAsync(p.CurrentAction, p.CurrentActionDisplay, TimeSpan.FromSeconds(cd)).GetAwaiter();
 		}
 

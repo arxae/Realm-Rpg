@@ -1,7 +1,7 @@
 ﻿namespace RealmRpgBot
 {
 	using System;
-	
+
 	/// <summary>
 	/// Utility methods for the rpg part of the game
 	/// </summary>
@@ -29,6 +29,22 @@
 		{
 			int levelFactor = Realm.GetSetting<int>("levelfactor");
 			return levelFactor * (int)Math.Pow((currentLevel + 1), 2) + levelFactor * (currentLevel + 1);
+		}
+
+		/// <summary>
+		/// Calculates the xp gained for a kill
+		/// </summary>
+		/// <param name="sourceLevel">The level of the (N)PC that will get the XP</param>
+		/// <param name="targetLevel">The level of the target that has been killed</param>
+		/// <returns></returns>
+		public static int GetGainedXpModifier(int sourceLevel, int targetLevel)
+		{
+			int minRange = sourceLevel - 5;
+			int maxRange = sourceLevel + 5;
+
+			if (targetLevel <= minRange || targetLevel >= maxRange) return 10;
+
+			return 100;
 		}
 	}
 }

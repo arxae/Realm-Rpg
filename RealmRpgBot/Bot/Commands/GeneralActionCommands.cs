@@ -482,7 +482,7 @@ namespace RealmRpgBot.Bot.Commands
 						{
 							case CombatOutcome.Attacker:
 								{
-									var xpGain = enemy.Level; // TODO: propper xp calculation
+									var xpGain = encounter.GetActualXpReward(player.Level, enemy.Level);
 									await player.AddXpAsync(xpGain, c);
 									xpMsg = $"Gained {xpGain}xp";
 									break;
@@ -495,7 +495,7 @@ namespace RealmRpgBot.Bot.Commands
 								}
 							case CombatOutcome.Tie:
 								{
-									var xpGain = enemy.Level; // TODO: propper xp calculation
+									var xpGain = encounter.GetActualXpReward(player.Level, enemy.Level);
 									await player.AddXpAsync(xpGain, c);
 									var xpLost = await player.SetFaintedAsync();
 									xpMsg = $"Gained {xpGain}xp, but lost {xpLost}xp.";

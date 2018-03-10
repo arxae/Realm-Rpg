@@ -1,4 +1,6 @@
-﻿namespace RealmRpgBot.Skills
+﻿using System.Collections.Generic;
+
+namespace RealmRpgBot.Skills
 {
 	using System;
 	using System.Linq;
@@ -53,16 +55,6 @@
 				{
 					var item = await session.LoadAsync<Item>(perceptable.DocId);
 
-					// TODO: Move to somewhere sensible/db
-					var uncoverVariations = new[]
-					{
-						"under some bushes",
-						"on the floor",
-						"in some boxes",
-						"under a bench",
-						"behind a frog"
-					};
-
 					var existingInventory = location.LocationInventory.FirstOrDefault(li => li.DocId == perceptable.DocId);
 					if (existingInventory == null)
 					{
@@ -77,7 +69,8 @@
 						};
 						location.LocationInventory.Add(inv);
 
-						await c.RespondAsync($"{c.User.Mention} uncovered {item.DisplayName} {uncoverVariations.GetRandomEntry()} (Roll {roll})");
+						var uncoverVariation = Realm.GetSetting<List<string>>("perception_uncover_variations").GetRandomEntry();
+						await c.RespondAsync($"{c.User.Mention} uncovered {item.DisplayName} {uncoverVariation} (Roll {roll})");
 					}
 					else
 					{
@@ -87,9 +80,8 @@
 							var percDecaySkillFactor = Realm.GetSetting<double>("skillperceptionrankfactor");
 							existingInventory.DecaysOn = existingInventory.DecaysOn +
 														 TimeSpan.FromMilliseconds(trainedSkill.Rank * percDecaySkillFactor * 10000);
-
-							await c.RespondAsync(
-								$"{c.User.Mention} found some more {item.DisplayName} {uncoverVariations.GetRandomEntry()} (Roll {roll})");
+							var uncoverVariation = Realm.GetSetting<List<string>>("perception_uncover_variations").GetRandomEntry();
+							await c.RespondAsync($"{c.User.Mention} found some more {item.DisplayName} {uncoverVariation} (Roll {roll})");
 						}
 						else
 						{

@@ -7,6 +7,8 @@
 		public string Id { get; set; }
 		public string TemplateName { get; set; }
 
+		public int XpReward { get; set; }
+
 		public bool AdjustToPlayerLevel { get; set; }
 		public int LevelRangeMin { get; set; }
 		public int LevelRangeMax { get; set; }
