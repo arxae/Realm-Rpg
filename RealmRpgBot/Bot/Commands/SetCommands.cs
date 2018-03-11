@@ -1,6 +1,5 @@
 ﻿namespace RealmRpgBot.Bot.Commands
 {
-	using System.Linq;
 	using System.Threading.Tasks;
 
 	using DSharpPlus.CommandsNext;

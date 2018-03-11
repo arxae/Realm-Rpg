@@ -1,6 +1,5 @@
 ﻿namespace RealmRpgBot.JobScheduler
 {
-	using System;
 	using FluentScheduler;
 
 	public class Scheduler

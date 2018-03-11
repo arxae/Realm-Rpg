@@ -111,17 +111,11 @@
 				var responseName = response.Emoji.GetDiscordName().ToLower();
 				var selectedSkill = skills.FirstOrDefault(s => s.ReactionIcon.Equals(responseName));
 				var skillEntry = player.Skills.FirstOrDefault(ls => ls.Id.Equals(selectedSkill?.Id));
-
-				int nextRankCost = 0;
+				
 				var currentPlayerSkill = player.Skills.FirstOrDefault(ps => ps.Id == selectedSkill.Id);
-				if (currentPlayerSkill != null)
-				{
-					nextRankCost = selectedSkill.TrainingCosts[currentPlayerSkill.Rank];
-				}
-				else
-				{
-					nextRankCost = selectedSkill.TrainingCosts[0];
-				}
+				int nextRankCost = currentPlayerSkill != null 
+					? selectedSkill.TrainingCosts[currentPlayerSkill.Rank] 
+					: selectedSkill.TrainingCosts[0];
 
 				if (nextRankCost > player.SkillPoints)
 				{
@@ -131,13 +125,13 @@
 
 				if (skillEntry == null)
 				{
-					player.Skills.Add(new TrainedSkill(selectedSkill?.Id, 1));
-					await c.RespondAsync($"{c.User.Mention} learned {selectedSkill?.DisplayName}");
+					player.Skills.Add(new TrainedSkill(selectedSkill.Id, 1));
+					await c.RespondAsync($"{c.User.Mention} learned {selectedSkill.DisplayName}");
 				}
 				else
 				{
 					skillEntry.Rank += 1;
-					await c.RespondAsync($"{c.User.Mention} {selectedSkill?.DisplayName} has increased to {skillEntry.Rank}");
+					await c.RespondAsync($"{c.User.Mention} {selectedSkill.DisplayName} has increased to {skillEntry.Rank}");
 				}
 
 				player.SkillPoints -= nextRankCost;
