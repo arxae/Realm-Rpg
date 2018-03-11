@@ -10,7 +10,7 @@
 	using Models.Character;
 	using Models.Map;
 
-	[Group("dev"), Description("Game administration commands"), RequireRoles(RoleCheckMode.All, new[] { Constants.ROLE_ADMIN })]
+	[Group("dev"), Description("Game administration commands"), RequireRoles(RoleCheckMode.Any, new[] { Constants.ROLE_ADMIN })]
 	public class DeveloperCommands : RpgCommandBase
 	{
 		[Command("addxp"), Description("Add specified amount of xp to a player")]

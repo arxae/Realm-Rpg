@@ -41,6 +41,8 @@ namespace RealmRpgBot.Bot
 			{
 				return Task.Run(async () =>
 				{
+					Serilog.Log.ForContext<RpgBot>().Error(e.Exception, "Exception happened");
+
 					var checks = ((DSharpPlus.CommandsNext.Exceptions.ChecksFailedException)e.Exception).FailedChecks;
 					// Check if the error is due to missing role
 					if (checks.Any(x => x is RequireRolesAttribute))

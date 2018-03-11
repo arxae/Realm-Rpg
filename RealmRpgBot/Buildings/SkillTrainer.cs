@@ -14,14 +14,14 @@
 	{
 		public async Task EnterBuilding(CommandContext c, Building building)
 		{
+			var log = Serilog.Log.ForContext<SkillTrainer>();
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				var player = await session.LoadAsync<Player>(c.User.Id.ToString());
 
 				if (player == null)
 				{
-					await c.RespondAsync(Realm.GetMessage("not_registered"));
-					await c.RejectMessage();
+					await c.RejectMessage(Realm.GetMessage("not_registered"));
 					return;
 				}
 
@@ -32,37 +32,69 @@
 				description.AppendLine($"*\"{building.WelcomeMessage}\"*");
 
 				// Get skills
-				var skills = await session.LoadAsync<Skill>(building.Parameters.Where(p => p.Value.StartsWith("skills/")).Select(p => p.Value));
-
-				foreach (var skill in skills.Values)
+				var skillsDict = await session.LoadAsync<Skill>(building.Parameters.Where(p => p.Value.StartsWith("skills/")).Select(p => p.Value));
+				var skills = skillsDict.Where(kv => kv.Value != null).Select(s => s.Value).ToList();
+				
+				foreach (var skill in skills)
 				{
-					if (skill.TrainingCosts == null) continue;
+					if (skill.TrainingCosts == null)
+					{
+						log.Error("No trainingcosts defined for {skillname} ({skillid}).", skill.DisplayName, skill.Id);
+						return;
+					}
 
 					var descriptionLines = skill.Description.Split('\n');
 					string descriptionText = descriptionLines[0];
-					if (descriptionLines.Length > 1)
+					if (descriptionLines.Length > 0) descriptionText += "...";
+
+					// Get the  player rank
+					int playerSkillRank = 0;
+					var playerSkill = player.Skills.FirstOrDefault(ps => ps.Id == skill.Id);
+					if (playerSkill != null)
 					{
-						descriptionText += "...";
+						playerSkillRank = playerSkill.Rank;
 					}
 
-					description.AppendLine($"{skill.ReactionIcon} {skill.DisplayName} (Cost: {skill.TrainingCosts[0]}) - *{descriptionText}*");
+					// Check if max rank
+					if (skill.TrainingCosts.Count == playerSkillRank)
+					{
+						description.AppendLine($"{skill.ReactionIcon} {skill.DisplayName} (Max skill) - *{descriptionText}*");
+						continue;
+					}
+
+					// Get next cost
+					int rankCost = skill.TrainingCosts[playerSkillRank];
+					description.AppendLine($"{skill.ReactionIcon} {skill.DisplayName} (Cost: {rankCost}) - *{descriptionText}*");
 				}
 
 				skillMenuBuilder.WithDescription(description.ToString());
 
 				if (player.SkillPoints < 1)
 				{
-					skillMenuBuilder.WithFooter("Only showing buttons for skills you can purchase. For full descriptions, use the \".info skill <skillname>\" command");
+					skillMenuBuilder.WithFooter("You do not have any skillpoints");
 				}
 
 				var msg = await c.RespondAsync(embed: skillMenuBuilder.Build());
 
 				if (player.SkillPoints < 1) return;
 
-				foreach (var skill in skills.Values)
+				foreach (var skill in skills)
 				{
 					if (skill.TrainingCosts == null) continue;
-					await msg.CreateReactionAsync(DiscordEmoji.FromName(c.Client, skill.ReactionIcon));
+
+					// Get the  player rank
+					int playerSkillRank = 0;
+					var playerSkill = player.Skills.FirstOrDefault(ps => ps.Id == skill.Id);
+					if (playerSkill != null)
+					{
+						playerSkillRank = playerSkill.Rank;
+					}
+
+					// Check if max rank
+					if (skill.TrainingCosts.Count != playerSkillRank)
+					{
+						await msg.CreateReactionAsync(DiscordEmoji.FromName(c.Client, skill.ReactionIcon));
+					}
 				}
 
 				var interact = c.Client.GetInteractivity();
@@ -77,23 +109,38 @@
 
 				await msg.DeleteAllReactionsAsync();
 				var responseName = response.Emoji.GetDiscordName().ToLower();
+				var selectedSkill = skills.FirstOrDefault(s => s.ReactionIcon.Equals(responseName));
+				var skillEntry = player.Skills.FirstOrDefault(ls => ls.Id.Equals(selectedSkill?.Id));
 
-				var selectedSkill = skills.FirstOrDefault(s => s.Value.ReactionIcon.Equals(responseName));
+				int nextRankCost = 0;
+				var currentPlayerSkill = player.Skills.FirstOrDefault(ps => ps.Id == selectedSkill.Id);
+				if (currentPlayerSkill != null)
+				{
+					nextRankCost = selectedSkill.TrainingCosts[currentPlayerSkill.Rank];
+				}
+				else
+				{
+					nextRankCost = selectedSkill.TrainingCosts[0];
+				}
 
-				var skillEntry = player.Skills.FirstOrDefault(ls => ls.Id.Equals(selectedSkill.Key));
+				if (nextRankCost > player.SkillPoints)
+				{
+					await c.RejectMessage(string.Format(Realm.GetMessage("next_skill_not_enough_skillpts"), selectedSkill.DisplayName));
+					return;
+				}
+
 				if (skillEntry == null)
 				{
-					player.Skills.Add(new TrainedSkill(selectedSkill.Key, 1));
-					await c.RespondAsync($"{c.User.Mention} learned {selectedSkill.Value.DisplayName}");
+					player.Skills.Add(new TrainedSkill(selectedSkill?.Id, 1));
+					await c.RespondAsync($"{c.User.Mention} learned {selectedSkill?.DisplayName}");
 				}
 				else
 				{
 					skillEntry.Rank += 1;
-					await c.RespondAsync($"{c.User.Mention} {selectedSkill.Value.DisplayName} has increased to {skillEntry.Rank}");
+					await c.RespondAsync($"{c.User.Mention} {selectedSkill?.DisplayName} has increased to {skillEntry.Rank}");
 				}
 
-				// TODO: Get correct level cost
-				player.SkillPoints -= selectedSkill.Value.TrainingCosts[0];
+				player.SkillPoints -= nextRankCost;
 
 				if (session.Advanced.HasChanged(player))
 				{

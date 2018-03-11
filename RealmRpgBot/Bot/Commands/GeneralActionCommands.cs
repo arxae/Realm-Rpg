@@ -8,9 +8,9 @@ namespace RealmRpgBot.Bot.Commands
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.CommandsNext.Attributes;
 	using DSharpPlus.Entities;
+	using DSharpPlus.Interactivity;
 	using Raven.Client.Documents;
 
-	using Combat;
 	using Models.Character;
 	using Models.Encounters;
 	using Models.Map;
@@ -285,9 +285,7 @@ namespace RealmRpgBot.Bot.Commands
 		}
 
 		[Command("train"), Description("Increase attributes (with attribute points)")]
-		public async Task TrainAttributes(CommandContext c,
-			[Description("Full or shorthand name of the attribute to train")]
-			string attributeName)
+		public async Task TrainAttributes(CommandContext c)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
@@ -307,55 +305,72 @@ namespace RealmRpgBot.Bot.Commands
 					return;
 				}
 
-				string trainingMessage;
-				switch (attributeName.ToLower())
+				var interact = c.Client.GetInteractivity();
+
+				var desc = new System.Text.StringBuilder();
+
+				desc.AppendLine($"{c.User.Mention}, what attribute do you want to train. Current level in parentheses");
+				desc.AppendLine($"STR: :muscle: ({player.Attributes.Strength})");
+				desc.AppendLine($"AGI: :hand_splayed: ({player.Attributes.Agility})");
+				desc.AppendLine($"STA: :heart: ({player.Attributes.Stamina})");
+				desc.AppendLine($"INT: :eye_in_speech_bubble: ({player.Attributes.Intelligence})");
+				desc.AppendLine($"WIS: :six_pointed_star: ({player.Attributes.Wisdom})");
+
+				var embed = new DiscordEmbedBuilder().WithDescription(desc.ToString());
+
+				var msg = await c.RespondAsync(embed: embed);
+				await msg.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.ATTRIB_STR)); // Strength
+				await msg.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.ATTRIB_AGI)); // Agility
+				await msg.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.ATTRIB_STA)); // Stamina
+				await msg.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.ATTRIB_INT)); // Intelligence
+				await msg.CreateReactionAsync(DiscordEmoji.FromName(c.Client, Constants.ATTRIB_WIS)); // Wisdom
+
+				var response = await interact.WaitForMessageReactionAsync(msg, c.User, System.TimeSpan.FromSeconds(10));
+
+				if (response == null)
 				{
-					case "str":
-					case "strength":
+					await c.RejectMessage();
+					await msg.DeleteAsync();
+					return;
+				}
+
+				await msg.DeleteAllReactionsAsync();
+				var responsename = response.Emoji.GetDiscordName().ToLower();
+
+				switch (responsename)
+				{
+					case Constants.ATTRIB_STR:
 						player.Attributes.Strength++;
 						player.AttributePoints--;
-						trainingMessage = " has been lifting, increasing his strength";
+						await c.RespondAsync(string.Format(Realm.GetMessage("train_str"), c.User.Mention));
 						break;
-
-					case "agi":
-					case "agility":
+					case Constants.ATTRIB_AGI:
 						player.Attributes.Agility++;
 						player.AttributePoints--;
-						trainingMessage = " has been doing flips and shit";
+						await c.RespondAsync(string.Format(Realm.GetMessage("train_agi"), c.User.Mention));
 						break;
-
-					case "sta":
-					case "stamina":
+					case Constants.ATTRIB_STA:
 						player.Attributes.Stamina++;
 						player.AttributePoints--;
-						trainingMessage = " has been roughed up in a place we do not talk about";
+						await c.RespondAsync(string.Format(Realm.GetMessage("train_sta"), c.User.Mention));
 						break;
-
-					case "int":
-					case "intelligence":
+					case Constants.ATTRIB_INT:
 						player.Attributes.Intelligence++;
 						player.AttributePoints--;
-						trainingMessage = " has been sleeping. With some books.";
+						await c.RespondAsync(string.Format(Realm.GetMessage("train_int"), c.User.Mention));
 						break;
-
-					case "wis":
-					case "wisdom":
+					case Constants.ATTRIB_WIS:
 						player.Attributes.Wisdom++;
 						player.AttributePoints--;
-						trainingMessage = " has been sitting on his knees in church. Praying for sure";
+						await c.RespondAsync(string.Format(Realm.GetMessage("train_wis"), c.User.Mention));
 						break;
-
-					default:
-						await c.RespondAsync(
-							$"Attribute *{attributeName}* is invalid. Valid options are: STR/Strength, AGI/Agility, STA/Stamina, INT/Intelligence, WIS/Wisdom");
-						await c.RejectMessage();
-						return;
 				}
+
+				await msg.DeleteAsync();
 
 				if (session.Advanced.HasChanged(player))
 				{
 					await session.SaveChangesAsync();
-					await c.RespondAsync($"{c.User.Mention} {trainingMessage}");
 				}
 			}
 
@@ -447,7 +462,7 @@ namespace RealmRpgBot.Bot.Commands
 				{
 					var encounterId = location.Encounters?.GetRandomEntry();
 					var encounter = await session.LoadAsync<Encounter>(encounterId);
-					
+
 					if (encounter?.EncounterType == Encounter.EncounterTypes.Enemy)
 					{
 						await encounter.DoBattleEncounter(session, c, player);
