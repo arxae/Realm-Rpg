@@ -74,8 +74,7 @@
 				}
 
 				// Check if player has that skill
-				var playerSkill = player.Skills
-					.FirstOrDefault(ps => ps.Id == skill.Id);
+				var playerSkill = player.Skills.FirstOrDefault(ps => ps.Id == skill.Id);
 
 				if (playerSkill == null)
 				{

@@ -4,5 +4,6 @@
 	{
 		public string Id { get; set; }
 		public string DisplayName { get; set; }
+		public AttributeBlock BonusStats { get; set; }
 	}
 }

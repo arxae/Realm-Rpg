@@ -77,7 +77,7 @@ namespace RealmRpgBot.Skills
 						if (existingInventory.Amount < perceptable.MaxPerceptable)
 						{
 							existingInventory.Amount += perceptable.Count;
-							var percDecaySkillFactor = Realm.GetSetting<double>("skillperceptionrankfactor");
+							var percDecaySkillFactor = Realm.GetSetting<double>("skill_perception_decay_factor");
 							existingInventory.DecaysOn = existingInventory.DecaysOn +
 														 TimeSpan.FromMilliseconds(trainedSkill.Rank * percDecaySkillFactor * 10000);
 							var uncoverVariation = Realm.GetSetting<List<string>>("perception_uncover_variations").GetRandomEntry();

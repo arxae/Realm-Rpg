@@ -45,14 +45,44 @@
 				var player = await session.LoadAsync<Player>(mention.Id.ToString());
 				if (player == null)
 				{
-					await c.RespondAsync(Realm.GetMessage("user_not_registered"));
-					await c.RejectMessage();
-
+					await c.RejectMessage(Realm.GetMessage("user_not_registered"));
 					return;
 				}
 
 				var xpNeeded = player.XpNext - player.XpCurrent;
 				await player.AddXpAsync(xpNeeded, c);
+				await session.SaveChangesAsync();
+			}
+
+			await c.ConfirmMessage();
+		}
+
+		[Command("addlevels"), Description("Add specified amount of levels to a character")]
+		public async Task AddLevels(CommandContext c,
+			[Description("")] DiscordUser mention,
+			[Description("")] int levels)
+		{
+			if (levels > 10)
+			{
+				await c.RejectMessage("Cannot add more then 10 levels at the same time");
+				return;
+			}
+
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var player = await session.LoadAsync<Player>(mention.Id.ToString());
+				if (player == null)
+				{
+					await c.RejectMessage(Realm.GetMessage("user_not_registered"));
+					return;
+				}
+
+				for (int i = 0; i < levels; i++)
+				{
+					var xpNeeded = player.XpNext - player.XpCurrent;
+					await player.AddXpAsync(xpNeeded, c);
+				}
+
 				await session.SaveChangesAsync();
 			}
 

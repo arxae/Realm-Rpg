@@ -5,6 +5,7 @@
 
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.CommandsNext.Attributes;
+	using Raven.Client.Documents;
 
 	using Models.Character;
 
@@ -25,22 +26,21 @@
 					return;
 				}
 
-				if (await session.Advanced.ExistsAsync("races/" + race) == false)
+				var raceInfo = await session.Query<Race>().FirstOrDefaultAsync(r => r.Id == $"races/{race}");
+				if (raceInfo == null)
 				{
-					await c.RespondAsync($"{c.Member.Mention} Race \"{race}\" is not valid. You can use *.info races* to get a list of races");
-					await c.RejectMessage();
-
+					await c.RejectMessage($"{c.Member.Mention} Race \"{race}\" is not valid. You can use *.info races* to get a list of races");
 					return;
 				}
 
-				var player = new Player(c.User, c.Guild, "races/" + race);
-
-				var skillIds = Realm.GetSetting<string>("startingskills");
-
-				foreach (var skillId in skillIds.Split(';'))
+				var charClass = await session.Query<CharacterClass>().FirstOrDefaultAsync(cls => cls.Id == Realm.GetSetting<string>("startingclass"));
+				if (charClass == null)
 				{
-					player.Skills.Add(new TrainedSkill(skillId, 1));
+					await c.RespondAsync($"Something went wrong while getting the startingclass (Error_StartingClassNull {Realm.GetSetting<string>("startingclass")})");
+					return;
 				}
+
+				var player = Realm.GetPlayerRegistration(c.Member, raceInfo, charClass);
 
 				await session.StoreAsync(player);
 				await session.SaveChangesAsync();
@@ -49,9 +49,7 @@
 			var role = c.Guild.Roles.FirstOrDefault(r => r.Name == "Realm Player");
 			if (role == null)
 			{
-				await c.RespondAsync("No Realm Player role exists, Contact an administrator");
-				await c.RejectMessage();
-
+				await c.RejectMessage(Realm.GetMessage("missing_player_role"));
 				return;
 			}
 

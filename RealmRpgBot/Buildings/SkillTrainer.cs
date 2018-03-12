@@ -34,7 +34,7 @@
 				// Get skills
 				var skillsDict = await session.LoadAsync<Skill>(building.Parameters.Where(p => p.Value.StartsWith("skills/")).Select(p => p.Value));
 				var skills = skillsDict.Where(kv => kv.Value != null).Select(s => s.Value).ToList();
-				
+
 				foreach (var skill in skills)
 				{
 					if (skill.TrainingCosts == null)
@@ -111,10 +111,10 @@
 				var responseName = response.Emoji.GetDiscordName().ToLower();
 				var selectedSkill = skills.FirstOrDefault(s => s.ReactionIcon.Equals(responseName));
 				var skillEntry = player.Skills.FirstOrDefault(ls => ls.Id.Equals(selectedSkill?.Id));
-				
+
 				var currentPlayerSkill = player.Skills.FirstOrDefault(ps => ps.Id == selectedSkill.Id);
-				int nextRankCost = currentPlayerSkill != null 
-					? selectedSkill.TrainingCosts[currentPlayerSkill.Rank] 
+				int nextRankCost = currentPlayerSkill != null
+					? selectedSkill.TrainingCosts[currentPlayerSkill.Rank]
 					: selectedSkill.TrainingCosts[0];
 
 				if (nextRankCost > player.SkillPoints)
@@ -125,7 +125,7 @@
 
 				if (skillEntry == null)
 				{
-					player.Skills.Add(new TrainedSkill(selectedSkill.Id, 1));
+					player.AddSkill(new TrainedSkill(selectedSkill.Id, 1));
 					await c.RespondAsync($"{c.User.Mention} learned {selectedSkill.DisplayName}");
 				}
 				else

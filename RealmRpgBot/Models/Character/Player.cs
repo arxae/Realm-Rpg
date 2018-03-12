@@ -5,8 +5,6 @@
 	using System.Linq;
 	using System.Threading.Tasks;
 
-	using DSharpPlus.Entities;
-
 	using Combat;
 
 	public class Player : IBattleParticipant
@@ -48,34 +46,12 @@
 
 		public bool IsIdle => CurrentAction.Equals("idle", StringComparison.OrdinalIgnoreCase);
 
-		public Player() { }
-		public Player(DiscordUser user, DiscordGuild guild, string race) : this()
+		public Player()
 		{
-			Id = user.Id.ToString();
-			GuildId = guild.Id;
-			Name = user.Username;
-
 			Inventory = new List<CharacterInventoryItem>();
-
-			Level = 1;
-			Race = race;
-			Class = Realm.GetSetting<string>("startingclass");
-			Attributes = new AttributeBlock(1);
-
-			HpMax = Rpg.GetBaseHpForLevel(1);
-			HpCurrent = HpMax;
-
-			XpCurrent = 0;
-			XpNext = Rpg.GetNextXp(1);
 			Skills = new List<TrainedSkill>();
-
-			CurrentLocation = Realm.GetSetting<string>("startinglocation");
-			PreviousLocation = CurrentLocation;
 			FoundHiddenLocations = new List<string>();
 			LocationExploreCounts = new Dictionary<string, int>();
-
-			CurrentAction = "Idle";
-			CurrentActionDisplay = "Idling";
 		}
 
 		public async Task AddXpAsync(int amount, DSharpPlus.CommandsNext.CommandContext c = null)
@@ -93,8 +69,8 @@
 					Level++;
 					XpNext = Rpg.GetNextXp(Level);
 
-					SkillPoints += Realm.GetSetting<int>("skillpointsperlevelup");
-					AttributePoints += Realm.GetSetting<int>("attributepointsperlevelup");
+					SkillPoints += Realm.GetSetting<int>("skill_points_per_levelup");
+					AttributePoints += Realm.GetSetting<int>("attribute_points_per_levelup");
 				}
 			}
 
@@ -163,6 +139,17 @@
 				HpCurrent += hp;
 				if (HpCurrent > HpMax) HpCurrent = HpMax;
 			});
+		}
+
+		public void AddSkill(TrainedSkill skill)
+		{
+			if (Skills.Any(s => s.Id == skill.Id) == false)
+			{
+				Skills.Add(skill);
+				return;
+			}
+
+			Serilog.Log.ForContext<Player>().Warning("Tried adding  {skill} to player {n} ({id}), but was already added", skill.Id, Name, Id);
 		}
 	}
 }

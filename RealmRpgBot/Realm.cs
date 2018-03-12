@@ -5,7 +5,10 @@
 	using System.IO;
 	using System.Linq;
 
+	using DSharpPlus.Entities;
+
 	using Models;
+	using Models.Character;
 
 	/// <summary>
 	/// This class is used to hold various methods in regards to system functionality (settings, cache, etc...)
@@ -230,6 +233,63 @@
 				default:
 					return mention;
 			}
+		}
+
+		/// <summary>
+		/// Prepares a player object to be stored into the database
+		/// </summary>
+		/// <param name="member">The discord member of the registering user</param>
+		/// <param name="raceInfo">The raceinformation that the user registered with</param>
+		/// <param name="classInfo">Class of the player</param>
+		/// <returns>Complete player object (do note, this is not directly saved)</returns>
+		public static Player GetPlayerRegistration(DiscordMember member, Race raceInfo, CharacterClass classInfo)
+		{
+			var p = new Player
+			{
+				Id = member.Id.ToString(),
+				GuildId = member.Guild.Id,
+				Name = member.Username,
+				Level = 1,
+				Race = raceInfo.Id,
+				Class = classInfo.Id,
+				Attributes = new AttributeBlock(1),
+				HpMax = Rpg.GetBaseHpForLevel(1),
+				XpCurrent = 0,
+				XpNext = Rpg.GetNextXp(1),
+				CurrentLocation = GetSetting<string>("startinglocation")
+			};
+
+			p.HpCurrent = p.HpMax;
+			p.PreviousLocation = p.CurrentLocation;
+
+			foreach (var skillId in raceInfo.StartingSkills)
+			{
+				var split = skillId.Split(':');
+				if (split.Length == 1)
+				{
+					p.AddSkill(new TrainedSkill(skillId, 1));
+					continue;
+				}
+
+				if (int.TryParse(split[1], out int rank) == false)
+				{
+					Serilog.Log.ForContext<Player>().Error("Error while parsing skill id {skill}", skillId);
+					continue;
+				}
+
+				p.AddSkill(new TrainedSkill(split[0], rank));
+			}
+
+			foreach (var skill in GetSetting<List<string>>("global_starting_skills"))
+			{
+				p.AddSkill(new TrainedSkill(skill, 1));
+			}
+
+			p.Attributes += raceInfo.BonusStats + classInfo.BonusStats;
+
+			p.SetIdleAction();
+
+			return p;
 		}
 	}
 }

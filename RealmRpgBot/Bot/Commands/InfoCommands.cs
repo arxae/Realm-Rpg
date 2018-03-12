@@ -17,7 +17,7 @@
 		{
 			using (var s = Db.DocStore.OpenAsyncSession())
 			{
-				var raceList = await s.Query<Race>("Races/All").ToListAsync();
+				var raceList = await s.Query<Race>().ToListAsync();
 
 				var sb = new System.Text.StringBuilder();
 				foreach (var r in raceList) sb.AppendLine($"- {r.DisplayName}");
@@ -32,6 +32,45 @@
 			}
 
 			await c.ConfirmMessage();
+		}
+
+		[Command("race"), Description("List available races")]
+		public async Task ListRaces(CommandContext c,
+			[Description("")] string raceName)
+		{
+			using (var s = Db.DocStore.OpenAsyncSession())
+			{
+				var race = await s.Query<Race>().FirstOrDefaultAsync(rn => rn.DisplayName == raceName);
+
+				if (race == null)
+				{
+					await c.RejectMessage("This is not a valid race");
+					return;
+				}
+
+				var raceInfo = new DiscordEmbedBuilder()
+					.WithTitle($"Race Information - {race.DisplayName}");
+
+				if (string.IsNullOrWhiteSpace(race.ImageUrl) == false)
+				{
+					raceInfo.WithImageUrl(race.ImageUrl);
+				}
+
+				var descr = new System.Text.StringBuilder(race.Description)
+					.AppendLine()
+					.AppendLine("**Stat Bonusses**")
+					.AppendLine($"{nameof(race.BonusStats.Strength)}: +{race.BonusStats.Strength}")
+					.AppendLine($"{nameof(race.BonusStats.Agility)}: +{race.BonusStats.Agility}")
+					.AppendLine($"{nameof(race.BonusStats.Stamina)}: +{race.BonusStats.Stamina}")
+					.AppendLine($"{nameof(race.BonusStats.Wisdom)}: +{race.BonusStats.Wisdom}")
+					.AppendLine($"{nameof(race.BonusStats.Intelligence)}: +{race.BonusStats.Intelligence}");
+
+				raceInfo.WithDescription(descr.ToString());
+
+				await c.RespondAsync(embed: raceInfo.Build());
+
+				await c.ConfirmMessage();
+			}
 		}
 
 		[Command("skill"), Description("Get information about a skill")]
