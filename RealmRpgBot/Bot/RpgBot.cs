@@ -76,7 +76,7 @@ namespace RealmRpgBot.Bot
 
 			// Interactivity
 			Client.UseInteractivity(new InteractivityConfiguration());
-
+			
 			l.Information("Bot initialized");
 		}
 

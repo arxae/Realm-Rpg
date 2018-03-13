@@ -126,7 +126,7 @@
 			await c.ConfirmMessage();
 		}
 
-		[Command("clearcache"), Aliases("cc"), Description("Clear the settings cache")]
+		[Command("clearcache"), Aliases("cc"), Description("Clear caches")]
 		public async Task ClearSettingsCache(CommandContext c)
 		{
 			Realm.ClearSettingsCache();

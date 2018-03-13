@@ -11,6 +11,7 @@
 	using Raven.Client.Documents.Attachments;
 	using Raven.Client.Documents.Operations.Attachments;
 
+	using Models.Character;
 	using Models.Map;
 
 	public class GenericBuilding : IBuilding
@@ -19,10 +20,13 @@
 		{
 			List<BuildingAction> actions = new List<BuildingAction>();
 
+			Player player;
 			using (var session = Db.DocStore.OpenAsyncSession())
 			{
 				var acts = await session.LoadAsync<BuildingAction>(building.Actions);
 				actions.AddRange(acts.Values);
+
+				player = await session.LoadAsync<Player>(c.User.Id.ToString());
 			}
 
 			var desc = new System.Text.StringBuilder();
@@ -71,16 +75,23 @@
 			if (buildingActionId == null)
 			{
 				Serilog.Log.ForContext<GenericBuilding>().Error("Could not find BuildingAction with id {response}", responseName);
-				await c.RespondAsync("An error occured. Contact one of the admins and (Error_BuildingActionReactionIdNotFound)");
-				await c.RejectMessage();
+				await c.RejectMessage("An error occured. Contact one of the admins (Error_BuildingActionReactionIdNotFound)");
 				return;
 			}
 
-			var attachment = await Db.DocStore.Operations.SendAsync(new GetAttachmentOperation(buildingActionId, "action.lua", AttachmentType.Document, null));
+			var attachment = await Db.DocStore.Operations.SendAsync(new GetAttachmentOperation(buildingActionId, "action.js", AttachmentType.Document, null));
+
+			if (attachment == null)
+			{
+				Serilog.Log.ForContext<GenericBuilding>().Error($"{building.Name} is missing an action script.");
+				await c.RejectMessage($"{building.Name} is missing an action script. Contact one of the admins (Error_BuildingActionScriptNotFound)");
+				return;
+			}
+
 			string script = await new System.IO.StreamReader(attachment.Stream).ReadToEndAsync();
 
 			await playerRespondMsg.DeleteAsync();
-			await new ScriptRunner(c, playerRespondMsg).PerformScriptAsync(script);
+			await Script.ScriptManager.RunDiscordScriptAsync(buildingActionId, script, c, player, playerRespondMsg);
 		}
 	}
 }
