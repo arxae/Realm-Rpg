@@ -10,7 +10,7 @@
 	using Models.Character;
 	using Models.Inventory;
 
-	[Group("inv"), Description("Inventory Commands"), RequireRoles(RoleCheckMode.Any, new[] { Constants.ROLE_PLAYER })]
+	[Group("inv"), Description("Inventory Commands"), RequireRoles(RoleCheckMode.Any, Constants.ROLE_PLAYER)]
 	public class InventoryCommands : RpgCommandBase
 	{
 		[Command("list"), Description("List your inventory")]

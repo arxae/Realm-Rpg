@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-
-namespace RealmRpgBot.Bot.Commands
+﻿namespace RealmRpgBot.Bot.Commands
 {
+	using System.Collections.Generic;
 	using System.Linq;
 	using System.Threading.Tasks;
 
@@ -18,7 +17,7 @@ namespace RealmRpgBot.Bot.Commands
 	/// <summary>
 	/// Various actions player can perform
 	/// </summary>
-	[RequireRoles(RoleCheckMode.Any, new[] { Constants.ROLE_PLAYER })]
+	[RequireRoles(RoleCheckMode.Any, Constants.ROLE_PLAYER)]
 	public class GeneralActionCommands : RpgCommandBase
 	{
 		[Command("ping"), Aliases("p"), Description("Check bot responsiveness, replies with latency")]

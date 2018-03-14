@@ -12,7 +12,7 @@
 
 	[Group("skill"),
 		Description("Skill related commands"),
-		RequireRoles(RoleCheckMode.Any, new[] { Constants.ROLE_PLAYER })]
+		RequireRoles(RoleCheckMode.Any, Constants.ROLE_PLAYER)]
 	public class SkillCommands : RpgCommandBase
 	{
 		// Format: .skill use <skillname> on <othername>
