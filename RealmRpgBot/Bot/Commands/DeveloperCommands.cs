@@ -1,4 +1,6 @@
-﻿namespace RealmRpgBot.Bot.Commands
+﻿using RealmRpgBot.Models.Inventory;
+
+namespace RealmRpgBot.Bot.Commands
 {
 	using System.Threading.Tasks;
 
@@ -198,6 +200,42 @@
 				{
 					await m.SendMessageAsync("[ADMIN] No additional exits have been unlocked for this location");
 				}
+
+				if (session.Advanced.HasChanges)
+				{
+					await session.SaveChangesAsync();
+				}
+			}
+
+			await c.ConfirmMessage();
+		}
+
+		[Command("giveitem"), Description("Give a player an item")]
+		public async Task GiveItem(CommandContext c,
+			[Description("User who will receive the item")] DiscordUser mention,
+			[Description("The itemid as it's referenced in the database")] string itemId,
+			[Description("Amount of the item to give. If ommited, defaults to 1")] int amount = 1)
+		{
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var player = await session
+					.Include<Item>(itm => itm.Id)
+					.LoadAsync<Player>(mention.Id.ToString());
+
+				if (player == null)
+				{
+					await c.RejectMessage(Realm.GetMessage("user_not_registered"));
+					return;
+				}
+
+				var item = await session.LoadAsync<Item>(itemId);
+				if (item == null)
+				{
+					await c.RejectMessage("No item with that ID exists");
+					return;
+				}
+
+				player.AddItemToInventory(item.Id, amount);
 
 				if (session.Advanced.HasChanges)
 				{

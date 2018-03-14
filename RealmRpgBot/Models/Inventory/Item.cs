@@ -13,7 +13,8 @@
 	    {
 			Junk,
 			Recipe,
-			Resource
+			Resource,
+			Consumable
 	    }
     }
 }
