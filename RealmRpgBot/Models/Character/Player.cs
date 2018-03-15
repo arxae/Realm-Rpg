@@ -6,6 +6,7 @@
 	using System.Threading.Tasks;
 
 	using Combat;
+	using Inventory;
 
 	public class Player : IBattleParticipant
 	{
@@ -20,6 +21,7 @@
 		public string Race { get; set; }
 		public AttributeBlock Attributes { get; set; }
 		public List<CharacterInventoryItem> Inventory { get; set; }
+		public EquipSet EquippedItems { get; set; }
 
 		// Vitality
 		public int HpMax { get; set; }
@@ -56,6 +58,7 @@
 			Skills = new List<TrainedSkill>();
 			FoundHiddenLocations = new List<string>();
 			LocationExploreCounts = new Dictionary<string, int>();
+			EquippedItems = new EquipSet();
 		}
 
 		public async Task AddXpAsync(int amount, DSharpPlus.CommandsNext.CommandContext c = null)

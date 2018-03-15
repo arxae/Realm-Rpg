@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RealmRpgBot.Models.Inventory
+﻿namespace RealmRpgBot.Models.Inventory
 {
 	using System.Collections.Generic;
 
@@ -13,16 +11,29 @@ namespace RealmRpgBot.Models.Inventory
 	{
 		public string Id { get; set; }
 		public string DisplayName { get; set; }
+		public string Description { get; set; }
 		public string UsedResponse { get; set; }
 		public ItemTypes Type { get; set; }
 		public List<ItemEffect> Effects { get; set; }
+
+		// Equipable Items
+		public string EquipmentSlot { get; set; }
+		public int AttackBonus { get; set; }
+		public int DefenceBonus { get; set; }
 
 		public enum ItemTypes
 		{
 			Junk,
 			Recipe,
 			Resource,
-			Consumable
+			Consumable,
+			Equipment
+		}
+
+		public enum EquipmentSlots
+		{
+			Head,
+			Chest
 		}
 
 		public void UseOnSelf(Player player)

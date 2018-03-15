@@ -38,7 +38,10 @@
 				{
 					var itemDef = items[item.ItemId];
 					if (itemDict.ContainsKey(itemDef.Type) == false) itemDict.Add(itemDef.Type, new List<string>());
-					itemDict[itemDef.Type].Add($"{itemDef.DisplayName} *x{item.Amount}*");
+
+					itemDict[itemDef.Type].Add(itemDef.Type == Item.ItemTypes.Equipment
+						? $"{itemDef.DisplayName} (*{itemDef.EquipmentSlot} - x{item.Amount}*)"
+						: $"{itemDef.DisplayName} *x{item.Amount}*");
 				}
 
 				var desc = new System.Text.StringBuilder();
@@ -57,6 +60,13 @@
 				await c.Member.SendMessageAsync(embed: embed.Build());
 				await c.ConfirmMessage();
 			}
+		}
+
+		[Command("discard"), Description("Discard an item")]
+		public async Task DiscardItem(CommandContext c,
+			[Description("The name of the item to discard"), RemainingText] string itemName)
+		{
+			await DiscardItem(c, 0, itemName);
 		}
 
 		[Command("discard"), Aliases("remove", "rm", "del"), Description("Discard an item")]
@@ -101,7 +111,6 @@
 			await c.ConfirmMessage("Item(s) have been discarded");
 		}
 
-		// TODO: Overload (use itemname) that just uses 1
 		[Command("use"), Description("Use an item")]
 		public async Task UseItem(CommandContext c,
 			[Description(""), RemainingText] string itemName)
@@ -158,6 +167,67 @@
 
 				await c.ConfirmMessage($"{c.User.Mention}, {itemDef.UsedResponse}");
 			}
+		}
+
+		[Command("equip"), Description("Equip a item. If something is already equipped in that slot it will be swapped")]
+		public async Task EquipItem(CommandContext c,
+			[Description("Name of the item to equip"), RemainingText] string itemName)
+		{
+			using (var session = Db.DocStore.OpenAsyncSession())
+			{
+				var player = await session
+					.Include<Item>(itm => itm.DisplayName)
+					.LoadAsync<Player>(c.User.Id.ToString());
+
+				var itemDef = await session.Query<Item>(collectionName: "Equipment")
+					.FirstOrDefaultAsync(i => i.DisplayName.Equals(itemName, System.StringComparison.OrdinalIgnoreCase));
+
+				if (itemDef == null)
+				{
+					await c.RejectMessage($"{c.User.Mention}, Incorrect item");
+					return;
+				}
+
+				session.Advanced.IgnoreChangesFor(itemDef);
+
+				var invEntry = player.Inventory.FirstOrDefault(pi => pi.ItemId == itemDef.Id);
+				if (invEntry == null)
+				{
+					await c.RejectMessage($"{c.User.Mention}, you don't have that item in your inventory");
+					return;
+				}
+
+				// Remove equipped item from inventory and put previous item back into inventory
+				if (invEntry.Amount == 1) // 1 item in inventory, remove the inventory
+				{
+					player.Inventory.RemoveAll(i => i.ItemId == invEntry.ItemId);
+				}
+				else if (invEntry.Amount > 1) // More then 1 item in inventory, reduce by 1
+				{
+					invEntry.Amount--;
+				}
+
+				// Check previous equipped item
+				string prevEquipedItem = player.EquippedItems.Head;
+				var prevInv = player.Inventory.FirstOrDefault(i => i.ItemId == prevEquipedItem);
+				if (prevInv == null) // Nothing in inventory, add entry
+				{
+					player.AddItemToInventory(prevEquipedItem, 1);
+				}
+				else if (prevInv.Amount > 0) // Already in inventory, increase by 1
+				{
+					prevInv.Amount++;
+				}
+
+				player.EquippedItems.EquipItem(itemDef.Id, itemDef.EquipmentSlot);
+
+				if (session.Advanced.HasChanges)
+				{
+					await session.SaveChangesAsync();
+				}
+			}
+
+			await c.ConfirmMessage();
 		}
 	}
 }
