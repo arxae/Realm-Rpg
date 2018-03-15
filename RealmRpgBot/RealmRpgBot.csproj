@@ -144,6 +144,7 @@
     <Compile Include="DiceNotation\Random\KnownSeriesRandom.cs" />
     <Compile Include="DiceNotation\Random\MaxRandom.cs" />
     <Compile Include="DiceNotation\Random\MinRandom.cs" />
+    <Compile Include="Models\Inventory\ItemEffect.cs" />
     <Compile Include="Rng.cs" />
     <Compile Include="DiceNotation\Terms\AddTerm.cs" />
     <Compile Include="DiceNotation\Terms\ConstantTerm.cs" />

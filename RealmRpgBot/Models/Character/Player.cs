@@ -25,6 +25,10 @@
 		public int HpMax { get; set; }
 		public int HpCurrent { get; set; }
 
+		// Mana
+		public int ManaMax { get; set; }
+		public int ManaCurrent { get; set; }
+
 		// Progression
 		public int XpCurrent { get; set; }
 		public int XpNext { get; set; }
@@ -138,6 +142,15 @@
 			{
 				HpCurrent += hp;
 				if (HpCurrent > HpMax) HpCurrent = HpMax;
+			});
+		}
+
+		public async Task RestoreMpAsync(int mp)
+		{
+			await Task.Run(() =>
+			{
+				ManaCurrent += mp;
+				if (ManaCurrent > ManaMax) ManaCurrent = ManaMax;
 			});
 		}
 

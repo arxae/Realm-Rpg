@@ -46,5 +46,19 @@
 
 			return 100;
 		}
+
+		/// <summary>
+		/// Calculates mana for a given level and int attribute
+		/// </summary>
+		/// <param name="level">The level of the (N)PC</param>
+		/// <param name="intelligence">Intelligence attribute of the (N)PC</param>
+		/// <returns>Max mana</returns>
+		public static int GetMaxMana(int level, int intelligence)
+		{
+			var baseMana = Realm.GetSetting<int>("base_mana");
+			var manaMult = Realm.GetSetting<float>("mana_int_mult");
+
+			return (int)Math.Round(baseMana + level + (intelligence * manaMult));
+		}
 	}
 }

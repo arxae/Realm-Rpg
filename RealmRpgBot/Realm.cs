@@ -254,12 +254,14 @@
 				Class = classInfo.Id,
 				Attributes = new AttributeBlock(1),
 				HpMax = Rpg.GetBaseHpForLevel(1),
+				ManaMax = Rpg.GetMaxMana(1, 1),
 				XpCurrent = 0,
 				XpNext = Rpg.GetNextXp(1),
 				CurrentLocation = GetSetting<string>("startinglocation")
 			};
 
 			p.HpCurrent = p.HpMax;
+			p.ManaCurrent = p.ManaMax;
 			p.PreviousLocation = p.CurrentLocation;
 
 			foreach (var skillId in raceInfo.StartingSkills)

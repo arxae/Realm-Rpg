@@ -104,6 +104,13 @@
 		// TODO: Overload (use itemname) that just uses 1
 		[Command("use"), Description("Use an item")]
 		public async Task UseItem(CommandContext c,
+			[Description(""), RemainingText] string itemName)
+		{
+			await UseItem(c, 1, itemName);
+		}
+
+		[Command("use"), Description("Use an item")]
+		public async Task UseItem(CommandContext c,
 			[Description("")] int amount,
 			[Description(""), RemainingText] string itemName)
 		{
@@ -128,6 +135,8 @@
 					return;
 				}
 
+				session.Advanced.IgnoreChangesFor(itemDef);
+
 				var invEntry = player.Inventory.FirstOrDefault(pi => pi.ItemId == itemDef.Id);
 				if (invEntry.Amount < amount)
 				{
@@ -135,11 +144,19 @@
 					return;
 				}
 
+				for (int i = 0; i < amount; i++)
+				{
+					itemDef.UseOnSelf(player);
+				}
+
 				invEntry.Amount -= amount;
 
-				if (session.Advanced.HasChanges) await session.SaveChangesAsync();
+				if (session.Advanced.HasChanges)
+				{
+					await session.SaveChangesAsync();
+				}
 
-				await c.RespondAsync("TODO: Item implementation, item was lost though");
+				await c.ConfirmMessage($"{c.User.Mention}, {itemDef.UsedResponse}");
 			}
 		}
 	}
