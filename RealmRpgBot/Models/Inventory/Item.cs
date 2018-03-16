@@ -33,7 +33,13 @@
 		public enum EquipmentSlots
 		{
 			Head,
-			Chest
+			Chest,
+			Hands,
+			Shoulders,
+			Pants,
+			Feet,
+			MainHand,
+			OffHand
 		}
 
 		public void UseOnSelf(Player player)

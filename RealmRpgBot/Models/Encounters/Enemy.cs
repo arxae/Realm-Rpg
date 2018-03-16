@@ -1,8 +1,7 @@
-﻿using RealmRpgBot.Models.Inventory;
-
-namespace RealmRpgBot.Models.Encounters
+﻿namespace RealmRpgBot.Models.Encounters
 {
 	using Character;
+	using Inventory;
 
 	public class Enemy : Combat.IBattleParticipant
 	{
@@ -11,12 +10,12 @@ namespace RealmRpgBot.Models.Encounters
 		public int HpMax { get; set; }
 		public int HpCurrent { get; set; }
 		public AttributeBlock Attributes { get; set; }
+		public EquipSet Equipment { get; set; }
 
 		public string TemplateId { get; set; }
 
 		public Enemy(EncounterTemplate tmp, int playerLevel)
 		{
-			//Name = name;
 			Name = tmp.TemplateName;
 
 			if (tmp.AdjustToPlayerLevel)
@@ -46,6 +45,7 @@ namespace RealmRpgBot.Models.Encounters
 			}
 
 			Attributes = tmp.Attributes ?? new AttributeBlock(1);
+			Equipment = tmp.Equipment ?? new EquipSet();
 
 			HpCurrent = HpMax;
 
@@ -54,8 +54,7 @@ namespace RealmRpgBot.Models.Encounters
 
 		public EquipmentBonusses GetEquipmentBonusses()
 		{
-			// TODO: Add equipment to templates
-			return new EquipmentBonusses(Attributes.Strength, Attributes.Stamina);
+			return new EquipmentBonusses(Attributes.Strength, Attributes.Stamina) + Equipment.GetCurrentBonusses();
 		}
 	}
 }

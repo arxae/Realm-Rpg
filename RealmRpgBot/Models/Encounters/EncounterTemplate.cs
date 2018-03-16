@@ -1,6 +1,7 @@
 ﻿namespace RealmRpgBot.Models.Encounters
 {
 	using Character;
+	using Inventory;
 
 	public class EncounterTemplate
 	{
@@ -18,6 +19,7 @@
 		public int HpVariance { get; set; }
 
 		public AttributeBlock Attributes { get; set; }
+		public EquipSet Equipment { get; set; }
 
 		public override string ToString() => $"{TemplateName} ({Id})";
 	}
