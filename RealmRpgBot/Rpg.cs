@@ -36,15 +36,16 @@
 		/// </summary>
 		/// <param name="sourceLevel">The level of the (N)PC that will get the XP</param>
 		/// <param name="targetLevel">The level of the target that has been killed</param>
-		/// <returns></returns>
-		public static int GetGainedXpModifier(int sourceLevel, int targetLevel)
+		/// <returns>Fraction of how much xp should be earned</returns>
+		public static double GetGainedXpModifier(int sourceLevel, int targetLevel)
 		{
 			int minRange = sourceLevel - 5;
 			int maxRange = sourceLevel + 5;
 
-			if (targetLevel <= minRange || targetLevel >= maxRange) return 10;
+			if (targetLevel <= minRange) return Realm.GetSetting<double>("settings/low_level_xp_penalty");
+			if (targetLevel >= maxRange) return Realm.GetSetting<double>("setting/high_level_xp_bonus");
 
-			return 100;
+			return 1;
 		}
 
 		/// <summary>

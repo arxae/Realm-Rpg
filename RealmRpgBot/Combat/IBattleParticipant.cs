@@ -1,4 +1,6 @@
-﻿namespace RealmRpgBot.Combat
+﻿using RealmRpgBot.Models.Inventory;
+
+namespace RealmRpgBot.Combat
 {
 	using Models.Character;
 
@@ -10,5 +12,7 @@
 		int HpCurrent { get; set; }
 
 		AttributeBlock Attributes { get; set; }
+
+		EquipmentBonusses GetEquipmentBonusses();
 	}
 }

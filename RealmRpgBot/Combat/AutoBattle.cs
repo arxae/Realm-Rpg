@@ -1,7 +1,6 @@
-﻿using System;
-
-namespace RealmRpgBot.Combat
+﻿namespace RealmRpgBot.Combat
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Threading.Tasks;
 
@@ -47,6 +46,8 @@ namespace RealmRpgBot.Combat
 		public async Task StartCombatAsync()
 		{
 			log.Debug("[ac:{id}] Start combat {a} vs {b}", CombatId, Attacker.Name, Defender.Name);
+			log.Debug("{name} bonus (a/d) {a}/{d}", Attacker.Name, Attacker.GetEquipmentBonusses().AttackBonus, Attacker.GetEquipmentBonusses().DefenceBonus);
+			log.Debug("{name} bonus (a/d) {a}/{d}", Defender.Name, Defender.GetEquipmentBonusses().AttackBonus, Defender.GetEquipmentBonusses().DefenceBonus);
 
 			while (Attacker.HpCurrent > 0 && Defender.HpCurrent > 0)
 			{
@@ -73,8 +74,13 @@ namespace RealmRpgBot.Combat
 				// Issue attacks
 				// TODO: Players: Allow to set when to heal etc..
 				// TODO: Monsters: Heal when < x% hp (have setting to be able to heal in EncounterTemplate)
-				AttackerAttacks.Add(new Attack("Attacker Attack", Attacker.Attributes.Strength + DiceNotation.Dice.Roll("1d6"), Attack.DamageTypes.Physical, 1));
-				DefenderAttacks.Add(new Attack("Defender Attack", Defender.Attributes.Strength + DiceNotation.Dice.Roll("1d6"), Attack.DamageTypes.Physical, 1));
+				AttackerAttacks.Add(new Attack($"{Attacker.Name} sword strike",
+					Attacker.GetEquipmentBonusses().AttackBonus + DiceNotation.Dice.Roll("1d6"),
+					Attack.DamageTypes.Physical, 1));
+
+				DefenderAttacks.Add(new Attack($"{Defender.Name} claw strike",
+					Defender.GetEquipmentBonusses().AttackBonus + DiceNotation.Dice.Roll("1d6"),
+					Attack.DamageTypes.Physical, 1));
 
 				// Execute all attacks with duration > 1
 

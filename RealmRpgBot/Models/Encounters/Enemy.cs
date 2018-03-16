@@ -1,4 +1,6 @@
-﻿namespace RealmRpgBot.Models.Encounters
+﻿using RealmRpgBot.Models.Inventory;
+
+namespace RealmRpgBot.Models.Encounters
 {
 	using Character;
 
@@ -48,6 +50,12 @@
 			HpCurrent = HpMax;
 
 			TemplateId = tmp.Id;
+		}
+
+		public EquipmentBonusses GetEquipmentBonusses()
+		{
+			// TODO: Add equipment to templates
+			return new EquipmentBonusses(Attributes.Strength, Attributes.Stamina);
 		}
 	}
 }

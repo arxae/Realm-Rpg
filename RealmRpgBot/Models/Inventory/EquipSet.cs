@@ -24,5 +24,31 @@
 					break;
 			}
 		}
+
+		public EquipmentBonusses GetCurrentBonusses()
+		{
+			using (var session = Db.DocStore.OpenSession())
+			{
+				int att = 0;
+				int def = 0;
+
+				var head = session.Load<Item>(Head);
+				var chest = session.Load<Item>(Chest);
+
+				if (head != null)
+				{
+					att += head.AttackBonus;
+					def += head.DefenceBonus;
+				}
+
+				if (chest != null)
+				{
+					att += head.AttackBonus;
+					def += head.DefenceBonus;
+				}
+
+				return new EquipmentBonusses(att, def);
+			}
+		}
 	}
 }

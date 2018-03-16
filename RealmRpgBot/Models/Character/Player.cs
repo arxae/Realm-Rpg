@@ -167,5 +167,13 @@
 
 			Serilog.Log.ForContext<Player>().Warning("Tried adding  {skill} to player {n} ({id}), but was already added", skill.Id, Name, Id);
 		}
+
+		public EquipmentBonusses GetEquipmentBonusses()
+		{
+			var eqBonus = EquippedItems.GetCurrentBonusses();
+			return new EquipmentBonusses(
+				Attributes.Strength + eqBonus.AttackBonus,
+				Attributes.Stamina + eqBonus.DefenceBonus);
+		}
 	}
 }

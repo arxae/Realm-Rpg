@@ -19,7 +19,10 @@
 		public EncounterTypes EncounterType { get; set; }
 		public int XpReward { get; set; }
 
-		public int GetActualXpReward(int playerLevel, int enemyLevel) => XpReward / 100 * Rpg.GetGainedXpModifier(playerLevel, enemyLevel);
+		public int GetActualXpReward(int playerLevel, int enemyLevel)
+		{
+			return (int)System.Math.Round(XpReward * Rpg.GetGainedXpModifier(playerLevel, enemyLevel));
+		}
 
 		/// <summary>
 		/// Do automatic battle encounter
