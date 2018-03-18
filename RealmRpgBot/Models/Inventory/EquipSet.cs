@@ -67,7 +67,7 @@
 				var ohand = session.Load<Item>(OffHand);
 
 				if (head != null) { att += head.AttackBonus; def += head.DefenceBonus; }
-				if (chest != null) { att += head.AttackBonus; def += head.DefenceBonus; }
+				if (chest != null) { att += chest.AttackBonus; def += chest.DefenceBonus; }
 				if (hands != null) { att += hands.AttackBonus; def += hands.DefenceBonus; }
 				if (shoulders != null) { att += shoulders.AttackBonus; def += shoulders.DefenceBonus; }
 				if (pants != null) { att += pants.AttackBonus; def += pants.DefenceBonus; }

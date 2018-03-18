@@ -108,7 +108,7 @@
 
 		public enum EncounterTypes
 		{
-			Enemy
+			Battle
 		}
 	}
 }

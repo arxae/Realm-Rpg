@@ -14,7 +14,9 @@
 		public Attack(string name, int amount, DamageTypes dmgType, int duration)
 		{
 			Name = name;
-			DamageAmount = amount;
+			DamageAmount = amount < 0
+				? 0
+				: amount;
 			DamageType = dmgType;
 			Duration = duration;
 

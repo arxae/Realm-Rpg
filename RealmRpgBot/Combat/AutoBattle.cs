@@ -68,7 +68,6 @@
 		{
 			await Task.Run(() =>
 			{
-
 				CombatLog.Add($"Begin round {Round}");
 
 				// Issue attacks

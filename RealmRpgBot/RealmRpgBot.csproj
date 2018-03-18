@@ -109,6 +109,7 @@
     <Compile Include="Combat\AutoBattle.cs" />
     <Compile Include="Combat\CombatOutcome.cs" />
     <Compile Include="DiceNotation\SingletonRandom.cs" />
+    <Compile Include="JobScheduler\Jobs\LocationAttackTick.cs" />
     <Compile Include="JobScheduler\Jobs\ServerTick.cs" />
     <Compile Include="Models\CombatLog.cs" />
     <Compile Include="Models\Encounters\Encounter.cs" />

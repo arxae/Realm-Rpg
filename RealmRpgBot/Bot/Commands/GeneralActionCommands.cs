@@ -462,7 +462,7 @@
 					var encounterId = location.Encounters?.GetRandomEntry();
 					var encounter = await session.LoadAsync<Encounter>(encounterId);
 
-					if (encounter?.EncounterType == Encounter.EncounterTypes.Enemy)
+					if (encounter?.EncounterType == Encounter.EncounterTypes.Battle)
 					{
 						await encounter.DoBattleEncounter(session, c, player);
 					}
@@ -477,7 +477,9 @@
 
 				if (location.ExploresNeeded == player.LocationExploreCounts[player.CurrentLocation])
 				{
-					await c.RespondAsync($"{c.User.Mention} has discovered routes to new locations");
+					int xp = Realm.GetSetting<int>("settings/complete_explore_xp_award");
+					await player.AddXpAsync(xp);
+					await c.RespondAsync($"{c.User.Mention} has discovered routes to new locations and received {xp}xp.");
 				}
 
 				if (session.Advanced.HasChanges)
