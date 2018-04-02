@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace RealmRpgBot.Skills
+﻿namespace RealmRpgBot.Skills
 {
+	using System.Collections.Generic;
+
 	using System;
 	using System.Linq;
 	using System.Threading.Tasks;
@@ -28,8 +28,8 @@ namespace RealmRpgBot.Skills
 
 				if (location.Perceptables?.Count == 0 && location.HiddenLocationConnections?.Count == 0)
 				{
-					await c.RespondAsync("Nothing to see here");
-					await c.ConfirmMessage();
+					await c.ConfirmMessage("Nothing to see here");
+					DoCooldown = true;
 					return;
 				}
 

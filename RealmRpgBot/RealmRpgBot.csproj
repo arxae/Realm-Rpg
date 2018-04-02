@@ -145,6 +145,8 @@
     <Compile Include="DiceNotation\Random\KnownSeriesRandom.cs" />
     <Compile Include="DiceNotation\Random\MaxRandom.cs" />
     <Compile Include="DiceNotation\Random\MinRandom.cs" />
+    <Compile Include="Models\Encounters\Event.cs" />
+    <Compile Include="Models\Encounters\EventStage.cs" />
     <Compile Include="Models\Inventory\EquipmentBonusses.cs" />
     <Compile Include="Models\Inventory\EquipSet.cs" />
     <Compile Include="Models\Inventory\ItemEffect.cs" />

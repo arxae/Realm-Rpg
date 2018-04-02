@@ -57,14 +57,20 @@ namespace RealmRpgBot.Bot
 							else
 							{
 								var missingRoles = ((RequireRolesAttribute)checks
-										.FirstOrDefault(x => x is RequireRolesAttribute))
-									.RoleNames
+										.FirstOrDefault(x => x is RequireRolesAttribute))?.RoleNames
 									.ExtendToString("", null, ", ", "");
 
 								await e.Context.Member.SendMessageAsync(string.Format(Realm.GetMessage("missing_roles"), missingRoles));
 							}
 						}
 
+						e.Handled = true;
+						return;
+					}
+
+					if (checks.Any(x => x is CooldownAttribute))
+					{
+						await e.Context.RespondAsync($"{e.Context.User.Mention}, you need to wait {((CooldownAttribute)checks[0]).Reset.TotalSeconds} more seconds.");
 						e.Handled = true;
 						return;
 					}
@@ -76,7 +82,7 @@ namespace RealmRpgBot.Bot
 
 			// Interactivity
 			Client.UseInteractivity(new InteractivityConfiguration());
-			
+
 			l.Information("Bot initialized");
 		}
 

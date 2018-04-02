@@ -1,4 +1,7 @@
-﻿namespace RealmRpgBot.Models.Encounters
+﻿using Raven.Client.Documents.Attachments;
+using Raven.Client.Documents.Operations.Attachments;
+
+namespace RealmRpgBot.Models.Encounters
 {
 	using System.Collections.Generic;
 	using System.Linq;
@@ -16,12 +19,69 @@
 		public string Id { get; set; }
 		public string Description { get; set; }
 		public List<string> Templates { get; set; }
+		public List<string> Events { get; set; }
 		public EncounterTypes EncounterType { get; set; }
 		public int XpReward { get; set; }
 
 		public int GetActualXpReward(int playerLevel, int enemyLevel)
 		{
 			return (int)System.Math.Round(XpReward * Rpg.GetGainedXpModifier(playerLevel, enemyLevel));
+		}
+
+		public async Task DoEncounter(IAsyncDocumentSession session, CommandContext cmdCtx, Player player)
+		{
+			if (Templates.Count == 0 && Events.Count == 0)
+			{
+				throw new System.InvalidOperationException($"No encounter tempaltes or events have been defined for {Id}");
+			}
+
+			if (Templates.Count == 0 && Events.Count > 0)
+			{
+				await DoEventEncounter(session, cmdCtx, player);
+				return;
+			}
+
+			if (Templates.Count > 0 && Events.Count == 0)
+			{
+				await DoBattleEncounter(session, cmdCtx, player);
+				return;
+			}
+
+			// 50/50 chance for either
+			if (Rng.Instance.Next(0, 100) > 50)
+			{
+				await DoEventEncounter(session, cmdCtx, player);
+			}
+			else
+			{
+				await DoBattleEncounter(session, cmdCtx, player);
+			}
+		}
+
+		public async Task DoEventEncounter(IAsyncDocumentSession session, CommandContext cmdCtx, Player player)
+		{
+			var events = (await session.LoadAsync<Event>(Events)).Values.ToList();
+			if (events.Count == 0)
+			{
+				await cmdCtx.ConfirmMessage("Nothing to see here");
+				return;
+			}
+
+			var evt = events.GetRandomEntry();
+			evt.Stages.ForEach(async stage =>
+			{
+				var stageScript = await Db.DocStore.Operations.SendAsync(new GetAttachmentOperation(evt.Id, stage.Script, AttachmentType.Document, null));
+
+				if (stageScript == null)
+				{
+					Serilog.Log.ForContext<Encounter>().Error($"{evt.Id}-{stage.StageName} is missing an action script.");
+					await cmdCtx.RejectMessage($"{evt.Id}-{stage.StageName} is missing an action script. Contact one of the admins (Error_EventStageScriptNotFound)");
+					return;
+				}
+
+				string script = await new System.IO.StreamReader(stageScript.Stream).ReadToEndAsync();
+				await Script.ScriptManager.RunDiscordScriptAsync($"{evt.Id}-{stage.StageName}", script, cmdCtx, player, null);
+			});
 		}
 
 		/// <summary>
@@ -39,8 +99,7 @@
 
 			if (templates.Count == 0)
 			{
-				await cmdCtx.RespondAsync("Nothing to see here");
-				await cmdCtx.ConfirmMessage();
+				await cmdCtx.ConfirmMessage("Nothing to see here");
 				return;
 			}
 
@@ -102,13 +161,18 @@
 			encounterEmbed.WithDescription(body.ToString());
 
 			await player.SetActionAsync(Constants.ACTION_REST, "Recovering from combat", System.TimeSpan.FromMinutes(1));
+			player.SetIdleAction("Resting");
 
 			await cmdCtx.RespondAsync(embed: encounterEmbed.Build());
 		}
 
+
+
 		public enum EncounterTypes
 		{
-			Battle
+			None,
+			Battle,
+			Event
 		}
 	}
 }

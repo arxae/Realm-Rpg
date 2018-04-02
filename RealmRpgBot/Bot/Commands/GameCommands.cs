@@ -59,7 +59,7 @@
 			await c.ConfirmMessage();
 		}
 
-		[Command("remove"), Description("Remove yourself"), RequireRoles(RoleCheckMode.All, new string[] { Constants.ROLE_PLAYER })]
+		[Command("remove"), Description("Remove yourself"), RequireRoles(RoleCheckMode.Any, Constants.ROLE_PLAYER)]
 		public async Task RemovePlayer(CommandContext c)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())

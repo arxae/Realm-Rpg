@@ -4,6 +4,7 @@
 
 	using DSharpPlus.CommandsNext;
 	using DSharpPlus.Entities;
+	using Microsoft.ClearScript;
 	using Microsoft.ClearScript.V8;
 
 	using Models.Character;
@@ -42,12 +43,16 @@
 						}
 
 						engine.AddHostObject("Realm", new ScriptContext(player, c, m));
+						engine.AddHostType(typeof(DiscordMessage));
+						engine.AddHostType(typeof(CommandContext));
+						engine.AddHostType(typeof(DiscordEmoji));
+						engine.AddHostObject("Discord", new HostTypeCollection("DSharpPlus", "DSharpPlus.CommandsNext", "DSharpPlus.Interactivity"));
 
 						try
 						{
 							engine.Execute(compiled);
 						}
-						catch (Microsoft.ClearScript.ScriptEngineException e)
+						catch (ScriptEngineException e)
 						{
 							Log.Error(e, "Scripting Exception");
 							c.RespondAsync($"A exception occured while running the {scriptName} action script: {e.Message}");

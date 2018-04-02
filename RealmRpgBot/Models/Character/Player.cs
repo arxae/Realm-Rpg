@@ -105,11 +105,11 @@
 			}
 		}
 
-		public void SetIdleAction()
+		public void SetIdleAction(string message = "Idling")
 		{
 			CurrentActionRepeat = false;
 			CurrentAction = "Idle";
-			CurrentActionDisplay = "Idling";
+			CurrentActionDisplay = message;
 		}
 
 		public async Task<int> SetFaintedAsync()
@@ -153,6 +153,17 @@
 			await Task.Run(() =>
 			{
 				ManaCurrent += mp;
+				if (ManaCurrent > ManaMax) ManaCurrent = ManaMax;
+			});
+		}
+
+		public async Task RestoreAsync(int hp, int mp)
+		{
+			await Task.Run(() =>
+			{
+				HpCurrent += hp;
+				ManaCurrent += mp;
+				if (HpCurrent > HpMax) HpCurrent = HpMax;
 				if (ManaCurrent > ManaMax) ManaCurrent = ManaMax;
 			});
 		}

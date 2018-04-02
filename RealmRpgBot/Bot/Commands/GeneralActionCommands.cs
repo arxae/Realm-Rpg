@@ -440,6 +440,7 @@
 		}
 
 		[Command("explore"), Description("Explore current location")]
+		//[Cooldown(1, 30, CooldownBucketType.User)]
 		public async Task ExploreLocation(CommandContext c)
 		{
 			using (var session = Db.DocStore.OpenAsyncSession())
@@ -461,11 +462,12 @@
 				{
 					var encounterId = location.Encounters?.GetRandomEntry();
 					var encounter = await session.LoadAsync<Encounter>(encounterId);
+					await encounter.DoEncounter(session, c, player);
 
-					if (encounter?.EncounterType == Encounter.EncounterTypes.Battle)
-					{
-						await encounter.DoBattleEncounter(session, c, player);
-					}
+					//if (encounter?.EncounterType == Encounter.EncounterTypes.Battle)
+					//{
+					//	await encounter.DoBattleEncounter(session, c, player);
+					//}
 				}
 
 				if (player.LocationExploreCounts.ContainsKey(player.CurrentLocation) == false)

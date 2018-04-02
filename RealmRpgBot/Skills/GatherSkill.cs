@@ -22,15 +22,13 @@
 
 				if (location.Resources?.Count == 0)
 				{
-					await c.RespondAsync("No resources available for this skill");
-					await c.ConfirmMessage();
+					await c.ConfirmMessage("No resources available for this skill");
 					return;
 				}
 
 				if (skill.Parameters.ContainsKey("ResourceType") == false)
 				{
-					await c.RespondAsync("An error occured. Contact one of the admins and (Error_NoResourceTypeForGatherSkill)");
-					await c.RejectMessage();
+					await c.RejectMessage("An error occured. Contact one of the admins and (Error_NoResourceTypeForGatherSkill)");
 					return;
 				}
 

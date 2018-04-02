@@ -29,7 +29,7 @@
 					{
 						Gathering(player, session);
 					}
-					else if (player.CurrentAction.StartsWith(Constants.ACTION_REST, StringComparison.OrdinalIgnoreCase))
+					else if (player.CurrentAction.StartsWith(Constants.ACTION_IDLE, StringComparison.OrdinalIgnoreCase))
 					{
 						Resting(player);
 					}
